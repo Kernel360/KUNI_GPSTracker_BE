@@ -78,7 +78,7 @@ public class TmapVehicleSimulator {
     static void simulateVehicle(List<LatLng> path, double speedKmph) throws InterruptedException {
         for (int i = 0; i < path.size(); i++) {
             LatLng point = path.get(i);
-            System.out.printf("🚗 차량 위치: (%.6f, %.6f)\n", point.lat, point.lng);
+            System.out.printf("차량 위치: (%.6f, %.6f)\n", point.lat, point.lng);
 
             if (i < path.size() - 1) {
                 double dist = calculateDistance(point, path.get(i + 1));
