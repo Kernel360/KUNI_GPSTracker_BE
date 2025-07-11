@@ -14,5 +14,9 @@ services:
       - MYSQL_DATABASE=gpsTdb
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
       - TZ=Asia/Seoul
-    volumes:
-      - C:\MYSQL:/var/lib/mysql
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#volumes:
+#  mysql_data: { }
+##    volumes:
+##      - C:\MYSQL:/var/lib/mysql
