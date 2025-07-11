@@ -7,7 +7,7 @@ spring:
     hibernate:
       ddl-auto: validate
   datasource:
-    url: jdbc:mysql://localhost:3306/gpsTdb?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
+    url: ${DB_URL}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: root1234!!
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
