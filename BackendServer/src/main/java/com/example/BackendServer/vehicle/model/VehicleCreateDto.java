@@ -3,7 +3,6 @@ package com.example.BackendServer.vehicle.model;
 import lombok.*;
 
 @Getter
-@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

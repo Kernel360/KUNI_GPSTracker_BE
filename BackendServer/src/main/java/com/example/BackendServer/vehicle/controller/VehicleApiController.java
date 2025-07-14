@@ -18,12 +18,6 @@ public class VehicleApiController {
 
     private final VehicleApiService vehicleApiService;
 
-    /**
-     * 차량 등록 api : 차량 정보를 받아 DB에 저장한다.
-     *
-     * @param dto : vehicleNumber와 vehicleName을 field로 가진다.
-     * @return VehicleCreateDto를 반환한다.
-     */
     @PostMapping
     public ResponseEntity<VehicleCreateDto> createVehicle(@RequestBody VehicleCreateDto dto) {
 
