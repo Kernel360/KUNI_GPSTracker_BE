@@ -10,11 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class VehicleApiService {
 
     private final VehicleRepository vehicleRepository;
@@ -25,6 +27,7 @@ public class VehicleApiService {
      * @param dto : vehicleNumber와 vehicleName을 field로 가진다.
      * @return VehicleEntity  : dto를 이용해 Builder로 Entity 생성 후 반환
      */
+	@Transactional
     public VehicleEntity createVehicle(VehicleCreateDto dto) {
 
         VehicleEntity entity = VehicleEntity.builder()
