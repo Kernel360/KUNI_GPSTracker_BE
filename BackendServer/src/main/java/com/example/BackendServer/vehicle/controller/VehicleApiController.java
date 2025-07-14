@@ -3,8 +3,9 @@ package com.example.BackendServer.vehicle.controller;
 import com.example.BackendServer.vehicle.Service.VehicleApiService;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
-import com.example.BackendServer.vehicle.model.VehicleRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,16 +20,17 @@ public class VehicleApiController {
     private final VehicleApiService vehicleApiService;
 
     @PostMapping
-    public ResponseEntity<VehicleCreateDto> createVehicle(@RequestBody VehicleCreateDto dto) {
+    public ResponseEntity<VehicleCreateDto> createVehicle(@Valid @RequestBody VehicleCreateDto dto) {
 
         VehicleEntity entity = vehicleApiService.createVehicle(dto);
 
         VehicleCreateDto result = VehicleCreateDto.builder()
                 .vehicleNumber(entity.getVehicleNumber())
-                .vehicleName(entity.getType().toString())
+                .vehicleName(entity.getType())
                 .build();
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+
     }
 
 }

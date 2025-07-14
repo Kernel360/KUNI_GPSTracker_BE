@@ -26,7 +26,7 @@ public class VehicleApiService {
                 .vehicleNumber(dto.getVehicleNumber())
                 .status(VehicleEntity.Status.INACTIVE)
                 .totalDist(0L)
-                .type(VehicleEntity.Type.valueOf(dto.getVehicleName()))
+                .type(dto.getVehicleName())
                 .createDate(LocalDateTime.now())
                 .build();
 
