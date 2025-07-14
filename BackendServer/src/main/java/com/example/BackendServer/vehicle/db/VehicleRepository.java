@@ -5,8 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
-	Page<VehicleEntity> findAllByStatus(
+	Page<VehicleEntity> findAllByStatusAndVehicleNumber(
 		VehicleEntity.Status status,
+		String vehicleNumber,
 		Pageable pageable
 	);
 }

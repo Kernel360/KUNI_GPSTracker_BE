@@ -40,8 +40,9 @@ public class VehicleApiController {
     @GetMapping
     public ResponseEntity<?> getVehicleList(
         Pageable pageable,
+        @RequestParam String vehicleName,
         @RequestParam VehicleEntity.Status status
     ) {
-        return ResponseEntity.ok(vehicleApiService.getVehicleList(pageable, status));
+        return ResponseEntity.ok(vehicleApiService.getVehicleList(pageable, vehicleName, status));
     }
 }
