@@ -3,9 +3,12 @@ package com.example.BackendServer.vehicle.controller;
 import com.example.BackendServer.vehicle.Service.VehicleApiService;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
+import com.example.BackendServer.vehicle.model.VehicleListResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +41,7 @@ public class VehicleApiController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getVehicleList(
+    public ResponseEntity<Page<VehicleListResponse>> getVehicleList(
         Pageable pageable,
         @RequestParam String vehicleName,
         @RequestParam VehicleEntity.Status status
