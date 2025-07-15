@@ -1,5 +1,6 @@
 package org.example;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -289,8 +290,9 @@ public class NaverVehicleSimulatorCSVFull {
 
     public static void main(String[] args) {
         // 네이버 API 키
-        String apiKeyId = "";
-        String apiKey = "";
+        Dotenv dotenv = Dotenv.load();  // .env 파일 로드
+        String apiKeyId = dotenv.get("NAVER_API_KEY_ID");
+        String apiKey = dotenv.get("NAVER_API_KEY");
 
         int numberOfVehicles = 1; // 시뮬레이션할 차량 수
         List<Thread> threads = new ArrayList<>();
