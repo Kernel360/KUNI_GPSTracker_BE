@@ -13,3 +13,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
+springdoc:
+  override-with-generic-response: false
