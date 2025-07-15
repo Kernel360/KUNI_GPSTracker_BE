@@ -50,7 +50,28 @@ public class NaverVehicleSimulatorCSVFull {
             this.lat = lat;
             this.lng = lng;
         }
+
+        @Override
+        public String toString() {
+            return String.format("LatLng(lat=%.6f, lng=%.6f)", lat, lng);
+        }
+
     }
+
+    //네이버 API주는 경로들 사이의 각도 -> 이게 차의 방량이 된다
+    static double calculateBearing(LatLng from, LatLng to) {
+        double lat1 = Math.toRadians(from.lat);
+        double lat2 = Math.toRadians(to.lat);
+        double dLng = Math.toRadians(to.lng - from.lng);
+
+        double y = Math.sin(dLng) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2)
+                - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+
+        double bearing = Math.toDegrees(Math.atan2(y, x));
+        return (bearing + 360) % 360; // 0~360도 값으로 정규화
+    }
+
 
     // 경로 결과: 좌표 리스트, 총 거리(m), 총 소요 시간(s)
     static class RouteResult {
@@ -240,7 +261,7 @@ public class NaverVehicleSimulatorCSVFull {
                             cycle.spd = String.valueOf((int) (speedKmph));
                             cycle.sum = String.valueOf((int) totalDistance);
                             cycle.bat = String.valueOf(batteryLevel);
-                            cycle.ang = String.valueOf(new Random().nextInt(360));
+                            cycle.ang = String.valueOf((int) calculateBearing(start, end));
                         }
 
                         // 배터리 소모 (30분마다 1 감소)
