@@ -36,7 +36,7 @@ public class VehicleApiController {
     }
 
     // 삭제
-    @DeleteMapping("/delete/{vehicleNumber}")
+    @DeleteMapping("/{vehicleNumber}")
     public ResponseEntity<Void> deleteByVehicleNumber(@PathVariable String vehicleNumber) {
         log.info("차량번호 삭제 요청: {}", vehicleNumber);
 
