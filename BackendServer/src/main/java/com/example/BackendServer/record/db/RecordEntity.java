@@ -1,13 +1,16 @@
 package com.example.BackendServer.record.db;
 
+import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.driver.db.DriverEntity;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,6 +31,9 @@ public class RecordEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "driver_id", nullable = false)
   private DriverEntity driver;
+  @OneToMany(mappedBy = "record")
+  @ToString.Exclude
+  private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
 
   @Column(name = "sum_dist", nullable = false)
   private String sumDist;

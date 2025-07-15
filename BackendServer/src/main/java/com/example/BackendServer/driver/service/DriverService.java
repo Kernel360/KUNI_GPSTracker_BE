@@ -5,13 +5,16 @@ import com.example.BackendServer.driver.db.DriverRepository;
 import com.example.BackendServer.driver.model.DriverRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DriverService {
 
   private final DriverRepository driverRepository;
 
+  @Transactional
   public DriverEntity create(DriverRequest driverRequest) {
     DriverEntity driver = DriverEntity.builder()
         .name(driverRequest.getName())

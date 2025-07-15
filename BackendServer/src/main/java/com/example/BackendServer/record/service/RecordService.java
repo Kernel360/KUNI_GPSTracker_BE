@@ -9,15 +9,18 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RecordService {
 
   private final RecordRepository recordRepository;
   private final VehicleRepository vehicleRepository;
   private final DriverRepository driverRepository;
 
+  @Transactional
   public RecordEntity create(RecordRequest recordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(recordRequest.getVehicleId())
         .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle ID"));

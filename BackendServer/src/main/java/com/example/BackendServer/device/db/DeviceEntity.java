@@ -5,7 +5,6 @@ import lombok.*;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,7 +18,7 @@ public class DeviceEntity {
   private Long id;
 
   // 외래 키
-  @ManyToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "vehicle_id", nullable = false)
   private VehicleEntity vehicle;
 

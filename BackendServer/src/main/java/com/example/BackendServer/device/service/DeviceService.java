@@ -5,16 +5,20 @@ import com.example.BackendServer.device.db.DeviceRepository;
 import com.example.BackendServer.device.model.DeviceRequest;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DeviceService {
 
   private final DeviceRepository deviceRepository;
   private final VehicleRepository vehicleRepository; // VehicleEntity 조회용
 
+  @Transactional
   public DeviceEntity create(DeviceRequest deviceRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(deviceRequest.getVehicleId())
         .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle ID"));

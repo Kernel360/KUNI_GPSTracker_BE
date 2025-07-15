@@ -11,9 +11,11 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GpsRecordService {
 
   private final GpsRecordRepository gpsRecordRepository;
@@ -21,6 +23,7 @@ public class GpsRecordService {
   private final DriverRepository driverRepository;
   private final RecordRepository recordRepository;
 
+  @Transactional
   public GpsRecordEntity create(GpsRecordRequest gpsRecordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(gpsRecordRequest.getVehicleId())
         .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle ID"));

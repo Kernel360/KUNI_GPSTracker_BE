@@ -5,11 +5,13 @@ import com.example.BackendServer.record.db.RecordEntity;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Builder
 @Entity
+@Getter
 @Table(name = "GpsRecord")
 public class GpsRecordEntity {
 
@@ -17,8 +19,7 @@ public class GpsRecordEntity {
   @Column(name = "record_id")
   private Long id;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @MapsId
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "record_id")
   private RecordEntity record;
 

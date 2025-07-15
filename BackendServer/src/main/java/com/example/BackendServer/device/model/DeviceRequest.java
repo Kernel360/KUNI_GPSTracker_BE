@@ -7,7 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor  // 이걸 추가해야 builder에서 사용할 생성자가 생깁니다.
 @Getter
-@Setter
 @ToString
 @Builder
 @JsonNaming(value= PropertyNamingStrategies.SnakeCaseStrategy.class)
