@@ -289,8 +289,8 @@ public class NaverVehicleSimulatorCSVFull {
 
     public static void main(String[] args) {
         // 네이버 API 키
-        String apiKeyId = "6a4zzn5ley";
-        String apiKey = "0B0ipBqpWrfYelCQKPqpV9CF9Oyr0g6eHZPCeMNA";
+        String apiKeyId = "";
+        String apiKey = "";
 
         int numberOfVehicles = 1; // 시뮬레이션할 차량 수
         List<Thread> threads = new ArrayList<>();
