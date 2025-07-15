@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j // 로그 사용을 위해 추가
 @RestController
-@RequestMapping("/api/management")
+@RequestMapping("/api/vehicle")
 @RequiredArgsConstructor
 public class VehicleApiController {
 
