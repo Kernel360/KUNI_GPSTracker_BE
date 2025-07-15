@@ -5,6 +5,7 @@ import com.example.BackendServer.vehicle.db.VehicleRepository;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -32,5 +33,14 @@ public class VehicleApiService {
 
         VehicleEntity saved = vehicleRepository.save(entity);
         return saved;
+    }
+
+
+    // 삭제
+    @Transactional
+    public void deleteByVehicleNumber(String vehicleNumber) {
+        VehicleEntity vehicle = vehicleRepository.findByVehicleNumber(vehicleNumber)
+                .orElseThrow(() -> new IllegalArgumentException(vehicleNumber));
+        vehicleRepository.delete(vehicle);
     }
 }
