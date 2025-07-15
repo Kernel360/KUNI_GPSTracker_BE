@@ -86,7 +86,8 @@ public class GlobalExceptionHandler {
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error("BAD_REQUEST")
 			.message(errorMessage)
-		.build(); // 위에서 생성한 상세 메시지 사용.path(request.getRequestURI()).build();
+			.path(request.getRequestURI())
+		.build();
 
 		return ResponseEntity.badRequest().body(response);
 	}
