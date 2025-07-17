@@ -1,8 +1,13 @@
 package com.example.BackendServer.vehicle.db;
 
+import com.example.BackendServer.device.db.DeviceEntity;
+import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
+import com.example.BackendServer.record.db.RecordEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -35,6 +40,19 @@ public class VehicleEntity {
   @Column(name = "create_date", nullable = false)
   private LocalDateTime createDate;
 
+  @OneToOne(mappedBy = "vehicle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @ToString.Exclude
+  private DeviceEntity device;
+
+  @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+  @ToString.Exclude
+  @Builder.Default
+  private List<RecordEntity> records = new ArrayList<>();
+
+  @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+  @ToString.Exclude
+  @Builder.Default
+  private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
   // status enum 정의
   public enum Status {
     ACTIVE, INACTIVE, INSPECTING

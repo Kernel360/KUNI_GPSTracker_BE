@@ -33,6 +33,7 @@ public class RecordEntity {
   private DriverEntity driver;
   @OneToMany(mappedBy = "record")
   @ToString.Exclude
+  @Builder.Default
   private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
 
   @Column(name = "sum_dist", nullable = false)

@@ -1,7 +1,12 @@
 package com.example.BackendServer.driver.db;
 
+import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
+import com.example.BackendServer.record.db.RecordEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -25,4 +30,14 @@ public class DriverEntity {
 
   @Column(name = "phone")
   private String phone;
+
+  @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL)
+  @ToString.Exclude
+  @Builder.Default
+  private List<RecordEntity> records = new ArrayList<>();
+
+  @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL)
+  @ToString.Exclude
+  @Builder.Default
+  private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
 }

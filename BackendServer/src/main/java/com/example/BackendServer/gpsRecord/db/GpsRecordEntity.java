@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @Table(name = "GpsRecord")
 public class GpsRecordEntity {
 
-  @Id
-  @Column(name = "record_id")
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  //@Column(name = "gps_record_id")
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
