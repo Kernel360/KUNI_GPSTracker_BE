@@ -27,7 +27,7 @@ public class NaverVehicleSimulatorCSVFull {
         int cCnt;             // 사이클 카운트
         String timestamp;     // 타임스탬프
         String sec;           // 초
-        String gcd;           // GPS 상태 코드
+        String gcd = "A";           // GPS 상태 코드
         String lat;           // 위도 (1/1000000 단위)
         String lon;           // 경도 (1/1000000 단위)
         String ang;           // 각도
@@ -39,7 +39,8 @@ public class NaverVehicleSimulatorCSVFull {
         public String toString() {
             // CSV 포맷에 맞게 문자열로 변환
             return String.format("%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                    mdn, tid, mid, pv, did, cCnt, timestamp, sec, gcd, lat, lon, ang, spd, sum, bat);
+                    mdn, tid, mid, pv, did, cCnt, timestamp, sec, 
+                     gcd, lat, lon, ang, spd, sum, bat);
         }
     }
 
@@ -184,7 +185,6 @@ public class NaverVehicleSimulatorCSVFull {
             List<Double> accumulatedDistances = new ArrayList<>();
             accumulatedDistances.add(0.0);
 
-            // 각 세그먼트 거리 및 누적 거리 계산
             for (int i = 0; i < path.size() - 1; i++) {
                 double dist = calculateDistance(path.get(i), path.get(i + 1));
                 segmentDistances.add(dist);
@@ -194,53 +194,48 @@ public class NaverVehicleSimulatorCSVFull {
             int elapsedSeconds = 0;
             int cycleCount = 1;
             int batteryLevel = 135;
+            double totalDistance = 0.0; // 이동 거리 누적 변수
             String filename = mdn + ".csv";
             boolean fileExists = new File(filename).exists();
 
             try (FileWriter fw = new FileWriter(filename, true)) {
                 if (!fileExists) {
-                    // CSV 헤더 작성
                     fw.write("mdn,tid,mid,pv,did,cCnt,timestamp,sec,gcd,lat,lon,ang,spd,sum,bat\n");
                 }
 
                 LocalDateTime startTime = LocalDateTime.now();
+                Random random = new Random();
 
                 while (true) {
-                    // 현재 사이클 속도 생성 (20~50km/h)
-                    double speedKmph = 20 + new Random().nextDouble() * 30;
+                    double speedKmph = 20 + random.nextDouble() * 30; // 현재 1분 속도 (20~50km/h)
                     double speedMps = speedKmph * 1000 / 3600.0;
-                    speedHistory.add(speedKmph);
 
                     List<CycleInfo> batchData = new ArrayList<>();
 
                     for (int sec = 0; sec < 60; sec++) {
                         int totalSec = elapsedSeconds + sec;
+                        totalDistance += speedMps;
 
-                        // 누적 이동 거리 계산
-                        double totalDistance = 0;
-                        for (int i = 0; i < totalSec / 60; i++) {
-                            totalDistance += speedHistory.get(i) * 1000 / 3600.0 * 60;
-                        }
-                        totalDistance += speedHistory.get(totalSec / 60) * 1000 / 3600.0 * (totalSec % 60);
-
-                        // 주기 정보 생성
                         CycleInfo cycle = new CycleInfo();
                         cycle.mdn = mdn;
                         cycle.cCnt = cycleCount;
                         cycle.timestamp = startTime.plusSeconds(totalSec).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                         cycle.sec = String.format("%02d", sec);
 
-                        // 목적지 도착 후에는 V 상태로 설정
                         if (totalDistance >= accumulatedDistances.get(accumulatedDistances.size() - 1)) {
-                            cycle.gcd = "V"; // 차량 정지
-                            cycle.lat = "0";
-                            cycle.lon = "0";
+                            // 종료 상태 데이터 기록
+                            cycle.gcd = "V";
+                            LatLng dest = path.get(path.size() - 1);
+                            cycle.lat = String.valueOf((int) (dest.lat * 1_000_000));
+                            cycle.lon = String.valueOf((int) (dest.lng * 1_000_000));
                             cycle.spd = "0";
                             cycle.sum = String.valueOf((int) accumulatedDistances.get(accumulatedDistances.size() - 1).doubleValue());
-                            cycle.bat = "0";
+                            cycle.bat = String.valueOf(batteryLevel); // 기존 배터리 값 유지
                             cycle.ang = "0";
+                            batchData.add(cycle);
+                            break; // for문 즉시 탈출!
                         } else {
-                            cycle.gcd = "A"; // 정상 주행
+                            // 정상 데이터 기록
                             int segmentIndex = 0;
                             while (segmentIndex < accumulatedDistances.size() - 1 && accumulatedDistances.get(segmentIndex + 1) < totalDistance) {
                                 segmentIndex++;
@@ -258,18 +253,16 @@ public class NaverVehicleSimulatorCSVFull {
 
                             cycle.lat = String.valueOf((int) (lat * 1_000_000));
                             cycle.lon = String.valueOf((int) (lng * 1_000_000));
-                            cycle.spd = String.valueOf((int) (speedKmph));
+                            cycle.spd = String.valueOf((int) speedKmph);
                             cycle.sum = String.valueOf((int) totalDistance);
                             cycle.bat = String.valueOf(batteryLevel);
                             cycle.ang = String.valueOf((int) calculateBearing(start, end));
+                            batchData.add(cycle);
                         }
 
-                        // 배터리 소모 (30분마다 1 감소)
                         if (totalSec % 1800 == 0 && totalSec != 0) {
                             batteryLevel = Math.max(0, batteryLevel - 1);
                         }
-
-                        batchData.add(cycle);
                     }
 
                     for (CycleInfo ci : batchData) {
@@ -280,13 +273,13 @@ public class NaverVehicleSimulatorCSVFull {
                     elapsedSeconds += 60;
                     cycleCount++;
 
-                    // 도착 여부 확인
-                    if (speedHistory.get(speedHistory.size() - 1) * elapsedSeconds / 3.6 > accumulatedDistances.get(accumulatedDistances.size() - 1)) {
+                    if (totalDistance >= accumulatedDistances.get(accumulatedDistances.size() - 1)) {
                         break;
                     }
 
-                    Thread.sleep(10); // 실제 전송 주기에서는 60000 (1분)
+                    Thread.sleep(10); // 실제는 60000
                 }
+
             } catch (IOException e) {
                 System.err.println("CSV 파일 저장 실패: " + e.getMessage());
             }
