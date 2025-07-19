@@ -106,6 +106,7 @@ public enum ErrorCode {
 	// FRIEND_INVITE_NOT_FOUND_ERROR(404, "FRIEND-INVITE-001", "친구 요청을 찾지 못하였습니다."),
 	// FRIEND_TWO_WAY_INVITE_ERROR(400, "FRIEND-INVITE-002", "친구 요청을 받은 상태입니다.");
 
+
 	private final int status;
 	private final String code;
 	private final String message;

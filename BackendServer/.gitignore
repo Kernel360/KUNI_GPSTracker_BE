@@ -68,3 +68,5 @@ replay_pid*
 .env           # 실제 비밀번호 등이 들어가는 파일
 .env.*         # .env.local, .env.dev 등 기타 변형
 !.env.example  # 공유용 템플릿 파일은 무시하지 않음
+
+.env.properties
