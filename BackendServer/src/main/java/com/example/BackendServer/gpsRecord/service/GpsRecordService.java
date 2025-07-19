@@ -1,7 +1,6 @@
 package com.example.BackendServer.gpsRecord.service;
 
-import com.example.BackendServer.driver.db.DriverEntity;
-import com.example.BackendServer.driver.db.DriverRepository;
+
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import com.example.BackendServer.gpsRecord.db.GpsRecordRepository;
 import com.example.BackendServer.gpsRecord.model.GpsRecordRequest;
@@ -20,15 +19,13 @@ public class GpsRecordService {
 
   private final GpsRecordRepository gpsRecordRepository;
   private final VehicleRepository vehicleRepository;
-  private final DriverRepository driverRepository;
   private final RecordRepository recordRepository;
 
   @Transactional
   public GpsRecordEntity create(GpsRecordRequest gpsRecordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(gpsRecordRequest.getVehicleId())
         .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle ID"));
-    DriverEntity driver = driverRepository.findById(gpsRecordRequest.getDriverId())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid driver ID"));
+
 
     GpsRecordEntity.Status statusEnum;
     try {
@@ -42,7 +39,6 @@ public class GpsRecordService {
 
     GpsRecordEntity gpsRecord = GpsRecordEntity.builder()
         .vehicle(vehicle)
-        .driver(driver)
         .status(statusEnum)
         .latitude(gpsRecordRequest.getLatitude())
         .longitude(gpsRecordRequest.getLongitude())

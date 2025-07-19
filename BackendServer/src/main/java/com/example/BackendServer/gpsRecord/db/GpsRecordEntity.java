@@ -1,17 +1,22 @@
 package com.example.BackendServer.gpsRecord.db;
 
-import com.example.BackendServer.driver.db.DriverEntity;
+
 import com.example.BackendServer.record.db.RecordEntity;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Builder
 @Entity
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
+
 @Table(name = "GpsRecord")
 public class GpsRecordEntity {
 
@@ -27,9 +32,7 @@ public class GpsRecordEntity {
   @JoinColumn(name = "vehicle_id", nullable = false)
   private VehicleEntity vehicle;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "driver_id", nullable = false)
-  private DriverEntity driver;
+
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)

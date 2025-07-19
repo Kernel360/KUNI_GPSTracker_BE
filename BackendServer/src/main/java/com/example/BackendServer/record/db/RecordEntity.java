@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.BackendServer.vehicle.db.VehicleEntity;
-import com.example.BackendServer.driver.db.DriverEntity;
+
 
 @Getter
 @NoArgsConstructor
@@ -28,9 +28,8 @@ public class RecordEntity {
   @JoinColumn(name = "vehicle_id", nullable = false)
   private VehicleEntity vehicle;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "driver_id", nullable = false)
-  private DriverEntity driver;
+
+
   @OneToMany(mappedBy = "record")
   @ToString.Exclude
   @Builder.Default
