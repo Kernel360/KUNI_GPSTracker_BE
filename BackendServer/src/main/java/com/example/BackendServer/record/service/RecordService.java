@@ -1,6 +1,8 @@
 package com.example.BackendServer.record.service;
 
 
+import com.example.BackendServer.global.exception.CustomException;
+import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.record.db.RecordEntity;
 import com.example.BackendServer.record.db.RecordRepository;
 import com.example.BackendServer.record.model.RecordRequest;
@@ -22,7 +24,8 @@ public class RecordService {
   @Transactional
   public RecordEntity create(RecordRequest recordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(recordRequest.getVehicleId())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle ID"));
+        .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+
 
 
 

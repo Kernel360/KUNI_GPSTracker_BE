@@ -3,8 +3,10 @@ package com.example.BackendServer.device.service;
 import com.example.BackendServer.device.db.DeviceEntity;
 import com.example.BackendServer.device.db.DeviceRepository;
 import com.example.BackendServer.device.model.DeviceRequest;
+import com.example.BackendServer.global.exception.CustomException;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
+import com.example.BackendServer.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class DeviceService {
   @Transactional
   public DeviceEntity create(DeviceRequest deviceRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(deviceRequest.getVehicleId())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle ID"));
+        .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
 
     DeviceEntity device = DeviceEntity.builder()
         .vehicle(vehicle)
