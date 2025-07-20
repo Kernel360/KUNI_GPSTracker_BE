@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,7 +28,7 @@ public class GpsRecordService {
   @Transactional
   public GpsRecordEntity create(GpsRecordRequest gpsRecordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(gpsRecordRequest.getVehicleId())
-        .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
 
     GpsRecordEntity.Status statusEnum;
@@ -36,8 +38,9 @@ public class GpsRecordService {
       throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); // 임시, 나중에 적절한 ErrorCode 추가 권장
     }
 
-    // RecordEntity 연관 설정 (필요하면 추가, 아니면 null)
-    RecordEntity record = null;
+    // RecordEntity 이후 수정 필요
+    RecordEntity record = recordRepository.findByVehicleId(vehicle.getId())
+            .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
 
     GpsRecordEntity gpsRecord = GpsRecordEntity.builder()
         .vehicle(vehicle)

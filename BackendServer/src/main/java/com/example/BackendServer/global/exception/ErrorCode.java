@@ -7,7 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorCode {
 	// //global
-	INTERNAL_SERVER_ERROR(500, "GLOBAL-001", "서버에 오류가 발생하였습니다.");
+	INTERNAL_SERVER_ERROR(500, "GLOBAL-001", "서버에 오류가 발생하였습니다."),
+
+	VEHICLE_NOT_FOUND(500, "VEHICLE-001", "차량을 찾을 수 없습니다."),
+	RECORD_NOT_FOUND(500,"RECORD-001", "운행 기록이 없습니다."),
+	GPS_RECORD_NOT_FOUND(500,"GPS_RECORD-001", "GPS 기록이 없습니다.");
 	// INPUT_INVALID_VALUE_ERROR(400, "GLOBAL-002", "잘못된 입력 값입니다."),
 	// EMPTY_INPUT_ERROR(400, "GLOBAL-003", "입력 값이 비어있습니다."),
 	// POST_TIME_ERROR(400, "GLOBAL-004", "시간이 지났습니다."),

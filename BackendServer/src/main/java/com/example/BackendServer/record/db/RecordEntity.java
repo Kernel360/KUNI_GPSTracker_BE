@@ -29,7 +29,6 @@ public class RecordEntity {
   private VehicleEntity vehicle;
 
 
-
   @OneToMany(mappedBy = "record")
   @ToString.Exclude
   @Builder.Default
@@ -41,6 +40,6 @@ public class RecordEntity {
   @Column(name = "on_time", nullable = false)
   private LocalDateTime onTime;
 
-  @Column(name = "off_time", nullable = false)
+  @Column(name = "off_time", nullable = false) //ERD상 true
   private LocalDateTime offTime;
 }
