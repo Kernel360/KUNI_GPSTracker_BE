@@ -1,6 +1,7 @@
 package com.example.BackendServer.record.db;
 
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class RecordEntity {
   @OneToMany(mappedBy = "record")
   @ToString.Exclude
   @Builder.Default
+  @JsonIgnore
   private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
 
   @Column(name = "sum_dist", nullable = false)
