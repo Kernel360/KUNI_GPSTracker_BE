@@ -7,7 +7,7 @@ import java.util.List;
 public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long> {
 
     @Query(value = """
-        SELECT gr.*
+        SELECT gr.vehicle_id, gr.latitude, gr.longitude, gr.status, gr.oTime
         FROM GpsRecord gr
         INNER JOIN (
             SELECT vehicle_id, MAX(oTime) AS max_time
