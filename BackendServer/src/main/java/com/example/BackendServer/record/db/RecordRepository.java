@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
+import java.util.Optional;
+
 public interface RecordRepository extends JpaRepository<RecordEntity,Long> {
 
     @Query(value = """
@@ -19,4 +21,8 @@ public interface RecordRepository extends JpaRepository<RecordEntity,Long> {
         order by 1
 """, nativeQuery = true)
     List<DayCountView> findDailyCount(@Param("start") LocalDate start, @Param("end")LocalDate end);
+
+    Optional<RecordEntity> findTopByVehicleIdOrderByOnTimeDesc(Long vehicleId);
+
+    Optional<RecordEntity> findByVehicleId(Long id);
 }
