@@ -10,7 +10,7 @@ spring:
       hibernate:
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     hibernate:
-      ddl-auto: create-drop # 여기로 이동
+      ddl-auto: create-drop  # 여기로 이동
 
   datasource:
     url: ${DB_URL}
