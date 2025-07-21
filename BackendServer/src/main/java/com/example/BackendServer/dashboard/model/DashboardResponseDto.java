@@ -2,7 +2,6 @@ package com.example.BackendServer.dashboard.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Builder
