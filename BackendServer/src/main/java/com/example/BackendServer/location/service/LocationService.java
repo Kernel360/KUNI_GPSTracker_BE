@@ -4,6 +4,7 @@ import com.example.BackendServer.global.exception.CustomException;
 import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import com.example.BackendServer.gpsRecord.db.GpsRecordRepository;
+import com.example.BackendServer.location.model.Location;
 import com.example.BackendServer.location.model.VehicleRealtimeInfoDto;
 import com.example.BackendServer.record.db.RecordEntity;
 import com.example.BackendServer.record.db.RecordRepository;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LocationService {
 
     private final VehicleRepository vehicleRepository;
@@ -31,7 +33,6 @@ public class LocationService {
      * @param vehicleNumber : 차량 번호
      * @return VehicleRealtimeInfoDto
      */
-    @Transactional(readOnly = true)
     public VehicleRealtimeInfoDto getVehicleRealtimeInfo(String vehicleNumber) {
 
         VehicleEntity vehicle = vehicleRepository.findByVehicleNumber(vehicleNumber)
@@ -64,8 +65,7 @@ public class LocationService {
                 .drivingTime(drivingSeconds)
                 .drivingDistanceKm(drivingDistanceKm)
                 .location(
-                        VehicleRealtimeInfoDto.Location.builder()
-                                .onTime(latestGps.getOTime())
+                        Location.builder()
                                 .latitude(latestGps.getLatitude())
                                 .longitude(latestGps.getLongitude())
                                 .build()

@@ -20,8 +20,6 @@ public class LocationController {
     @GetMapping("/{vehicleNumber}")
     public ResponseEntity<VehicleRealtimeInfoDto> getVehicleRealTimeInfo(@PathVariable String vehicleNumber) {
 
-        VehicleRealtimeInfoDto dto = locationService.getVehicleRealtimeInfo(vehicleNumber);
-
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(locationService.getVehicleRealtimeInfo(vehicleNumber));
     }
 }
