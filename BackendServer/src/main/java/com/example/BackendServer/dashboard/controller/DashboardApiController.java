@@ -21,15 +21,13 @@ public class DashboardApiController {
 
     @GetMapping
     public ResponseEntity<DashboardResponseDto> returnVehicleStatus() {
-        DashboardResponseDto dashboardResponseDto = dashboardService.getDashboardData();
-        return ResponseEntity.ok(dashboardResponseDto);
+        return ResponseEntity.ok(dashboardService.getDashboardData());
     }
 
     @GetMapping("/map")
     public ResponseEntity<List<DashboardMapDto>> returnVehicleLocation(
             @RequestParam(required = false) String status
     ) {
-        List<DashboardMapDto> dashboardMapDto = dashboardService.getAllVehicleLocation(status);
-        return ResponseEntity.ok(dashboardMapDto);
+        return ResponseEntity.ok(dashboardService.getAllVehicleLocation(status));
     }
 }
