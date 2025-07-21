@@ -1,7 +1,7 @@
-package com.example.BackendServer.Dashboard.controller;
+package com.example.BackendServer.dashboard.controller;
 
-import com.example.BackendServer.Dashboard.Service.DashboardService;
-import com.example.BackendServer.Dashboard.model.DashboardResponseDto;
+import com.example.BackendServer.dashboard.service.DashboardService;
+import com.example.BackendServer.dashboard.model.DashboardResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.BackendServer.Dashboard.model.DashboardMapDto;
+import com.example.BackendServer.dashboard.model.DashboardMapDto;
 
 import java.util.List;
 

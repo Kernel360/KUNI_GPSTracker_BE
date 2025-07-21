@@ -1,4 +1,4 @@
-package com.example.BackendServer.Dashboard.model;
+package com.example.BackendServer.dashboard.model;
 
 import lombok.Builder;
 import lombok.Getter;

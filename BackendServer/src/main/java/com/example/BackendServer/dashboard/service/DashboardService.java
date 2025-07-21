@@ -1,7 +1,7 @@
-package com.example.BackendServer.Dashboard.Service;
+package com.example.BackendServer.dashboard.service;
 
-import com.example.BackendServer.Dashboard.model.DashboardResponseDto;
-import com.example.BackendServer.Dashboard.model.DashboardMapDto;
+import com.example.BackendServer.dashboard.model.DashboardResponseDto;
+import com.example.BackendServer.dashboard.model.DashboardMapDto;
 import com.example.BackendServer.gpsRecord.db.GpsRecordRepository;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
