@@ -1,6 +1,6 @@
 package com.example.BackendServer.record.db;
 
-import com.example.BackendServer.dashboard.model.DayCountVeiw;
+import com.example.BackendServer.dashboard.model.DayCountView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
