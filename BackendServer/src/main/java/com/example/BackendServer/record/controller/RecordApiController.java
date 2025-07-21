@@ -15,9 +15,8 @@ public class RecordApiController {
 
   private final RecordService recordService;
 
-  @PostMapping("")
+  @PostMapping
   public ResponseEntity<RecordEntity> create(@Valid @RequestBody RecordRequest recordRequest) {
-    RecordEntity entity = recordService.create(recordRequest);
-    return ResponseEntity.ok().body(entity);
+    return ResponseEntity.ok().body(recordService.create(recordRequest));
   }
 }

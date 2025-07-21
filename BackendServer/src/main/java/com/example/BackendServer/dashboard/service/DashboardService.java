@@ -30,10 +30,7 @@ public class DashboardService {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         LocalDate startDate = yesterday.minusDays(6);
 
-        LocalDateTime start = startDate.atStartOfDay();
-        LocalDateTime end = yesterday.plusDays(1).atStartOfDay();
-
-        List<DayCountView> raw = recordRepository.findDailyCount(start, end);
+        List<DayCountView> raw = recordRepository.findDailyCount(startDate, yesterday);
 
         Map<LocalDate, Long> countMap = raw.stream()
                 .collect(Collectors.toMap(DayCountView::getDay,

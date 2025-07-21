@@ -17,7 +17,6 @@ public class DashboardController {
 
     @GetMapping("/status")
     public ResponseEntity<DashboardStatusResponseDto> getDashboardWeekStatus() {
-        DashboardStatusResponseDto result = dashboardService.getDashboardWeekStatus();
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(dashboardService.getDashboardWeekStatus());
     }
 }
