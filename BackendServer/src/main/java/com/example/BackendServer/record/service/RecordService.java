@@ -33,6 +33,7 @@ public class RecordService {
   @Transactional
   public RecordEntity create(RecordRequest recordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(recordRequest.getVehicleId())
+            // TODO : 추후 예외 수정
             .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
 
     RecordEntity record = RecordEntity.builder()
@@ -57,7 +58,8 @@ public class RecordService {
   /** 운행일지 상세 조회 */
   public RecordDetailResponse getRecordDetail(Long id) {
     RecordEntity record = recordRepository.findById(id)
-            .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+            // TODO : 추후 예외 수정 (임시로 NotFound로 수정)
+            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND ));
 
     // GPS 경로 조회
     List<GpsRecordEntity> gpsList = gpsRecordRepository.findByRecordIdOrderByOTime(id);
@@ -74,17 +76,7 @@ public class RecordService {
       endLng = gpsList.get(gpsList.size() - 1).getLongitude();
     }
 
-    return RecordDetailResponse.builder()
-            .vehicleNumber(record.getVehicle().getVehicleNumber())  // 차량번호
-            .vehicleName(record.getVehicle().getType().name())
-            .onTime(record.getOnTime())
-            .offTime(record.getOffTime())
-            .sumDist(record.getSumDist())
-            .startLat(startLat)
-            .startLng(startLng)
-            .endLat(endLat)
-            .endLng(endLng)
-            .build();
+    return RecordDetailResponse.fromEntity(record, startLat, startLng, endLat, endLng, gpsList);
   }
 
 }

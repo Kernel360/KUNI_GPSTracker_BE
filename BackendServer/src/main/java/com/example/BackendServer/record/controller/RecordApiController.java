@@ -23,13 +23,13 @@ public class RecordApiController {
   private final RecordService recordService;
 
   /** 운행일지 생성 */
-  @PostMapping("")
+  @PostMapping
   public RecordEntity create(@Valid @RequestBody RecordRequest recordRequest) {
     return recordService.create(recordRequest);
   }
 
   /** 운행일지 목록 조회 */
-  @GetMapping("")
+  @GetMapping
   public Page<RecordListResponse> getRecordList(
           @RequestParam(required = false) String vehicleNumber,
           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
