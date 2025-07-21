@@ -5,6 +5,7 @@ import com.example.BackendServer.record.model.RecordRequest;
 import com.example.BackendServer.record.service.RecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,8 +15,8 @@ public class RecordApiController {
 
   private final RecordService recordService;
 
-  @PostMapping("")
-  public RecordEntity create(@Valid @RequestBody RecordRequest recordRequest) {
-    return recordService.create(recordRequest);
+  @PostMapping
+  public ResponseEntity<RecordEntity> create(@Valid @RequestBody RecordRequest recordRequest) {
+    return ResponseEntity.ok().body(recordService.create(recordRequest));
   }
 }

@@ -3,6 +3,7 @@ package com.example.BackendServer.vehicle.db;
 import com.example.BackendServer.device.db.DeviceEntity;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import com.example.BackendServer.record.db.RecordEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -47,11 +48,13 @@ public class VehicleEntity {
   @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
   @ToString.Exclude
   @Builder.Default
+  @JsonIgnore
   private List<RecordEntity> records = new ArrayList<>();
 
   @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
   @ToString.Exclude
   @Builder.Default
+  @JsonIgnore
   private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
   // status enum 정의
   public enum Status {
