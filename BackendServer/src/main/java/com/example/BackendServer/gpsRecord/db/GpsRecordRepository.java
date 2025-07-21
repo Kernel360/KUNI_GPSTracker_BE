@@ -1,7 +1,13 @@
 package com.example.BackendServer.gpsRecord.db;
 
-import com.example.BackendServer.device.db.DeviceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long> {
+import java.util.List;
+
+public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity, Long> {
+
+    @Query("SELECT g FROM GpsRecordEntity g WHERE g.record.id = :recordId ORDER BY g.oTime ASC")
+    List<GpsRecordEntity> findByRecordIdOrderByOTime(@Param("recordId") Long recordId);
 }

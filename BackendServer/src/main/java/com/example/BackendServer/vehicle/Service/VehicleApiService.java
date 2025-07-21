@@ -45,7 +45,7 @@ public class VehicleApiService {
 
     /**
      * 차량 리스트 조회 : 차량 타입과 상태에 따라 페이지네이션된 차량 리스트를 반환한다.
-     * @param pageable page, sort 정보를 가진다정
+     * @param pageable page, sort 정보를 가진다
      * @param vehicleName 차량 번호
      * @param status 차량 상태
      * @return Page<VehicleListResponse> : 차량 리스트를 반환한다.
