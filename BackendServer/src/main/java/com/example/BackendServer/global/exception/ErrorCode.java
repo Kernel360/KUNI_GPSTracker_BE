@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 	// //global
 	INTERNAL_SERVER_ERROR(500, "GLOBAL-001", "서버에 오류가 발생하였습니다."),
-	NOT_FOUND(404, "GLOBAL-002", "값을 찾을 수 없습니다.");
+	NOT_FOUND(404, "GLOBAL-002", "값을 찾을 수 없습니다."),
 
 	VEHICLE_NOT_FOUND(400, "VEHICLE-001", "차량을 찾을 수 없습니다."),
 	RECORD_NOT_FOUND(400,"RECORD-001", "운행 기록이 없습니다."),
