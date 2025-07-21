@@ -2,10 +2,21 @@ package com.example.BackendServer.gpsRecord.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long> {
+    @Query("""
+  select g
+  from GpsRecordEntity g
+  where g.record.id = :recordId
+  order by g.oTime desc
+  limit 1
+""")
+    Optional<GpsRecordEntity> findLatest(Long recordId);
+
 
     @Query(value = """
         SELECT gr.*
@@ -19,4 +30,5 @@ public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long>
         WHERE (:status IS NULL OR gr.status = :status)
         """, nativeQuery = true)
     List<GpsRecordEntity> findLatestGpsForAllVehiclesByStatus(@Param("status") String status);
+
 }

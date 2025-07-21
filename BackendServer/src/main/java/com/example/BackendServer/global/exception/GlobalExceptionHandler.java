@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> globalException(CustomException e) {
-		log.info("exception 발생");
+		log.info("exception 발생 : {}", e.getMessage());
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
 		ErrorResponse response = ErrorResponse.builder()
 			.timeStamp(LocalDateTime.now())
