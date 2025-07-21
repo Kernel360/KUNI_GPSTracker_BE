@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class RecordRequest {
 
   private Long vehicleId;
-  private Long driverId;
   private String sumDist;
   private LocalDateTime onTime;
   private LocalDateTime offTime;

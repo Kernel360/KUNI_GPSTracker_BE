@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,8 +25,8 @@ public class RecordApiController {
 
   /** 운행일지 생성 */
   @PostMapping
-  public RecordEntity create(@Valid @RequestBody RecordRequest recordRequest) {
-    return recordService.create(recordRequest);
+  public ResponseEntity<RecordEntity> create(@Valid @RequestBody RecordRequest recordRequest) {
+    return ResponseEntity.ok().body(recordService.create(recordRequest));
   }
 
   /** 운행일지 목록 조회 */
