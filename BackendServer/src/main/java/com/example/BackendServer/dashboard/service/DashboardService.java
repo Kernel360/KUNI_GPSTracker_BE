@@ -27,10 +27,10 @@ public class DashboardService {
         long inspect = vehicleRepository.countByStatus(VehicleEntity.Status.INSPECTING);
 
         return DashboardResponseDto.builder()
-                .vehicles((int) total)
-                .active((int) active)
-                .inactive((int) inactive)
-                .inspect((int) inspect)
+                .vehicles(total)
+                .active(active)
+                .inactive(inactive)
+                .inspect(inspect)
                 .build();
     }
 
