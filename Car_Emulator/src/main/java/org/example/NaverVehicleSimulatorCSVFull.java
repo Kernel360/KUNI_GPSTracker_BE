@@ -178,112 +178,124 @@ public class NaverVehicleSimulatorCSVFull {
             this.apiKey = apiKey;
         }
 
-        // 1분 단위로 속도 변화하며 주행 정보 생성 및 저장
+        // 기존 simulateVehicleWithVariableSpeed()를 아래 코드로 교체
         private void simulateVehicleWithVariableSpeed(String mdn, RouteResult route) throws InterruptedException {
             List<LatLng> path = route.path;
             List<Double> segmentDistances = new ArrayList<>();
             List<Double> accumulatedDistances = new ArrayList<>();
             accumulatedDistances.add(0.0);
-
+        
+            // 각 경로 구간별 거리 계산 (누적 거리 리스트 생성)
             for (int i = 0; i < path.size() - 1; i++) {
                 double dist = calculateDistance(path.get(i), path.get(i + 1));
                 segmentDistances.add(dist);
                 accumulatedDistances.add(accumulatedDistances.get(i) + dist);
             }
-
+        
             int elapsedSeconds = 0;
             int cycleCount = 1;
             int batteryLevel = 135;
-            double totalDistance = 0.0; // 이동 거리 누적 변수
+            double totalDistance = 0.0; // 누적 이동 거리 (m)
             String filename = mdn + ".csv";
             boolean fileExists = new File(filename).exists();
-
+        
             try (FileWriter fw = new FileWriter(filename, true)) {
                 if (!fileExists) {
                     fw.write("mdn,tid,mid,pv,did,cCnt,timestamp,sec,gcd,lat,lon,ang,spd,sum,bat\n");
                 }
-
+        
                 LocalDateTime startTime = LocalDateTime.now();
                 Random random = new Random();
-
+        
                 while (true) {
-                    double speedKmph = 20 + random.nextDouble() * 30; // 현재 1분 속도 (20~50km/h)
-                    double speedMps = speedKmph * 1000 / 3600.0;
-
+                    // 이번 1분 동안의 시작/끝 속도 (20~50km/h)
+                    double startSpeedKmph = 20 + random.nextDouble() * 30;
+                    double endSpeedKmph = 20 + random.nextDouble() * 30;
+                    double deltaSpeedKmph = (endSpeedKmph - startSpeedKmph) / 60.0; // 초당 속도 변화량 (선형 보간)
+        
                     List<CycleInfo> batchData = new ArrayList<>();
-
+        
                     for (int sec = 0; sec < 60; sec++) {
+                        double currentSpeedKmph = startSpeedKmph + deltaSpeedKmph * sec;
+                        double currentSpeedMps = currentSpeedKmph * 1000 / 3600.0;
+        
                         int totalSec = elapsedSeconds + sec;
-                        totalDistance += speedMps;
-
+                        totalDistance += currentSpeedMps * 1.0; // v * Δt (Δt = 1초)
+        
                         CycleInfo cycle = new CycleInfo();
                         cycle.mdn = mdn;
                         cycle.cCnt = cycleCount;
-                        cycle.timestamp = startTime.plusSeconds(totalSec).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                        cycle.timestamp = startTime.plusSeconds(totalSec)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                         cycle.sec = String.format("%02d", sec);
-
+        
                         if (totalDistance >= accumulatedDistances.get(accumulatedDistances.size() - 1)) {
-                            // 종료 상태 데이터 기록
+                            // 도착 지점 기록
                             cycle.gcd = "V";
                             LatLng dest = path.get(path.size() - 1);
                             cycle.lat = String.valueOf((int) (dest.lat * 1_000_000));
                             cycle.lon = String.valueOf((int) (dest.lng * 1_000_000));
                             cycle.spd = "0";
-                            cycle.sum = String.valueOf((int) accumulatedDistances.get(accumulatedDistances.size() - 1).doubleValue());
-                            cycle.bat = String.valueOf(batteryLevel); // 기존 배터리 값 유지
+                            double finalDistance = accumulatedDistances.get(accumulatedDistances.size() - 1);
+                            cycle.sum = String.valueOf((int) finalDistance);
+                            cycle.bat = String.valueOf(batteryLevel);
                             cycle.ang = "0";
                             batchData.add(cycle);
-                            break; // for문 즉시 탈출!
+                            break;
                         } else {
-                            // 정상 데이터 기록
+                            // 현재 위치 보간
                             int segmentIndex = 0;
-                            while (segmentIndex < accumulatedDistances.size() - 1 && accumulatedDistances.get(segmentIndex + 1) < totalDistance) {
+                            while (segmentIndex < accumulatedDistances.size() - 1 &&
+                                   accumulatedDistances.get(segmentIndex + 1) < totalDistance) {
                                 segmentIndex++;
                             }
-
+        
                             double segmentStartDist = accumulatedDistances.get(segmentIndex);
                             double segmentLength = segmentDistances.get(segmentIndex);
                             double ratio = (totalDistance - segmentStartDist) / segmentLength;
-
+        
                             LatLng start = path.get(segmentIndex);
                             LatLng end = path.get(segmentIndex + 1);
-
+        
                             double lat = start.lat + (end.lat - start.lat) * ratio;
                             double lng = start.lng + (end.lng - start.lng) * ratio;
-
+        
                             cycle.lat = String.valueOf((int) (lat * 1_000_000));
                             cycle.lon = String.valueOf((int) (lng * 1_000_000));
-                            cycle.spd = String.valueOf((int) speedKmph);
+                            cycle.spd = String.valueOf((int) currentSpeedKmph);
                             cycle.sum = String.valueOf((int) totalDistance);
                             cycle.bat = String.valueOf(batteryLevel);
                             cycle.ang = String.valueOf((int) calculateBearing(start, end));
                             batchData.add(cycle);
                         }
-
+        
+                        // 30분마다 배터리 1씩 감소
                         if (totalSec % 1800 == 0 && totalSec != 0) {
                             batteryLevel = Math.max(0, batteryLevel - 1);
                         }
                     }
-
+        
+                    // CSV로 기록
                     for (CycleInfo ci : batchData) {
                         fw.write(ci.toString() + "\n");
                     }
-
                     fw.flush();
+        
                     elapsedSeconds += 60;
                     cycleCount++;
-
+        
                     if (totalDistance >= accumulatedDistances.get(accumulatedDistances.size() - 1)) {
-                        break;
+                        break; // 경로 끝
                     }
-
-                    Thread.sleep(10); // 실제는 60000
+        
+                    Thread.sleep(10); // 실제 시뮬레이션에선 60000 (1분)
                 }
-
+        
             } catch (IOException e) {
                 System.err.println("CSV 파일 저장 실패: " + e.getMessage());
             }
         }
+
 
         @Override
         public void run() {
