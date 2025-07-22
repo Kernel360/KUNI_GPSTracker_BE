@@ -139,6 +139,10 @@ resource "aws_instance" "jenkins_server" {
   iam_instance_profile = aws_iam_instance_profile.jenkins_profile.name
   associate_public_ip_address = true # Public IP 자동 할당
   key_name = "jenkins-key" # 본인의 EC2 키 페어 이름으로 변경하세요.
+  root_block_device {
+    volume_size = 20 # Jenkins와 Docker 이미지 저장을 위한 최소 크기
+    volume_type = "gp2" # 일반 SSD
+  }
 
   # 인스턴스 시작 시 실행할 스크립트 (커스텀 Jenkins 이미지 빌드 및 실행)
   user_data = <<-EOF
