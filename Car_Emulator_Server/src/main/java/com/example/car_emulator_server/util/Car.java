@@ -8,7 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Car {
-    private String number;               // 예: 28나3920
+    private String number;// 예: 28나3920
+    @Builder.Default
     private CarState state = CarState.OFF;
 
     public Car(String number) {

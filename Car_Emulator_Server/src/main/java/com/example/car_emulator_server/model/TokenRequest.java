@@ -7,10 +7,8 @@ import lombok.Getter;
 @Builder
 public class TokenRequest {
     private String mdn;
-    private String tid;
-    private String mid;
-    private String pv;
-    private String did;
     private String dFWVer;
+
+    private MDT mdt;
 
 }
