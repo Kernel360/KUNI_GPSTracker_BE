@@ -8,6 +8,7 @@ pipeline {
         ECR_REPOSITORY_NAME = "spring-app"
         ECS_CLUSTER_NAME = "main-cluster"
         ECS_SERVICE_NAME = "spring-app-service"
+        ECS_TASK_DEFINITION_FAMILY = "spring-app-task" // 작업 정의 패밀리 이름 추가
     }
 
     stages {
@@ -30,7 +31,6 @@ pipeline {
                     def imageTag = "${env.BUILD_NUMBER}"
                     def dockerImage = "${ecrRepositoryUrl}:${imageTag}"
 
-                    sh "ls -l"
                     // ECR 로그인
                     sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
 
@@ -49,26 +49,26 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // 현재 작업 정의 가져오기
-                    def taskDefinitionJson = sh(script: "aws ecs describe-task-definition --task-definition ${ECS_SERVICE_NAME} --query taskDefinition", returnStdout: true).trim()
+                    // 현재 작업 정의 가져오기 (ECS_TASK_DEFINITION_FAMILY 사용)
+                    def taskDefinitionJson = sh(script: "aws ecs describe-task-definition --task-definition ${ECS_TASK_DEFINITION_FAMILY} --query taskDefinition", returnStdout: true).trim()
                     
                     // 새 이미지로 컨테이너 정의 업데이트
                     def newContainerDefinitions = groovy.json.JsonOutput.toJson(
                         (new groovy.json.JsonSlurper().parseText(taskDefinitionJson)).containerDefinitions.each { it.image = env.IMAGE_NAME }
                     )
 
-                    // 새 작업 정의 등록
-                    def newTaskDefinitionArn = sh(script: """\
+                    // 새 작업 정의 등록 (family를 ECS_TASK_DEFINITION_FAMILY로 수정)
+                    def newTaskDefinitionArn = sh(script: """
                         aws ecs register-task-definition \
-                            --family ${ECS_SERVICE_NAME} \
-                            --cli-input-json '{
-                                "containerDefinitions": ${newContainerDefinitions},
-                                "family": \"${ECS_SERVICE_NAME}\",
-                                "networkMode": \"awsvpc\",
-                                "requiresCompatibilities": [\"FARGATE\"],
-                                "cpu": \"256\",
-                                "memory": \"512\",
-                                "executionRoleArn": \"arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs_task_execution_role\"
+                            --family ${ECS_TASK_DEFINITION_FAMILY} \
+                            --cli-input-json '{ \
+                                "containerDefinitions": ${newContainerDefinitions}, \
+                                "family": "${ECS_TASK_DEFINITION_FAMILY}", \
+                                "networkMode": "awsvpc", \
+                                "requiresCompatibilities": ["FARGATE"], \
+                                "cpu": "256", \
+                                "memory": "512", \
+                                "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs_task_execution_role" \
                             }' \
                             --query 'taskDefinition.taskDefinitionArn' \
                             --output text
