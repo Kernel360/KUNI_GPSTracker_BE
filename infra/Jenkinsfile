@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'docs/47', url: 'https://github.com/Kernel360/KUNI_GPSTracker_BE.git' // 실제 Git 리포지토리 URL로 변경
+                git branch: 'develop', url: 'https://github.com/Kernel360/KUNI_GPSTracker_BE.git' // 실제 Git 리포지토리 URL로 변경
             }
         }
 
