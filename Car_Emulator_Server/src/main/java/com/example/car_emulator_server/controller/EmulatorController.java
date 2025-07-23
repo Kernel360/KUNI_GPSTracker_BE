@@ -38,7 +38,8 @@ public class EmulatorController {
         Resource res = new ClassPathResource("gps/"+number+".csv");
         Path csv = res.getFile().toPath();
         //2. 서버로 정보 전송
-        if(state.equals("ON")) emulatorService.sendOnAndStart(csv, number).subscribe();
+        if(state.equals("ON")) emulatorService.start(csv, number);
+        else emulatorService.stop(number);
         //TODO : 백그라운드에서 동작하기 때문에 모니터링 코드 추가 필요
 
 
