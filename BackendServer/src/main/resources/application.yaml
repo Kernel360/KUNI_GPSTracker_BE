@@ -1,6 +1,7 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+
   jpa:
     show-sql: true
     properties:
@@ -15,3 +16,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
+springdoc:
+  override-with-generic-response: false
+
+logging:
+  level:
+    org.springframework.boot.context.config: DEBUG  # ⬅️ 추가됨
