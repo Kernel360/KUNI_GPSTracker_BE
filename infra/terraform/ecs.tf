@@ -69,6 +69,7 @@ resource "aws_ecs_service" "main" {
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = 2
   launch_type     = "FARGATE"
+  health_check_grace_period_seconds = 120
 
   network_configuration {
     subnets         = [aws_subnet.private_a.id, aws_subnet.private_c.id]
