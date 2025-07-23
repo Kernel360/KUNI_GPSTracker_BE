@@ -16,7 +16,7 @@ resource "aws_db_instance" "main" {
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t3.micro"
-  db_name              = "mydatabase"
+  db_name              = "gpsTracker"
   username             = "admin"
   password             = "password" # 실제 환경에서는 Secrets Manager 또는 파라미터 스토어 사용 권장
   db_subnet_group_name = aws_db_subnet_group.main.name
