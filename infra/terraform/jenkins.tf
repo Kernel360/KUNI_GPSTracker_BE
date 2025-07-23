@@ -147,6 +147,13 @@ resource "aws_instance" "jenkins_server" {
   # 인스턴스 시작 시 실행할 스크립트 (커스텀 Jenkins 이미지 빌드 및 실행)
   user_data = <<-EOF
               #!/bin/bash
+              # swap memory 설정 (Jenkins와 Docker를 위한 메모리 최적화)
+              sudo dd if=/dev/zero of=/swapfile bs=128M count=16
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile
+              sudo swapon /swapfile
+              echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+
               # EC2 인스턴스에 Docker 설치 및 실행
               yum update -y
               amazon-linux-extras install -y docker
