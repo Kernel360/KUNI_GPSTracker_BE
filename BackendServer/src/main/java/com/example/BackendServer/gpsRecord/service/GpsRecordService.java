@@ -1,6 +1,7 @@
 package com.example.BackendServer.gpsRecord.service;
 
 
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.global.exception.CustomException;
 import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
@@ -13,8 +14,6 @@ import com.example.BackendServer.vehicle.db.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +30,9 @@ public class GpsRecordService {
         .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
 
-    GpsRecordEntity.Status statusEnum;
+    VehicleStatus statusEnum;
     try {
-      statusEnum = GpsRecordEntity.Status.valueOf(gpsRecordRequest.getStatus());
+      statusEnum = VehicleStatus.valueOf(gpsRecordRequest.getStatus());
     } catch (Exception e) {
       throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); //TODO : 임시, 나중에 적절한 ErrorCode 추가 권장
     }

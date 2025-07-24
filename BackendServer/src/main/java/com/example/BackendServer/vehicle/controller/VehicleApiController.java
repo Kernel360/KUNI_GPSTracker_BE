@@ -2,6 +2,7 @@ package com.example.BackendServer.vehicle.controller;
 
 import static org.springframework.data.domain.Sort.Direction.*;
 
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.vehicle.Service.VehicleApiService;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
@@ -68,10 +69,10 @@ public class VehicleApiController {
         @ParameterObject
         @PageableDefault(size = 10, page = 1, sort = "createDate", direction = DESC)
         Pageable pageable,
-        @Parameter(description = "차량 이름", example = "12가3456")
+        @Parameter(description = "차량 이름", example = "12가3456", required = false)
         @RequestParam String vehicleName,
         @Parameter(description = "차량 상태", example = "ACTIVE")
-        @RequestParam VehicleEntity.Status status
+        @RequestParam VehicleStatus status
     ) {
         return ResponseEntity.ok(vehicleApiService.getVehicleList(pageable, vehicleName, status));
     }

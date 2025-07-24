@@ -1,5 +1,8 @@
 package com.example.BackendServer.vehicle.Service;
 
+import static com.example.BackendServer.global.Class.VehicleStatus.*;
+
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
@@ -32,7 +35,7 @@ public class VehicleApiService {
 
         VehicleEntity entity = VehicleEntity.builder()
                 .vehicleNumber(dto.getVehicleNumber())
-                .status(VehicleEntity.Status.INACTIVE)
+                .status(INACTIVE)
                 .totalDist(0L)
                 .type(dto.getVehicleName())
                 .createDate(LocalDateTime.now())
@@ -50,7 +53,7 @@ public class VehicleApiService {
      * @param status 차량 상태
      * @return Page<VehicleListResponse> : 차량 리스트를 반환한다.
      */
-    public Page<VehicleListResponse> getVehicleList(Pageable pageable, String vehicleName, VehicleEntity.Status status) {
+    public Page<VehicleListResponse> getVehicleList(Pageable pageable, String vehicleName, VehicleStatus status) {
       return vehicleRepository.findAllByStatusAndVehicleNumberContains(status, vehicleName,
         pageable).map(
         vehicle -> VehicleListResponse.builder()
