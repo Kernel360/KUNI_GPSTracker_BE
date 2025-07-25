@@ -22,18 +22,16 @@ public class EmulatorService {
     }
 
     public TokenResponse issueToken(TokenRequest request) {
-        if ("01234567890".equals(request.getMdn()) && "A001".equals(request.getTid())) {
-            String token = Jwts.builder()
-                .setSubject(request.getMdn())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 4 * 60 * 60 * 1000)) // 4시간
-                .signWith(jwtKey)
-                .compact();
-            tokenStore.put(request.getMdn(), token);
-            return new TokenResponse("000", "Success", request.getMdn(), token, "4");
-        } else {
-            throw new RuntimeException("인증 실패");
-        }
+
+        String token = Jwts.builder()
+            .setSubject(request.getMdn())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 4 * 60 * 60 * 1000)) // 4시간
+            .signWith(jwtKey)
+            .compact();
+        tokenStore.put(request.getMdn(), token);
+        return new TokenResponse("000", "Success", request.getMdn(), token, "4");
+
     }
 
     public void verifyToken(String authHeader) {
