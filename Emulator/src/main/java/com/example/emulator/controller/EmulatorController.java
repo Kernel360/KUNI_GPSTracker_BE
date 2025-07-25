@@ -1,11 +1,15 @@
 package com.example.emulator.controller;
 
+import com.example.emulator.model.HtmlRequest;
+import com.example.emulator.model.OnRequestPayload;
+import com.example.emulator.model.RangeRequest;
 import com.example.emulator.service.EmulatorService;
 import com.example.emulator.service.TokenService;
 import com.example.emulator.util.CarRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -30,17 +34,32 @@ public class EmulatorController {
 
     @PostMapping("/{number}/{state}")
     @ResponseBody
-    public void changeState(@PathVariable("number") String number, @PathVariable("state") String state) throws IOException {
-        //1. 차량 on, off 상태 바꾸기
-        emulatorService.changeState(number, state);
-
+    public void changeState(@PathVariable("number") String number, @PathVariable("state") String state, @RequestBody HtmlRequest req) throws IOException {
         Resource res = new ClassPathResource("gps/"+number+".csv");
         Path csv = res.getFile().toPath();
         //2. 서버로 정보 전송
-        if(state.equals("ON")) emulatorService.start(csv, number);
+        if(state.equals("ON")) emulatorService.start(csv, number, req.getInterval());
         else emulatorService.stop(number);
-        //TODO : 백그라운드에서 동작하기 때문에 모니터링 코드 추가 필요
 
+    }
+
+    @PostMapping("/all/{state}")
+    @ResponseBody
+    public void turnOnAll(@PathVariable String state, @RequestBody OnRequestPayload payload) {
+        if(state.equals("ON")) {
+            emulatorService.turnOnAll(payload.getInterval());
+        }
+        else emulatorService.turnOffAll();
+
+    }
+
+    @PostMapping("/range/{state}")
+    @ResponseBody
+    public void turnOnRange(@PathVariable String state, @RequestBody RangeRequest payload) {
+        if(state.equals("ON")) {
+            emulatorService.turnOnRange(payload.getStart(), payload.getEnd(), payload.getInterval());
+        }
+        else emulatorService.turnOffRange(payload.getStart(), payload.getEnd());
 
     }
 

@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.Disposable;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -46,10 +48,10 @@ public class EmulatorService {
         Car car = carRegistry.get(number);
         car.setState(CarState.valueOf(state));
     }
-    public void start(Path csv, String mdn) throws IOException {
+    public void start(Path csv, String mdn, int interval) throws IOException {
         stop(mdn);   // 같은 차량이 이미 돌고 있으면 중단
 
-        Disposable d = sendOnAndStart(csv, mdn)         //  /on 전송 →  60초 주기 /gps
+        Disposable d = sendOnAndStart(csv, mdn, interval)         //  /on 전송 →  interval 주기 /gps
                 .doOnTerminate(() -> stop(mdn))
                 .subscribe(
                         null,
@@ -97,7 +99,7 @@ public class EmulatorService {
         }
 
         DateTimeFormatter inFmt  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
         String offTime = LocalDateTime.parse(last.getTimestamp(), inFmt)
                 .format(outFmt);
@@ -121,10 +123,9 @@ public class EmulatorService {
                 .gps(gps)
                 .build();
 
-
         return client.post()
                 .uri("/off")
-                .header("Token", tokenService.getToken(mdn))
+                .header("Authorization", tokenService.getToken(mdn))
                 .bodyValue(req)     // 규격에 맞춰 수정
                 .retrieve()
                 .toBodilessEntity()
@@ -136,10 +137,10 @@ public class EmulatorService {
      * @param csvPath CSV 파일
      * @param mdn     차량 번호
      */
-    public Mono<Void> sendOnAndStart(Path csvPath, String mdn) throws IOException {
+    public Mono<Void> sendOnAndStart(Path csvPath, String mdn, int interval) throws IOException {
 
         return sendOn(csvPath, mdn)                 // 1. ON
-                .then(startGps(csvPath, mdn));  // 2. 주기 전송
+                .then(startGps(csvPath, mdn, interval));  // 2. 주기 전송
     }
 
 
@@ -148,6 +149,12 @@ public class EmulatorService {
         List<CSV> all = loadCsv(csvPath);
 
         CSV csvFirst = all.get(0);
+
+        DateTimeFormatter inFmt  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+        String onTime = LocalDateTime.parse(csvFirst.getTimestamp(), inFmt)
+                .format(outFmt);
 
         firstGps.put(number, csvFirst);
 
@@ -163,14 +170,14 @@ public class EmulatorService {
         CarStartRequest req = CarStartRequest.builder()
                 .mdn(number)
                 .mdt(MDT.decidedMDT())
-                .onTime(csvFirst.getTimestamp())
+                .onTime(onTime)
                 .offTime(null)
                 .gps(gps)
                 .build();
 
         return client.post()
                 .uri("/on")
-                .header("Token", tokenService.getToken(number))
+                .header("Authorization", tokenService.getToken(number))
                 .bodyValue(req)
                 .retrieve()
                 .toBodilessEntity()
@@ -195,7 +202,7 @@ public class EmulatorService {
     }
 
     /** CSV를 한 번 읽고 60초 간격으로 전송 */
-    private Mono<Void> startGps(Path csv, String mdn) {
+    private Mono<Void> startGps(Path csv, String mdn, int interval) {
 
         /* 2-1 CSV → List<CSV> (블로킹 I/O이므로 boundedElastic) */
         Mono<List<CSV>> listMono =
@@ -204,10 +211,10 @@ public class EmulatorService {
 
         /* 2-2 60개씩 끊어 60초마다 POST */
         return listMono.flatMapMany(all -> {
-                    List<List<CSV>> batches = Lists.partition(all, 60);
+                    List<List<CSV>> batches = Lists.partition(all, interval);
                     return Flux.fromIterable(batches);
                 })
-                .delayElements(Duration.ofSeconds(60))
+                .delayElements(Duration.ofSeconds(interval))
                 .flatMap(batch -> sendGpsBatch(mdn, batch))
                 .then();                   // Mono<Void>
     }
@@ -248,7 +255,7 @@ public class EmulatorService {
 
         return client.post()
                 .uri("/gps")
-                .header("Token", tokenService.getToken(mdn))
+                .header("Authorization", tokenService.getToken(mdn))
                 .bodyValue(req)
                 .retrieve()
                 .toBodilessEntity()
@@ -259,4 +266,50 @@ public class EmulatorService {
                 .then();
     }
 
+
+    public void turnOnAll(int interval) {
+        for (Car car : carRegistry.all()) {
+            try {
+                Path csvPath = new ClassPathResource("gps/" + car.getNumber() + ".csv").getFile().toPath();
+                start(csvPath, car.getNumber(), interval);
+            } catch (Exception e) {
+                log.error("[{}] 전체 ON 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
+            }
+        }
+    }
+
+    public void turnOffAll() {
+        for (Car car : carRegistry.all()) {
+            try {
+                stop(car.getNumber());
+            } catch (Exception e) {
+                log.error("[{}] 전체 OFF 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
+            }
+        }
+    }
+
+    public void turnOnRange(int startIndex, int endIndex, int interval) {
+        List<Car> cars = new ArrayList<>(carRegistry.all());
+        for (int i = startIndex - 1; i < endIndex && i < cars.size(); i++) {
+            Car car = cars.get(i);
+            try {
+                Path csvPath = new ClassPathResource("gps/" + car.getNumber() + ".csv").getFile().toPath();
+                start(csvPath, car.getNumber(), interval);
+            } catch (Exception e) {
+                log.error("[{}] 범위 ON 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
+            }
+        }
+    }
+
+    public void turnOffRange(int startIndex, int endIndex) {
+        List<Car> cars = new ArrayList<>(carRegistry.all());
+        for (int i = startIndex - 1; i < endIndex && i < cars.size(); i++) {
+            Car car = cars.get(i);
+            try {
+                stop(car.getNumber());
+            } catch (Exception e) {
+                log.error("[{}] 범위 OFF 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
+            }
+        }
+    }
 }

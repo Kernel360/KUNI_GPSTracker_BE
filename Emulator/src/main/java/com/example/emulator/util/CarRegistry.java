@@ -32,7 +32,7 @@ public class CarRegistry {
             br.lines()
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
-                    .forEach(number -> cars.put(number, new Car(number)));
+                    .forEach(number -> cars.put(number, new Car(number,CarState.OFF)));
 
             log.info("Loaded {} car numbers", cars.size());
 
