@@ -20,6 +20,12 @@ public class TokenService {
     private final WebClient client;
     private final ConcurrentHashMap<String, TokenHolder> tokens = new ConcurrentHashMap<>();
 
+    /**
+     * ConcurrentHashMap으로 유지중인 tokens에서 현재 차량에 관한 token을 가져오는 메서드
+     *
+     * @param mdn
+     * @return
+     */
     public String getToken(String mdn) {
         // compute() = 스레드 안전하게 갱신
         return tokens.compute(mdn, (key, holder) -> {
@@ -30,6 +36,12 @@ public class TokenService {
         }).getToken();
     }
 
+    /**
+     * token이 없는 경우 관제 서버로 token 요청하는 메서드
+     *
+     * @param mdn
+     * @return
+     */
     private TokenHolder fetchToken(String mdn) {
 
         TokenRequest req = TokenRequest.builder()

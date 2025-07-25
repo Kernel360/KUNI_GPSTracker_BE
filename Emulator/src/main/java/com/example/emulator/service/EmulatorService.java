@@ -44,10 +44,27 @@ public class EmulatorService {
     private final ConcurrentMap<String, CSV> firstGps = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, CSV> lastGps = new ConcurrentHashMap<>();
 
+    /**
+     * 차량의 상태를 on/off 로 변경한다.
+     * @param number
+     * @param state
+     */
     public void changeState(String number, String state) {
         Car car = carRegistry.get(number);
         car.setState(CarState.valueOf(state));
     }
+
+    /**
+     * 차량에 대응되는 csv파일을 읽어서 interval 초 단위로 관제 서버로 데이터를 보내는 메서드
+     * sendOnAndStart 메서드를 사용해서 ON 요청과 주기정보 요청을 보내는 메서드를 호출 한다.
+     *
+     * running에 현재 요청 스트림을 유지한다.
+     *
+     * @param csv
+     * @param mdn
+     * @param interval
+     * @throws IOException
+     */
     public void start(Path csv, String mdn, int interval) throws IOException {
         stop(mdn);   // 같은 차량이 이미 돌고 있으면 중단
 
@@ -62,6 +79,10 @@ public class EmulatorService {
         changeState(mdn, "ON");
     }
 
+    /**
+     * 요청 스트림에서 차량 번호에 해당하는 스트림을 중단
+     * @param mdn
+     */
     public void stop(String mdn) {
         Disposable disposable = running.remove(mdn);
 
@@ -86,6 +107,12 @@ public class EmulatorService {
         firstGps.remove(mdn);
     }
 
+    /**
+     * 관제 서버로 Off 요청 보내는 메서드
+     *
+     * @param mdn
+     * @return
+     */
     private Mono<Void> sendOff(String mdn) {
 
         CSV last = lastGps.get(mdn);
@@ -143,7 +170,13 @@ public class EmulatorService {
                 .then(startGps(csvPath, mdn, interval));  // 2. 주기 전송
     }
 
-
+    /**
+     * 관제 서버로 On 요청을 보내느 메서드
+     * @param csvPath
+     * @param number
+     * @return
+     * @throws IOException
+     */
     public Mono<Void> sendOn(Path csvPath, String number) throws IOException {
 
         List<CSV> all = loadCsv(csvPath);
@@ -186,7 +219,13 @@ public class EmulatorService {
                 .then();
     }
 
-
+    /**
+     * CSV 파일을 읽어서 gps 정보를 리스트로 반환한다.
+     *
+     * @param csvPath
+     * @return
+     * @throws IOException
+     */
     public List<CSV> loadCsv(Path csvPath) throws IOException {
         try (Reader reader = Files.newBufferedReader(csvPath)) {
 
@@ -201,7 +240,7 @@ public class EmulatorService {
         }
     }
 
-    /** CSV를 한 번 읽고 60초 간격으로 전송 */
+    /** CSV를 한 번 읽고 interval초 간격으로 전송 */
     private Mono<Void> startGps(Path csv, String mdn, int interval) {
 
         /* 2-1 CSV → List<CSV> (블로킹 I/O이므로 boundedElastic) */
@@ -219,6 +258,12 @@ public class EmulatorService {
                 .then();                   // Mono<Void>
     }
 
+    /**
+     * 관제 서버로 주기정보를 전송하는 메서드
+     * @param mdn
+     * @param batch
+     * @return
+     */
     private Mono<Void> sendGpsBatch(String mdn, List<CSV> batch) {
 
         List<MdtGpsRequest.CList> cList = batch.stream()
@@ -265,6 +310,13 @@ public class EmulatorService {
                         log.error("[{}] GPS 전송 실패: {}", mdn, e.getMessage()))
                 .then();
     }
+
+
+    /**
+     * 아래 4가지 메서드는
+     * 애뮬레이터 웹에서 전체 차량 ON/Off , 범위 지정 ON/Off 기능을 구현한 메서드 들이다.
+     *
+     */
 
 
     public void turnOnAll(int interval) {

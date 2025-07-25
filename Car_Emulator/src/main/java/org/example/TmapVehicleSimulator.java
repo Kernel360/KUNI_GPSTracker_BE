@@ -93,7 +93,7 @@ public class TmapVehicleSimulator {
         String startY = "37.5665";   // latitude
         String endX = "126.9900";
         String endY = "37.5700";
-        String appKey = System.getenv("APP_KEY"); //실제 발급된 AppKey 넣기
+        String appKey = "YOUR_TMAP_APP_KEY"; //실제 발급된 AppKey 넣기
 
         List<LatLng> path = getTmapRoute(startX, startY, endX, endY, appKey);
         simulateVehicle(path, 30.0); //설정된 속도 이동 시뮬레이션
