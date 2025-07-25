@@ -1,15 +1,26 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+
   jpa:
     show-sql: true
     properties:
       format_sql: true
       dialect: org.hibernate.dialect.MySQL8Dialect
+      hibernate:
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update # 여기로 이동
+
   datasource:
     url: ${DB_URL}
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
+springdoc:
+  override-with-generic-response: false
+
+logging:
+  level:
+    org.springframework.boot.context.config: DEBUG  # ⬅️ 추가됨
