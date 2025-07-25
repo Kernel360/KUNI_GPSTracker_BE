@@ -1,0 +1,6 @@
+
+
+emulator:
+  target-base-url: "http://localhost:8080/api/emulator"
+server:
+  port: 8082
