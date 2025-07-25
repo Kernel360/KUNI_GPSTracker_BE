@@ -3,18 +3,14 @@ package com.example.BackendServer.emulator.model;
 import lombok.Data;
 
 @Data
-public class OnOffRequest {
-    private String mdn;
-    private String tid;
-    private String mid;
-    private String pv;
-    private String did;
-    private String onTime;
-    private String offTime;
+public class GpsCycleData {
+    private String sec;
     private String gcd;
     private String lat;
     private String lon;
     private String ang;
     private String spd;
     private String sum;
+    private String bat;
 }
+

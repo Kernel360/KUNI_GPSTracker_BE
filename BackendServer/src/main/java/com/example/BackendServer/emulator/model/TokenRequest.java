@@ -4,6 +4,10 @@ import lombok.Data;
 
 @Data
 public class TokenRequest {
-    private String emulatorId;
-    private String secret;
+    private String mdn;
+    private String tid;
+    private String mid;
+    private String pv;
+    private String did;
+    private String dFWVer;
 }
