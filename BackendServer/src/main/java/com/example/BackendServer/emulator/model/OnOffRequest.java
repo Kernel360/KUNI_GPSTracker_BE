@@ -1,22 +1,32 @@
 package com.example.BackendServer.emulator.model;
 
-import lombok.Data;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@ToString
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 public class OnOffRequest {
     private String mdn;
     private String tid;
     private String mid;
     private String pv;
     private String did;
-    private String onTime;
-    private String offTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime onTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime offTime;
+
     private String gcd;
-    private String lat;
-    private String lon;
-    private String ang;
-    private String spd;
-    private String sum;
+    private double lat;
+    private double lon;
+    private int ang;
+    private int spd;
+    private int sum;
+
+    // token 필드 삭제
 }
