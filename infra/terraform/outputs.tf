@@ -1,4 +1,3 @@
-
 output "alb_dns_name" {
   description = "The DNS name of the load balancer."
   value       = aws_lb.main.dns_name
@@ -17,4 +16,9 @@ output "rds_endpoint" {
 output "jenkins_server_public_ip" {
   description = "The public IP address of the Jenkins server."
   value       = aws_instance.jenkins_server.public_ip
+}
+
+output "bastion_server_public_ip" {
+  description = "The public IP address of the Bastion server."
+  value       = aws_instance.bastion_server.public_ip
 }
