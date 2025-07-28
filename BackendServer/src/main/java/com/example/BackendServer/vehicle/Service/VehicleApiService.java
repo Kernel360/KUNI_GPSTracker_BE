@@ -1,8 +1,10 @@
 package com.example.BackendServer.vehicle.Service;
 
 import static com.example.BackendServer.global.Class.VehicleStatus.*;
+import static com.example.BackendServer.global.exception.ErrorCode.*;
 
 import com.example.BackendServer.global.Class.VehicleStatus;
+import com.example.BackendServer.global.exception.CustomException;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;

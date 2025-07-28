@@ -32,12 +32,11 @@ public class GpsRecordService {
 
     VehicleStatus statusEnum;
     try {
-      statusEnum = VehicleStatus.valueOf(gpsRecordRequest.getStatus());
+      statusEnum = gpsRecordRequest.getStatus();
     } catch (Exception e) {
       throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); //TODO : 임시, 나중에 적절한 ErrorCode 추가 권장
     }
 
-    //TODO : RecordEntity 이후 수정 필요
     RecordEntity record = recordRepository.findByVehicleId(vehicle.getId())
             .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
 

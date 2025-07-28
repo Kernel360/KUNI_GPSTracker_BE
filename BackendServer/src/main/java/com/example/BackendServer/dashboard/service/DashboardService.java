@@ -4,6 +4,7 @@ import static com.example.BackendServer.global.Class.VehicleStatus.*;
 
 import com.example.BackendServer.dashboard.model.DashboardStatusResponseDto;
 import com.example.BackendServer.dashboard.model.DayCountView;
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.record.db.RecordRepository;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import lombok.RequiredArgsConstructor;
@@ -78,14 +79,14 @@ public class DashboardService {
 
     //map api로 vehicle_id에 따라 위도 경도 상태 가져오는 리스트 반환 함수 (status가 null 이면 전체 또는 각 상태를 지정해서 필터링해서 가져온다
     //여기서의 record는 GPSRecordEntity의 record와는 아예 다른 것이다
-    public List<DashboardMapDto> getAllVehicleLocation(String status) {
+    public List<DashboardMapDto> getAllVehicleLocation(VehicleStatus status) {
         List<GpsRecordEntity> latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByStatus(status);
 
         return latestRecords.stream()
             .map(record -> DashboardMapDto.builder()
                     .latitude(record.getLatitude())
                     .longitude(record.getLongitude())
-                    .status(record.getStatus().name().toLowerCase())
+                    .status(record.getStatus())
                     .build())
             .collect(Collectors.toList());
     }
