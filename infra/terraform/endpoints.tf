@@ -1,3 +1,4 @@
+
 # S3 Gateway Endpoint (ECR 이미지는 S3에 저장됨)
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
@@ -35,5 +36,19 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 
   tags = {
     Name = "ecr-dkr-vpc-endpoint"
+  }
+}
+
+# CloudWatch Logs Interface Endpoint
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.ap-northeast-2.logs"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = [aws_subnet.private_a.id, aws_subnet.private_c.id]
+  security_group_ids  = [aws_security_group.ecs_service.id] # ECS 서비스와 동일한 보안 그룹 사용
+
+  tags = {
+    Name = "logs-vpc-endpoint"
   }
 }
