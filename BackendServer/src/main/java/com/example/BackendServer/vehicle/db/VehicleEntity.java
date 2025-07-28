@@ -24,7 +24,7 @@ public class VehicleEntity {
   @Column(name = "id")  // 기본 키
   private Long id;
 
-  @Column(name = "vehicle_number", nullable = false, length = 20)
+  @Column(name = "vehicle_number", nullable = false, length = 20,unique = true)
   private String vehicleNumber;
 
   @Enumerated(EnumType.STRING)

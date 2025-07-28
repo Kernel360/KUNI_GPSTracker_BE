@@ -86,6 +86,8 @@ public class DashboardService {
                     .latitude(record.getLatitude())
                     .longitude(record.getLongitude())
                     .status(record.getStatus().name().toLowerCase())
+                    .type(record.getVehicle().getType().name())
+                    .vehicleNumber(record.getVehicle().getVehicleNumber())
                     .build())
             .collect(Collectors.toList());
     }

@@ -27,6 +27,7 @@ public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long>
                 GROUP BY vehicle_id
             ) latest
             ON gr.vehicle_id = latest.vehicle_id AND gr.oTime = latest.max_time
+            INNER JOIN Vehicle v ON gr.vehicle_id = v.id
             WHERE (:status IS NULL OR gr.status = :status)
             """, nativeQuery = true)
     List<GpsRecordEntity> findLatestGpsForAllVehiclesByStatus(@Param("status") String status);

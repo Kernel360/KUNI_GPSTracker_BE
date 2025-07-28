@@ -9,4 +9,6 @@ public class DashboardMapDto {
     private double latitude;
     private double longitude;
     private String status;
+    private String type;
+    private String vehicleNumber;
 }
