@@ -20,32 +20,20 @@ public class EmulatorController {
     }
 
     @PostMapping("/on")
-    public ResponseEntity<StandardResponse> on(
-        @RequestBody OnOffRequest request,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-
+    public ResponseEntity<StandardResponse> on(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         emulatorService.verifyToken(authHeader);
-        String token = authHeader.replace("Bearer ", "").trim();
-        return ResponseEntity.ok(emulatorService.handleOn(request, token));
+        return ResponseEntity.ok(emulatorService.handleOn(request));
     }
 
     @PostMapping("/off")
-    public ResponseEntity<StandardResponse> off(
-        @RequestBody OnOffRequest request,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-
+    public ResponseEntity<StandardResponse> off(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         emulatorService.verifyToken(authHeader);
-        String token = authHeader.replace("Bearer ", "").trim();
-        return ResponseEntity.ok(emulatorService.handleOff(request, token));
+        return ResponseEntity.ok(emulatorService.handleOff(request));
     }
 
     @PostMapping("/gps")
-    public ResponseEntity<StandardResponse> gps(
-        @RequestBody GpsCycleRequest request,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-
+    public ResponseEntity<StandardResponse> gps(@RequestBody GpsCycleRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         emulatorService.verifyToken(authHeader);
-        String token = authHeader.replace("Bearer ", "").trim();
-        return ResponseEntity.ok(emulatorService.handleGps(request, token));
+        return ResponseEntity.ok(emulatorService.handleGps(request));
     }
 }

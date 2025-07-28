@@ -8,12 +8,11 @@ import lombok.ToString;
 public class GpsCycleData {
     private String sec;
     private String gcd;
-    private double lat;
-    private double lon;
-    private int ang;
-    private int spd;
-    private int sum;
-    private int bat;
+    private String lat;
+    private String lon;
+    private String ang;
+    private String spd;
+    private String sum;
+    private String bat;
 }
-
 
