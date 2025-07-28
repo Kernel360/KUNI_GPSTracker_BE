@@ -69,7 +69,7 @@ public class VehicleApiController {
         @ParameterObject
         @PageableDefault(size = 10, page = 0, sort = "createDate", direction = DESC)
         Pageable pageable,
-        @Parameter(description = "차량 이름", example = "12가3456")
+        @Parameter(description = "차량 이름", example = "12가3456",required = false)
         @RequestParam(required = false) String vehicleName,
         @Parameter(description = "차량 상태", example = "ACTIVE")
         @RequestParam VehicleStatus status

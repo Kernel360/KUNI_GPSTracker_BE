@@ -1,4 +1,4 @@
-package org.example;
+package Kakao;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.File;
@@ -10,8 +10,11 @@ import java.util.*;
 import java.net.URI;
 import java.net.http.*;
 import org.json.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
-public class NaverVehicleSimulatorCSVFull {
+public class KakaoVehicleSimulatorCSVFull {
 
     // 경로 유효성 검사용 최소/최대 거리 (KM 단위)
     static final double MIN_DISTANCE_KM = 5.0;
@@ -39,8 +42,8 @@ public class NaverVehicleSimulatorCSVFull {
         public String toString() {
             // CSV 포맷에 맞게 문자열로 변환
             return String.format("%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                    mdn, tid, mid, pv, did, cCnt, timestamp, sec, 
-                     gcd, lat, lon, ang, spd, sum, bat);
+                    mdn, tid, mid, pv, did, cCnt, timestamp, sec,
+                    gcd, lat, lon, ang, spd, sum, bat);
         }
     }
 
@@ -130,16 +133,16 @@ public class NaverVehicleSimulatorCSVFull {
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    // 네이버 길찾기 API 호출 (출발~도착 좌표에 대해 경로 및 거리 정보 획득)
-    static RouteResult getNaverRoute(String startX, String startY, String endX, String endY,
-                                     String apiKeyId, String apiKey) throws Exception {
-        String url = String.format("https://maps.apigw.ntruss.com/map-direction/v1/driving?start=%s,%s&goal=%s,%s",
+    // 카카오 길찾기 API 호출 (출발~도착 좌표에 대해 경로 및 거리 정보 획득)
+    static RouteResult getKakaoRoute(String startX, String startY, String endX, String endY, String apiKey) throws Exception {
+        // Kakao Directions API endpoint
+        String url = String.format("https://apis-navi.kakaomobility.com/v1/directions?origin=%s,%s&destination=%s,%s&priority=RECOMMEND&alternatives=false&road_details=true&summary=false",
                 startX, startY, endX, endY);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("x-ncp-apigw-api-key-id", apiKeyId)
-                .header("x-ncp-apigw-api-key", apiKey)
+                .header("Authorization", "KakaoAK " + apiKey)
+                .header("Content-Type", "application/json")
                 .GET()
                 .build();
 
@@ -147,35 +150,42 @@ public class NaverVehicleSimulatorCSVFull {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         JSONObject json = new JSONObject(response.body());
-        JSONArray routes = json.getJSONObject("route").getJSONArray("traoptimal");
+        JSONArray routes = json.getJSONArray("routes");
         JSONObject firstRoute = routes.getJSONObject(0);
 
-        JSONArray pathArray = firstRoute.getJSONArray("path");
+        // Parse sections -> roads -> vertexes for path
         List<LatLng> path = new ArrayList<>();
-
-        for (int i = 0; i < pathArray.length(); i++) {
-            JSONArray coord = pathArray.getJSONArray(i);
-            double lng = coord.getDouble(0);
-            double lat = coord.getDouble(1);
-            path.add(new LatLng(lat, lng));
+        JSONArray sections = firstRoute.getJSONArray("sections");
+        for (int i = 0; i < sections.length(); i++) {
+            JSONObject section = sections.getJSONObject(i);
+            JSONArray roads = section.getJSONArray("roads");
+            for (int j = 0; j < roads.length(); j++) {
+                JSONObject road = roads.getJSONObject(j);
+                JSONArray vertexes = road.getJSONArray("vertexes");
+                for (int k = 0; k < vertexes.length(); k += 2) {
+                    double lng = vertexes.getDouble(k);
+                    double lat = vertexes.getDouble(k + 1);
+                    path.add(new LatLng(lat, lng));
+                }
+            }
         }
 
         JSONObject summary = firstRoute.getJSONObject("summary");
         double totalDistance = summary.getDouble("distance");
-        long totalTime = summary.getLong("duration") / 1000;
+        long totalTime = summary.getLong("duration"); // already in seconds
 
         return new RouteResult(path, totalDistance, totalTime);
     }
 
     // 차량 1대를 시뮬레이션하는 클래스 (Runnable 구현)
     static class VehicleSimulator implements Runnable {
-        private final String apiKeyId;
         private final String apiKey;
+        private final String mdn;
         private final List<Double> speedHistory = new ArrayList<>(); // 이전 주기의 속도 저장
 
-        VehicleSimulator(String apiKeyId, String apiKey) {
-            this.apiKeyId = apiKeyId;
+        VehicleSimulator(String apiKey, String mdn) {
             this.apiKey = apiKey;
+            this.mdn = mdn;
         }
 
         // 기존 simulateVehicleWithVariableSpeed()를 아래 코드로 교체
@@ -184,51 +194,51 @@ public class NaverVehicleSimulatorCSVFull {
             List<Double> segmentDistances = new ArrayList<>();
             List<Double> accumulatedDistances = new ArrayList<>();
             accumulatedDistances.add(0.0);
-        
+
             // 각 경로 구간별 거리 계산 (누적 거리 리스트 생성)
             for (int i = 0; i < path.size() - 1; i++) {
                 double dist = calculateDistance(path.get(i), path.get(i + 1));
                 segmentDistances.add(dist);
                 accumulatedDistances.add(accumulatedDistances.get(i) + dist);
             }
-        
+
             int elapsedSeconds = 0;
             int cycleCount = 1;
             int batteryLevel = 135;
             double totalDistance = 0.0; // 누적 이동 거리 (m)
             String filename = mdn + ".csv";
             boolean fileExists = new File(filename).exists();
-        
+
             try (FileWriter fw = new FileWriter(filename, true)) {
                 if (!fileExists) {
                     fw.write("mdn,tid,mid,pv,did,cCnt,timestamp,sec,gcd,lat,lon,ang,spd,sum,bat\n");
                 }
-        
+
                 LocalDateTime startTime = LocalDateTime.now();
                 Random random = new Random();
-        
+
                 while (true) {
                     // 이번 1분 동안의 시작/끝 속도 (20~50km/h)
                     double startSpeedKmph = 20 + random.nextDouble() * 30;
                     double endSpeedKmph = 20 + random.nextDouble() * 30;
                     double deltaSpeedKmph = (endSpeedKmph - startSpeedKmph) / 60.0; // 초당 속도 변화량 (선형 보간)
-        
+
                     List<CycleInfo> batchData = new ArrayList<>();
-        
+
                     for (int sec = 0; sec < 60; sec++) {
                         double currentSpeedKmph = startSpeedKmph + deltaSpeedKmph * sec;
                         double currentSpeedMps = currentSpeedKmph * 1000 / 3600.0;
-        
+
                         int totalSec = elapsedSeconds + sec;
                         totalDistance += currentSpeedMps * 1.0; // v * Δt (Δt = 1초)
-        
+
                         CycleInfo cycle = new CycleInfo();
                         cycle.mdn = mdn;
                         cycle.cCnt = cycleCount;
                         cycle.timestamp = startTime.plusSeconds(totalSec)
                                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                         cycle.sec = String.format("%02d", sec);
-        
+
                         if (totalDistance >= accumulatedDistances.get(accumulatedDistances.size() - 1)) {
                             // 도착 지점 기록
                             cycle.gcd = "V";
@@ -246,20 +256,20 @@ public class NaverVehicleSimulatorCSVFull {
                             // 현재 위치 보간
                             int segmentIndex = 0;
                             while (segmentIndex < accumulatedDistances.size() - 1 &&
-                                   accumulatedDistances.get(segmentIndex + 1) < totalDistance) {
+                                    accumulatedDistances.get(segmentIndex + 1) < totalDistance) {
                                 segmentIndex++;
                             }
-        
+
                             double segmentStartDist = accumulatedDistances.get(segmentIndex);
                             double segmentLength = segmentDistances.get(segmentIndex);
                             double ratio = (totalDistance - segmentStartDist) / segmentLength;
-        
+
                             LatLng start = path.get(segmentIndex);
                             LatLng end = path.get(segmentIndex + 1);
-        
+
                             double lat = start.lat + (end.lat - start.lat) * ratio;
                             double lng = start.lng + (end.lng - start.lng) * ratio;
-        
+
                             cycle.lat = String.valueOf((int) (lat * 1_000_000));
                             cycle.lon = String.valueOf((int) (lng * 1_000_000));
                             cycle.spd = String.valueOf((int) currentSpeedKmph);
@@ -268,29 +278,29 @@ public class NaverVehicleSimulatorCSVFull {
                             cycle.ang = String.valueOf((int) calculateBearing(start, end));
                             batchData.add(cycle);
                         }
-        
+
                         // 30분마다 배터리 1씩 감소
                         if (totalSec % 1800 == 0 && totalSec != 0) {
                             batteryLevel = Math.max(0, batteryLevel - 1);
                         }
                     }
-        
+
                     // CSV로 기록
                     for (CycleInfo ci : batchData) {
                         fw.write(ci.toString() + "\n");
                     }
                     fw.flush();
-        
+
                     elapsedSeconds += 60;
                     cycleCount++;
-        
+
                     if (totalDistance >= accumulatedDistances.get(accumulatedDistances.size() - 1)) {
                         break; // 경로 끝
                     }
-        
+
                     Thread.sleep(10); // 실제 시뮬레이션에선 60000 (1분)
                 }
-        
+
             } catch (IOException e) {
                 System.err.println("CSV 파일 저장 실패: " + e.getMessage());
             }
@@ -300,12 +310,12 @@ public class NaverVehicleSimulatorCSVFull {
         @Override
         public void run() {
             try {
-                String mdn = generateMDN();
+                // String mdn = generateMDN(); // 더 이상 랜덤 생성하지 않음
                 LatLng[] points = generateValidStartAndEndPoints();
-                RouteResult route = getNaverRoute(
+                RouteResult route = getKakaoRoute(
                         String.valueOf(points[0].lng), String.valueOf(points[0].lat),
                         String.valueOf(points[1].lng), String.valueOf(points[1].lat),
-                        apiKeyId, apiKey);
+                        apiKey);
                 simulateVehicleWithVariableSpeed(mdn, route);
             } catch (Exception e) {
                 System.err.println("차량 시뮬레이션 중 에러 발생: " + e.getMessage());
@@ -315,16 +325,50 @@ public class NaverVehicleSimulatorCSVFull {
     }
 
     public static void main(String[] args) {
-        // 네이버 API 키
+        // 카카오 API 키
         Dotenv dotenv = Dotenv.load();  // .env 파일 로드
-        String apiKeyId = dotenv.get("NAVER_API_KEY_ID");
-        String apiKey = dotenv.get("NAVER_API_KEY");
+        String apiKey = dotenv.get("KAKAO_REST_API_KEY");
+
+        // 차량 번호 리스트 읽기
+        List<String> carNumbers = new ArrayList<>();
+        try {
+            carNumbers = Files.readAllLines(Paths.get("CarNumber.txt"));
+        } catch (IOException e) {
+            System.err.println("차량 번호 파일 읽기 실패: " + e.getMessage());
+            return;
+        }
+        carNumbers.removeIf(String::isBlank); // 빈 줄 제거
+
+        // 이미 사용된 번호 읽기
+        Set<String> usedNumbers = new HashSet<>();
+        try {
+            if (Files.exists(Paths.get("CarNumber_used.txt"))) {
+                usedNumbers.addAll(Files.readAllLines(Paths.get("CarNumber_used.txt")));
+            }
+        } catch (IOException e) {
+            System.err.println("used 파일 읽기 실패: " + e.getMessage());
+        }
+
+        // 사용되지 않은 번호만 추출
+        List<String> availableNumbers = new ArrayList<>();
+        for (String num : carNumbers) {
+            if (!usedNumbers.contains(num)) {
+                availableNumbers.add(num);
+            }
+        }
 
         int numberOfVehicles = 1; // 시뮬레이션할 차량 수
+        if (numberOfVehicles > availableNumbers.size()) {
+            System.err.println("사용 가능한 차량 번호가 부족합니다.");
+            numberOfVehicles = availableNumbers.size();
+        }
         List<Thread> threads = new ArrayList<>();
 
+        List<String> justUsed = new ArrayList<>();
         for (int i = 0; i < numberOfVehicles; i++) {
-            VehicleSimulator simulator = new VehicleSimulator(apiKeyId, apiKey);
+            String mdn = availableNumbers.get(i);
+            justUsed.add(mdn);
+            VehicleSimulator simulator = new VehicleSimulator(apiKey, mdn);
             Thread thread = new Thread(simulator);
             threads.add(thread);
             thread.start();
@@ -337,6 +381,14 @@ public class NaverVehicleSimulatorCSVFull {
             } catch (InterruptedException e) {
                 System.err.println("쓰레드 조인 실패");
             }
+        }
+
+        // 사용한 차량 번호를 used 파일에 추가 기록
+        try {
+            Files.write(Paths.get("CarNumber_used.txt"), justUsed, StandardCharsets.UTF_8,
+                Files.exists(Paths.get("CarNumber_used.txt")) ? java.nio.file.StandardOpenOption.APPEND : java.nio.file.StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            System.err.println("used 파일 기록 실패: " + e.getMessage());
         }
     }
 }
