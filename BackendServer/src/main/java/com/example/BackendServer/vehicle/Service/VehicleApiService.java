@@ -103,20 +103,10 @@ public class VehicleApiService {
     public Page<VehicleListResponse> getVehicleList(Pageable pageable, String vehicleName, VehicleStatus status) {
         return status == null ?
             vehicleRepository.findAllByVehicleNumberContains(vehicleName == null ? "" : vehicleName, pageable)
-                .map(vehicle -> VehicleListResponse.builder()
-                    .carNumber(vehicle.getVehicleNumber())
-                    .type(vehicle.getType())
-                    .status(vehicle.getStatus())
-                    .totalDist(vehicle.getTotalDist())
-                    .build()
+                .map(VehicleListResponse::from
                 ) :
             vehicleRepository.findAllByStatusAndVehicleNumberContains(status, vehicleName == null ? "" : vehicleName,
-                pageable).map(vehicle -> VehicleListResponse.builder()
-                .carNumber(vehicle.getVehicleNumber())
-                .type(vehicle.getType())
-                .status(vehicle.getStatus())
-                .totalDist(vehicle.getTotalDist())
-                .build()
+                pageable).map(VehicleListResponse::from
             );
     }
 
