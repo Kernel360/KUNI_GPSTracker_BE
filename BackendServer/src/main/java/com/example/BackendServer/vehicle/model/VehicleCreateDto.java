@@ -1,10 +1,9 @@
 package com.example.BackendServer.vehicle.model;
 
-import com.example.BackendServer.vehicle.db.VehicleEntity;
+import com.example.BackendServer.global.Class.VehicleType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -19,5 +18,5 @@ public class VehicleCreateDto {
     @Schema(description = "차량 번호", example = "12가3456")
     private String vehicleNumber;
     @Schema(description = "차량 이름", example = "MERCEDES")
-    private VehicleEntity.Type vehicleName;
+    private VehicleType vehicleName;
 }

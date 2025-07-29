@@ -1,6 +1,7 @@
 package com.example.BackendServer.gpsRecord.db;
 
 
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.record.db.RecordEntity;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import jakarta.persistence.*;
@@ -36,7 +37,7 @@ public class GpsRecordEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private Status status;
+  private VehicleStatus status;
 
   @Column(name = "latitude", nullable = false)
   private Double latitude;
@@ -52,8 +53,4 @@ public class GpsRecordEntity {
 
   @Column(name = "total_dist", nullable = false)
   private String totalDist;
-
-  public enum Status {
-    ACTIVE, INACTIVE, INSPECTING
-  }
 }
