@@ -7,6 +7,10 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
 import com.example.BackendServer.vehicle.model.VehicleListResponse;
+import com.example.BackendServer.record.db.RecordEntity;
+import com.example.BackendServer.record.db.RecordRepository;
+import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
+import com.example.BackendServer.gpsRecord.db.GpsRecordRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -23,15 +28,23 @@ import java.time.LocalDateTime;
 public class VehicleApiService {
 
     private final VehicleRepository vehicleRepository;
+    private final RecordRepository recordRepository;
+    private final GpsRecordRepository gpsRecordRepository;
+    private final Random random = new Random();
 
     /**
      * 차량 등록 : Repository에 차량 entity를 등록한다.
+     * 차량 등록 후 RecordEntity와 GpsRecordEntity에 초기 데이터를 생성한다.
      *
      * @param dto : vehicleNumber와 vehicleName을 field로 가진다.
      * @return VehicleEntity  : dto를 이용해 Builder로 Entity 생성 후 반환
      */
 	  @Transactional
     public VehicleEntity createVehicle(VehicleCreateDto dto) {
+
+        // 무작위 초기 위치 생성 (한국 지역 기준)
+        double initialLatitude = generateRandomLatitude();
+        double initialLongitude = generateRandomLongitude();
 
         VehicleEntity entity = VehicleEntity.builder()
                 .vehicleNumber(dto.getVehicleNumber())
@@ -42,9 +55,43 @@ public class VehicleApiService {
                 .build();
 
         VehicleEntity saved = vehicleRepository.save(entity);
+        
+        RecordEntity recordEntity = RecordEntity.builder()
+                .vehicle(saved)
+                .sumDist("0")
+                .onTime(LocalDateTime.now())
+                .offTime(null)
+                .build();
+        
+        RecordEntity savedRecord = recordRepository.save(recordEntity);
+        
+        GpsRecordEntity gpsRecordEntity = GpsRecordEntity.builder()
+                .record(savedRecord)
+                .vehicle(saved)
+                .status(GpsRecordEntity.Status.INACTIVE)
+                .latitude(initialLatitude)
+                .longitude(initialLongitude)
+                .oTime(LocalDateTime.now()) 
+                .gcd("V") 
+                .totalDist("0")
+                .build();
+        
+        gpsRecordRepository.save(gpsRecordEntity);
+        
         return saved;
     }
 
+    
+    //무작위 위도 생성 (한국 지역: 33.0 ~ 38.5)
+    private double generateRandomLatitude() {
+        return 33.0 + (random.nextDouble() * 5.5);
+    }
+
+    
+    //무작위 경도 생성 (한국 지역: 124.5 ~ 132.0)
+    private double generateRandomLongitude() {
+        return 124.5 + (random.nextDouble() * 7.5);
+    }
 
     /**
      * 차량 리스트 조회 : 차량 타입과 상태에 따라 페이지네이션된 차량 리스트를 반환한다.
