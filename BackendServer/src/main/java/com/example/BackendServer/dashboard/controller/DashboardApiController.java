@@ -45,8 +45,10 @@ public class DashboardApiController {
                                 name = "DashboardMapDto",
                                 value = """
                                         [
+
                                             {"latitude": 37.111111, "longitude": 123.456789, "status": "ACTIVE", "vehicleNumber": "12가3456", "type": "MERCEDES"},
                                             {"latitude": 37.222222, "longitude": 123.567890, "status": "INACTIVE", "vehicleNumber": "34나5678", "type": "FERRARI"}
+
                                         ]
                                         """
                         )

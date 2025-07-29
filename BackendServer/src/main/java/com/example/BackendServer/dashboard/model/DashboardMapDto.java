@@ -21,5 +21,4 @@ public class DashboardMapDto {
     private String vehicleNumber;
     @Schema(description = "차량 종류", example = "MERCEDES")
     private VehicleType type;
-
 }
