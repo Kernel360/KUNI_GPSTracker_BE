@@ -2,6 +2,8 @@ package com.example.BackendServer.emulator.service;
 
 import com.example.BackendServer.device.db.DeviceRepository;
 import com.example.BackendServer.emulator.model.*;
+import com.example.BackendServer.global.exception.CustomException;
+import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.gpsRecord.model.GpsRecordRequest;
 import com.example.BackendServer.gpsRecord.service.GpsRecordService;
 import com.example.BackendServer.record.db.RecordEntity;
@@ -28,6 +30,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.example.BackendServer.global.exception.ErrorCode.EMPTY_CLIST_ERROR;
+import static com.example.BackendServer.global.exception.ErrorCode.INVALID_TOKEN_ERROR;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,7 +46,7 @@ public class EmulatorService {
     private final RecordService recordService;
     private final GpsRecordService gpsRecordService;
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     // JWT 관련
     private final Map<String, String> tokenStore = new ConcurrentHashMap<>();
@@ -68,9 +73,12 @@ public class EmulatorService {
     public void verifyToken(String authHeader) {
         String token = authHeader.replace("Bearer ", "").trim();
         try {
-            Jwts.parserBuilder().setSigningKey(jwtKey).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                .setSigningKey(jwtKey)
+                .build()
+                .parseClaimsJws(token);
         } catch (Exception e) {
-            throw new RuntimeException("토큰 유효하지 않음");
+            throw new CustomException(INVALID_TOKEN_ERROR);
         }
     }
 
@@ -97,7 +105,7 @@ public class EmulatorService {
         VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
 
         RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
-            .orElseThrow(() -> new RuntimeException("🚨 활성화된 주행 기록이 없습니다."));
+            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
         recordRepository.save(activeRecord);
@@ -111,17 +119,17 @@ public class EmulatorService {
 
         if (req.getCList() == null || req.getCList().isEmpty()) {
             log.warn("[GPS] cList is null or empty for mdn: {}", req.getMdn());
-            return new StandardResponse("001", "cList is missing", req.getMdn());
+            throw new CustomException(EMPTY_CLIST_ERROR);
         }
 
         VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
 
         RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
-            .orElseThrow(() -> new RuntimeException("🚨 활성화된 주행 기록이 없습니다."));
+            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         for (GpsCycleData gpsData : req.getCList()) {
             try {
-                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + ":" + gpsData.getSec(), formatter);
+                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + gpsData.getSec(), formatter);
 
                 GpsRecordRequest gpsReq = GpsRecordRequest.builder()
                     .vehicleId(vehicle.getId())
@@ -140,11 +148,12 @@ public class EmulatorService {
             }
         }
 
+
         return new StandardResponse("000", "Success", req.getMdn());
     }
 
     private VehicleEntity getVehicleByMdn(String mdn) {
         return vehicleRepository.findByVehicleNumber(mdn)
-            .orElseThrow(() -> new RuntimeException("🚨 해당 mdn에 해당하는 차량을 찾을 수 없습니다: " + mdn));
+            .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
     }
 }
