@@ -52,7 +52,7 @@ public class RecordService {
                                                 LocalDateTime endTime,
                                                 Pageable pageable) {
     Page<RecordEntity> page = recordRepository.searchRecords(vehicleNumber, startTime, endTime, pageable);
-    return page.map(RecordListResponse::fromEntity);
+    return page.map(RecordListResponse::from);
   }
 
   /** 운행일지 상세 조회 */
@@ -76,7 +76,7 @@ public class RecordService {
       endLng = gpsList.get(gpsList.size() - 1).getLongitude();
     }
 
-    return RecordDetailResponse.fromEntity(record, startLat, startLng, endLat, endLng, gpsList);
+    return RecordDetailResponse.from(record, startLat, startLng, endLat, endLng, gpsList);
   }
 
 }

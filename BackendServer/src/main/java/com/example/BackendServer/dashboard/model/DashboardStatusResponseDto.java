@@ -18,17 +18,19 @@ public class DashboardStatusResponseDto {
 
     @Schema(description = "1주간 운행 통계", example = """
       [
-        {"day":"2025-07-14","totalCar":0},
-        {"day":"2025-07-15","totalCar":0},
-        {"day":"2025-07-16","totalCar":0},
-        {"day":"2025-07-17","totalCar":0},
-        {"day":"2025-07-18","totalCar":0},
-        {"day":"2025-07-19","totalCar":0},
-        {"day":"2025-07-20","totalCar":1}
+        {"day":"2025-07-14","totalCar":100},
+        {"day":"2025-07-15","totalCar":200},
+        {"day":"2025-07-16","totalCar":300},
+        {"day":"2025-07-17","totalCar":400},
+        {"day":"2025-07-18","totalCar":500},
+        {"day":"2025-07-19","totalCar":600},
+        {"day":"2025-07-20","totalCar":701}
       ]
     """)
     private DayCount[] dayCount;
 
+
+    // TODO : 외부로 빼버리기
     @Data
     @ToString
     @NoArgsConstructor

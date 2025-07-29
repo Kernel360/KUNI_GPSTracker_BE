@@ -1,5 +1,8 @@
 package com.example.BackendServer.vehicle.Service;
 
+import static com.example.BackendServer.global.Class.VehicleStatus.*;
+
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
@@ -45,7 +48,7 @@ public class VehicleApiService {
 
         VehicleEntity entity = VehicleEntity.builder()
                 .vehicleNumber(dto.getVehicleNumber())
-                .status(VehicleEntity.Status.INACTIVE)
+                .status(INACTIVE)
                 .totalDist(0L)
                 .type(dto.getVehicleName())
                 .createDate(LocalDateTime.now())
@@ -65,7 +68,7 @@ public class VehicleApiService {
         GpsRecordEntity gpsRecordEntity = GpsRecordEntity.builder()
                 .record(savedRecord)
                 .vehicle(saved)
-                .status(GpsRecordEntity.Status.INACTIVE) 
+                .status(VehicleStatus.INACTIVE)
                 .latitude(initialLatitude)
                 .longitude(initialLongitude)
                 .oTime(LocalDateTime.now()) 
@@ -97,16 +100,16 @@ public class VehicleApiService {
      * @param status 차량 상태
      * @return Page<VehicleListResponse> : 차량 리스트를 반환한다.
      */
-    public Page<VehicleListResponse> getVehicleList(Pageable pageable, String vehicleName, VehicleEntity.Status status) {
-      return vehicleRepository.findAllByStatusAndVehicleNumberContains(status, vehicleName,
-        pageable).map(
-        vehicle -> VehicleListResponse.builder()
-          .carNumber(vehicle.getVehicleNumber())
-          .type(vehicle.getType())
-          .status(vehicle.getStatus())
-          .totalDist(vehicle.getTotalDist())
-          .build()
-      );
+    public Page<VehicleListResponse> getVehicleList(Pageable pageable, String vehicleName, VehicleStatus status) {
+        // TODO: status가 ALL일 경우 모든 상태의 차량을 조회하도록 수정 필요
+        return vehicleRepository.findAllByStatusAndVehicleNumberContains(status, vehicleName == null ? "" : vehicleName,
+            pageable).map(vehicle -> VehicleListResponse.builder()
+            .carNumber(vehicle.getVehicleNumber())
+            .type(vehicle.getType())
+            .status(vehicle.getStatus())
+            .totalDist(vehicle.getTotalDist())
+            .build()
+        );
     }
 
     // 삭제

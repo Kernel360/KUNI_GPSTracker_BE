@@ -2,7 +2,8 @@ package com.example.BackendServer.vehicle.model;
 
 import static lombok.AccessLevel.*;
 
-import com.example.BackendServer.vehicle.db.VehicleEntity;
+import com.example.BackendServer.global.Class.VehicleStatus;
+import com.example.BackendServer.global.Class.VehicleType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -19,9 +20,9 @@ public class VehicleListResponse {
 	@Schema(description = "차량 ID", example = "12가3456")
 	private String carNumber;
 	@Schema(description = "차량 이름", example = "MERCEDES")
-	private VehicleEntity.Type type;
+	private VehicleType type;
 	@Schema(description = "차량 상태", example = "ACTIVE")
-	private VehicleEntity.Status status;
+	private VehicleStatus status;
 	//TODO : 소수점 자리 표현할 수 있게 VehicleEntity 타입 수정
 	@Schema(description = "총 주행 거리", example = "10000")
 	private Long totalDist;
