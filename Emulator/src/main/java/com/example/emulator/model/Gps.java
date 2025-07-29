@@ -3,9 +3,11 @@ package com.example.emulator.model;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Builder
+@ToString
 public class Gps {
     private String gcd;
     private String lon;

@@ -2,9 +2,11 @@ package com.example.emulator.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @Builder
+@ToString
 public class MDT {
     private String tid;
     private String mid;

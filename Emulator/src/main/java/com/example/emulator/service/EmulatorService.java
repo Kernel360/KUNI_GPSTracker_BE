@@ -208,6 +208,8 @@ public class EmulatorService {
                 .gps(gps)
                 .build();
 
+        log.info("on에서 보내는 것 : {}",req);
+
         return client.post()
                 .uri("/on")
                 .header("Authorization", tokenService.getToken(number))
@@ -295,6 +297,8 @@ public class EmulatorService {
                 .cCnt(String.valueOf(cList.size()))
                 .cList(cList)
                 .build();
+
+        log.info("gps정보 확인 : {}",req);
 
         lastGps.put(mdn, batch.get(batch.size() - 1));
 
