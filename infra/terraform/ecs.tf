@@ -1,4 +1,3 @@
-
 # ECS 클러스터 생성
 resource "aws_ecs_cluster" "main" {
   name = "main-cluster"
@@ -30,6 +29,16 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# CloudWatch Log Group 생성
+resource "aws_cloudwatch_log_group" "main" {
+  name = "/ecs/spring-app"
+  retention_in_days = 7 # 로그 보관 기간 (일), 0이면 무기한
+
+  tags = {
+    Name = "spring-app-log-group"
+  }
+}
+
 # ECS 작업 정의 생성
 resource "aws_ecs_task_definition" "main" {
   family                   = "spring-app-task"
@@ -58,6 +67,14 @@ resource "aws_ecs_task_definition" "main" {
         { name = "DB_USERNAME", value = "admin" },
         { name = "DB_PASSWORD", value = "password" } # 실제 환경에서는 Secrets Manager 사용 권장
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group" = aws_cloudwatch_log_group.main.name
+          "awslogs-region" = "ap-northeast-2"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
 }

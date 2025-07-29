@@ -62,17 +62,17 @@ resource "aws_security_group" "ecs_service" {
   }
 }
 
-# RDS 보안 그룹 (ECS 서비스로부터의 트래픽만 허용)
+# RDS 보안 그룹 (ECS 서비스와 Bastion 서버로부터의 트래픽만 허용)
 resource "aws_security_group" "rds" {
   name        = "rds-sg"
-  description = "Allow traffic from ECS service"
+  description = "Allow traffic from ECS service and Bastion Server"
   vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port       = 3306 # MySQL Port
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_service.id]
+    security_groups = [aws_security_group.ecs_service.id, aws_security_group.bastion.id]
   }
 
   egress {
@@ -84,5 +84,30 @@ resource "aws_security_group" "rds" {
 
   tags = {
     Name = "rds-sg"
+  }
+}
+
+# Bastion 서버 보안 그룹 (SSH 트래픽 허용)
+resource "aws_security_group" "bastion" {
+  name        = "bastion-sg"
+  description = "Allow SSH inbound traffic"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # 보안을 위해 실제 IP 주소로 변경하세요.
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "bastion-sg"
   }
 }
