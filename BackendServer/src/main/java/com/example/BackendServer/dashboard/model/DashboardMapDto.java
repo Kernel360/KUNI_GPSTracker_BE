@@ -1,6 +1,7 @@
 package com.example.BackendServer.dashboard.model;
 
 import com.example.BackendServer.global.Class.VehicleStatus;
+import com.example.BackendServer.global.Class.VehicleType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -16,4 +17,8 @@ public class DashboardMapDto {
     private double longitude;
     @Schema(description = "차량 상태", example = "ACTIVE")
     private VehicleStatus status;
+    @Schema(description = "차량 번호", example = "12가3456")
+    private String vehicleNumber;
+    @Schema(description = "차량 종류", example = "MERCEDES")
+    private VehicleType type;
 }

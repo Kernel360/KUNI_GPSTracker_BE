@@ -5,6 +5,7 @@ import static com.example.BackendServer.global.Class.VehicleStatus.*;
 import com.example.BackendServer.dashboard.model.DashboardStatusResponseDto;
 import com.example.BackendServer.dashboard.model.DayCountView;
 import com.example.BackendServer.global.Class.VehicleStatus;
+import com.example.BackendServer.global.Class.VehicleType;
 import com.example.BackendServer.record.db.RecordRepository;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,8 @@ public class DashboardService {
                     .latitude(record.getLatitude())
                     .longitude(record.getLongitude())
                     .status(record.getStatus())
+                    .vehicleNumber(record.getVehicle().getVehicleNumber())
+                    .type(record.getVehicle().getType()) // 차량 종류 (MERCEDES, FERRARI, PORSCHE)
                     .build())
             .collect(Collectors.toList());
     }

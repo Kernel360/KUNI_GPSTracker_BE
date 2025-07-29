@@ -68,7 +68,7 @@ public class VehicleApiService {
         GpsRecordEntity gpsRecordEntity = GpsRecordEntity.builder()
                 .record(savedRecord)
                 .vehicle(saved)
-                .status(GpsRecordEntity.Status.INACTIVE)
+                .status(VehicleStatus.INACTIVE)
                 .latitude(initialLatitude)
                 .longitude(initialLongitude)
                 .oTime(LocalDateTime.now()) 
