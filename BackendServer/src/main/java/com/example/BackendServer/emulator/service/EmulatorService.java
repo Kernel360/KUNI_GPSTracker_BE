@@ -114,6 +114,7 @@ public class EmulatorService {
         // 2. sumDist → totalDist로 변환 및 Vehicle 업데이트
         String sumDistStr = activeRecord.getSumDist();
         Long sumDistLong = 0L;
+
         if (sumDistStr != null) {
             try {
                 sumDistLong = Long.parseLong(sumDistStr);
@@ -122,11 +123,15 @@ public class EmulatorService {
             }
         }
 
+        // 기존 totalDist + 이번 주행 거리 누적
+        Long updatedTotalDist = vehicle.getTotalDist() + sumDistLong;
+
         vehicle = vehicle.toBuilder()
             .status(VehicleEntity.Status.INACTIVE)
-            .totalDist(sumDistLong)
+            .totalDist(updatedTotalDist)
             .build();
         vehicleRepository.save(vehicle);
+
 
         return new StandardResponse("000", "Success", req.getMdn());
     }
