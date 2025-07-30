@@ -106,18 +106,31 @@ public class EmulatorService {
         RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
             .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
+        // 1. offTime, sumDist 저장
         activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
-        activeRecord.setSumDist(req.getSum());  // sumDist 대신 sum 필드 사용
+        activeRecord.setSumDist(req.getSum());  // sum 필드 활용
         recordRepository.save(activeRecord);
 
+        // 2. sumDist → totalDist로 변환 및 Vehicle 업데이트
+        String sumDistStr = activeRecord.getSumDist();
+        Long sumDistLong = 0L;
+        if (sumDistStr != null) {
+            try {
+                sumDistLong = Long.parseLong(sumDistStr);
+            } catch (NumberFormatException e) {
+                log.warn("sumDist 변환 실패: {}", sumDistStr);
+            }
+        }
 
         vehicle = vehicle.toBuilder()
             .status(VehicleEntity.Status.INACTIVE)
+            .totalDist(sumDistLong)
             .build();
         vehicleRepository.save(vehicle);
 
         return new StandardResponse("000", "Success", req.getMdn());
     }
+
 
     // GPS 주기 데이터 처리 + DB 저장
     public StandardResponse handleGps(GpsCycleRequest req) {
