@@ -60,7 +60,7 @@ public class VehicleApiService {
                 .vehicle(saved)
                 .sumDist("0")
                 .onTime(LocalDateTime.now())
-                .offTime(null)
+                .offTime(LocalDateTime.now())
                 .build();
         
         RecordEntity savedRecord = recordRepository.save(recordEntity);

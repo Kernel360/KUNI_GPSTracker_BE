@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.example.BackendServer.global.Class.VehicleStatus.ACTIVE;
+import static com.example.BackendServer.global.Class.VehicleStatus.INACTIVE;
 import static com.example.BackendServer.global.exception.ErrorCode.EMPTY_CLIST_ERROR;
 import static com.example.BackendServer.global.exception.ErrorCode.INVALID_TOKEN_ERROR;
 
@@ -90,7 +92,7 @@ public class EmulatorService {
         recordService.create(recordReq);
 
         vehicle = vehicle.toBuilder()
-            .status(VehicleEntity.Status.ACTIVE)
+            .status(ACTIVE)
             .build();
         vehicleRepository.save(vehicle);
 
@@ -127,7 +129,7 @@ public class EmulatorService {
         Long updatedTotalDist = vehicle.getTotalDist() + sumDistLong;
 
         vehicle = vehicle.toBuilder()
-            .status(VehicleEntity.Status.INACTIVE)
+            .status(INACTIVE)
             .totalDist(updatedTotalDist)
             .build();
         vehicleRepository.save(vehicle);
@@ -161,7 +163,7 @@ public class EmulatorService {
                     .latitude(Double.parseDouble(data.getLat()))
                     .longitude(Double.parseDouble(data.getLon()))
                     .oTime(oTime)
-                    .status(GpsRecordEntity.Status.ACTIVE)
+                    .status(ACTIVE)
                     .totalDist(data.getSum())
                     .build();
             })

@@ -33,7 +33,6 @@ public class GpsRecordService {
         .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
 
-    GpsRecordEntity.Status statusEnum;
     VehicleStatus statusEnum;
 
     try {
