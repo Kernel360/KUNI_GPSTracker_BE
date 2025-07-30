@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,15 +33,17 @@ public class GpsRecordService {
         .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
 
+    GpsRecordEntity.Status statusEnum;
     VehicleStatus statusEnum;
+
     try {
       statusEnum = gpsRecordRequest.getStatus();
     } catch (Exception e) {
-      throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); //TODO : 임시, 나중에 적절한 ErrorCode 추가 권장
+      throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     RecordEntity record = recordRepository.findByVehicleId(vehicle.getId())
-            .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
 
     GpsRecordEntity gpsRecord = GpsRecordEntity.builder()
         .vehicle(vehicle)
@@ -48,9 +53,10 @@ public class GpsRecordService {
         .oTime(gpsRecordRequest.getOTime())
         .gcd(gpsRecordRequest.getGcd())
         .totalDist(gpsRecordRequest.getTotalDist())
-        .record(record) // nullable
+        .record(record)
         .build();
 
     return gpsRecordRepository.save(gpsRecord);
   }
+
 }

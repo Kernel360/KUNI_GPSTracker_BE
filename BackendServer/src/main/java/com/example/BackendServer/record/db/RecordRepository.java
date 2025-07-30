@@ -15,6 +15,9 @@ import java.util.Optional;
 
 public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
 
+    // 📌 여기에 추가
+    Optional<RecordEntity> findByVehicleIdAndOffTimeIsNull(Long vehicleId);
+
     @Query(value = """
         select Date(r.on_time) As day,
                 count(*) As totalCar

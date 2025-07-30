@@ -12,7 +12,9 @@ public enum ErrorCode {
 
 	VEHICLE_NOT_FOUND(400, "VEHICLE-001", "차량을 찾을 수 없습니다."),
 	RECORD_NOT_FOUND(400,"RECORD-001", "운행 기록이 없습니다."),
-	GPS_RECORD_NOT_FOUND(400,"GPS_RECORD-001", "GPS 기록이 없습니다.");
+	GPS_RECORD_NOT_FOUND(400,"GPS_RECORD-001", "GPS 기록이 없습니다."),
+	INVALID_TOKEN_ERROR(401, "AUTH-001", "jwt 토큰이 유효하지 않습니다."),
+	EMPTY_CLIST_ERROR(400, "GPS-001", "cList가 비어있거나 존재하지 않습니다.");
 
 	// INPUT_INVALID_VALUE_ERROR(400, "GLOBAL-002", "잘못된 입력 값입니다."),
 	// EMPTY_INPUT_ERROR(400, "GLOBAL-003", "입력 값이 비어있습니다."),
