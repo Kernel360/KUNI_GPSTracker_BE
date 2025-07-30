@@ -1,7 +1,11 @@
 package com.example.BackendServer.dashboard.service;
 
+import static com.example.BackendServer.global.Class.VehicleStatus.*;
+
 import com.example.BackendServer.dashboard.model.DashboardStatusResponseDto;
 import com.example.BackendServer.dashboard.model.DayCountView;
+import com.example.BackendServer.global.Class.VehicleStatus;
+import com.example.BackendServer.global.Class.VehicleType;
 import com.example.BackendServer.record.db.RecordRepository;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.BackendServer.dashboard.model.DashboardResponseDto;
 import com.example.BackendServer.dashboard.model.DashboardMapDto;
 import com.example.BackendServer.gpsRecord.db.GpsRecordRepository;
-import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,9 +66,9 @@ public class DashboardService {
     //기존 dashboard api 전체 차량 개수와 status에 따른 각 개수를 반환한다
     public DashboardResponseDto getDashboardData() {
         long total = vehicleRepository.count();
-        long active = vehicleRepository.countByStatus(VehicleEntity.Status.ACTIVE);
-        long inactive = vehicleRepository.countByStatus(VehicleEntity.Status.INACTIVE);
-        long inspect = vehicleRepository.countByStatus(VehicleEntity.Status.INSPECTING);
+        long active = vehicleRepository.countByStatus(ACTIVE);
+        long inactive = vehicleRepository.countByStatus(INACTIVE);
+        long inspect = vehicleRepository.countByStatus(INSPECTING);
 
         return DashboardResponseDto.builder()
                 .vehicles(total)
@@ -78,14 +80,16 @@ public class DashboardService {
 
     //map api로 vehicle_id에 따라 위도 경도 상태 가져오는 리스트 반환 함수 (status가 null 이면 전체 또는 각 상태를 지정해서 필터링해서 가져온다
     //여기서의 record는 GPSRecordEntity의 record와는 아예 다른 것이다
-    public List<DashboardMapDto> getAllVehicleLocation(String status) {
+    public List<DashboardMapDto> getAllVehicleLocation(VehicleStatus status) {
         List<GpsRecordEntity> latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByStatus(status);
 
         return latestRecords.stream()
             .map(record -> DashboardMapDto.builder()
                     .latitude(record.getLatitude())
                     .longitude(record.getLongitude())
-                    .status(record.getStatus().name().toLowerCase())
+                    .status(record.getStatus())
+                    .vehicleNumber(record.getVehicle().getVehicleNumber())
+                    .type(record.getVehicle().getType()) // 차량 종류 (MERCEDES, FERRARI, PORSCHE)
                     .build())
             .collect(Collectors.toList());
     }

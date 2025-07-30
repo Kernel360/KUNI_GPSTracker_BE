@@ -1,5 +1,7 @@
 package com.example.BackendServer.gpsRecord.service;
 
+
+import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.global.exception.CustomException;
 import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
@@ -30,9 +32,12 @@ public class GpsRecordService {
     VehicleEntity vehicle = vehicleRepository.findById(gpsRecordRequest.getVehicleId())
         .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
+
     GpsRecordEntity.Status statusEnum;
+    VehicleStatus statusEnum;
+
     try {
-      statusEnum = GpsRecordEntity.Status.valueOf(gpsRecordRequest.getStatus());
+      statusEnum = gpsRecordRequest.getStatus();
     } catch (Exception e) {
       throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
