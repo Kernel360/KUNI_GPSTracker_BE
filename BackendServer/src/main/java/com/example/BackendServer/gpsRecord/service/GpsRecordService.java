@@ -54,38 +54,4 @@ public class GpsRecordService {
     return gpsRecordRepository.save(gpsRecord);
   }
 
-  @Transactional
-  public List<GpsRecordEntity> createAll(List<GpsRecordRequest> gpsRecordRequests) {
-    List<GpsRecordEntity> gpsRecords = new ArrayList<>();
-
-    for (GpsRecordRequest gpsRecordRequest : gpsRecordRequests) {
-      VehicleEntity vehicle = vehicleRepository.findById(gpsRecordRequest.getVehicleId())
-          .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
-
-      GpsRecordEntity.Status statusEnum;
-      try {
-        statusEnum = GpsRecordEntity.Status.valueOf(gpsRecordRequest.getStatus());
-      } catch (Exception e) {
-        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-      }
-
-      RecordEntity record = recordRepository.findByVehicleId(vehicle.getId())
-          .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-      GpsRecordEntity gpsRecord = GpsRecordEntity.builder()
-          .vehicle(vehicle)
-          .status(statusEnum)
-          .latitude(gpsRecordRequest.getLatitude())
-          .longitude(gpsRecordRequest.getLongitude())
-          .oTime(gpsRecordRequest.getOTime())
-          .gcd(gpsRecordRequest.getGcd())
-          .totalDist(gpsRecordRequest.getTotalDist())
-          .record(record)
-          .build();
-
-      gpsRecords.add(gpsRecord);
-    }
-
-    return gpsRecordRepository.saveAll(gpsRecords);
-  }
 }
