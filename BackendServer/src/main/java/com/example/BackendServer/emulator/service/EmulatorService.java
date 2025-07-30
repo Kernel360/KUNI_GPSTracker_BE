@@ -26,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -82,7 +84,7 @@ public class EmulatorService {
         }
     }
 
-    // 시동 ON 처리 + DB 저장
+    // 시동 ON 처리 + DB 저장 + Vehicle 상태 ACTIVE
     public StandardResponse handleOn(OnOffRequest req) {
         log.info("✅ [ON] EmulatorService: {}", req);
 
@@ -95,10 +97,16 @@ public class EmulatorService {
 
         recordService.create(recordReq);
 
+        // 상태 업데이트
+        vehicle = vehicle.toBuilder()
+            .status(VehicleEntity.Status.ACTIVE)
+            .build();
+        vehicleRepository.save(vehicle);
+
         return new StandardResponse("000", "Success", req.getMdn());
     }
 
-    // 시동 OFF 처리 + DB 저장
+    // 시동 OFF 처리 + DB 저장 + Vehicle 상태 INACTIVE
     public StandardResponse handleOff(OnOffRequest req) {
         log.info("🛑 [OFF] EmulatorService: {}", req);
 
@@ -109,6 +117,12 @@ public class EmulatorService {
 
         activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
         recordRepository.save(activeRecord);
+
+        // 상태 업데이트
+        vehicle = vehicle.toBuilder()
+            .status(VehicleEntity.Status.INACTIVE)
+            .build();
+        vehicleRepository.save(vehicle);
 
         return new StandardResponse("000", "Success", req.getMdn());
     }
@@ -124,8 +138,10 @@ public class EmulatorService {
 
         VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
+        recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
             .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+
+        List<GpsRecordRequest> gpsRequests = new ArrayList<>();
 
         for (GpsCycleData gpsData : req.getCList()) {
             try {
@@ -141,13 +157,15 @@ public class EmulatorService {
                     .totalDist(gpsData.getSum())
                     .build();
 
-                gpsRecordService.create(gpsReq);
-
+                gpsRequests.add(gpsReq);
             } catch (Exception e) {
-                log.error("❌ GPS 데이터 저장 실패: {}", gpsData, e);
+                log.error("❌ GPS 데이터 파싱 실패: {}", gpsData, e);
             }
         }
 
+        if (!gpsRequests.isEmpty()) {
+            gpsRecordService.createAll(gpsRequests);
+        }
 
         return new StandardResponse("000", "Success", req.getMdn());
     }
