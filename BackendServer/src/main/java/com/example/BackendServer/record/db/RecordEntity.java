@@ -12,6 +12,7 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

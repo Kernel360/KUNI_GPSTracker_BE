@@ -107,7 +107,9 @@ public class EmulatorService {
             .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
+        activeRecord.setSumDist(req.getSum());  // sumDist 대신 sum 필드 사용
         recordRepository.save(activeRecord);
+
 
         vehicle = vehicle.toBuilder()
             .status(VehicleEntity.Status.INACTIVE)
