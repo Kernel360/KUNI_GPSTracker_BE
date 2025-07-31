@@ -1,5 +1,7 @@
 package com.example.BackendServer.emulator.model;
 
+import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -11,8 +13,8 @@ public class OnOffRequest {
     private String mid; // 제조사 아이디
     private String pv; //패킷 버전
     private String did; //디바이스 아이디
-    private String onTime; //차량 시동 On 시간
-    private String offTime; //차량 시동 Off 시간
+    private LocalDateTime onTime; //차량 시동 On 시간
+    private LocalDateTime offTime; //차량 시동 Off 시간
     private String gcd; //GPS 상태
     private String lat; //GPS 위도
     private String lon; //GPS 경도

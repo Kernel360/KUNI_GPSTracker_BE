@@ -2,6 +2,8 @@ package com.example.BackendServer.emulator.controller;
 
 import com.example.BackendServer.emulator.model.*;
 import com.example.BackendServer.emulator.service.EmulatorService;
+
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +22,19 @@ public class EmulatorController {
     }
 
     @PostMapping("/on")
-    public ResponseEntity<StandardResponse> on(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<StandardResponse> on(@RequestBody OnOffRequest request, @Parameter(hidden = true) @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) {
         emulatorService.verifyToken(authHeader);
         return ResponseEntity.ok(emulatorService.handleOn(request));
     }
 
     @PostMapping("/off")
-    public ResponseEntity<StandardResponse> off(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<StandardResponse> off(@RequestBody OnOffRequest request, @Parameter(hidden = true) @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) {
         emulatorService.verifyToken(authHeader);
         return ResponseEntity.ok(emulatorService.handleOff(request));
     }
 
     @PostMapping("/gps")
-    public ResponseEntity<StandardResponse> gps(@RequestBody GpsCycleRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<StandardResponse> gps(@RequestBody GpsCycleRequest request, @Parameter(hidden = true) @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) {
         emulatorService.verifyToken(authHeader);
         return ResponseEntity.ok(emulatorService.handleGps(request));
     }

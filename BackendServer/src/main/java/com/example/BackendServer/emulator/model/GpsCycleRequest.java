@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -34,7 +35,7 @@ public class GpsCycleRequest {
   private String did; //디바이스 아이디
 
   @JsonProperty("oTime")
-  private String oTime; //발생시간
+  private LocalDateTime oTime; //발생시간
 
   @JsonProperty("cCnt")
   private String cCnt; //주기정보 개수

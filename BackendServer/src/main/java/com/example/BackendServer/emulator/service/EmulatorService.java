@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -70,6 +71,9 @@ public class EmulatorService {
 
     // 토큰 검증
     public void verifyToken(String authHeader) {
+        if(!StringUtils.hasText(authHeader)){
+            throw new CustomException(INVALID_TOKEN_ERROR);
+        }
         String token = authHeader.replace("Bearer ", "").trim();
         try {
             Jwts.parserBuilder().setSigningKey(jwtKey).build().parseClaimsJws(token);
@@ -86,7 +90,7 @@ public class EmulatorService {
 
         RecordRequest recordReq = RecordRequest.builder()
             .vehicleId(vehicle.getId())
-            .onTime(LocalDateTime.parse(req.getOnTime(), formatter))
+            .onTime(req.getOnTime())
             .build();
 
         recordService.create(recordReq);
@@ -109,7 +113,7 @@ public class EmulatorService {
             .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         // 1. offTime, sumDist 저장
-        activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
+        activeRecord.setOffTime(req.getOffTime());
         activeRecord.setSumDist(req.getSum());  // sum 필드 활용
         recordRepository.save(activeRecord);
 
@@ -155,7 +159,8 @@ public class EmulatorService {
 
         List<GpsRecordEntity> entities = req.getCList().stream()
             .map(data -> {
-                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + data.getSec(), formatter);
+                LocalDateTime oTime = req.getOTime().plusSeconds(data.getSec());
+
                 return GpsRecordEntity.builder()
                     .record(activeRecord)
                     .vehicle(vehicle)

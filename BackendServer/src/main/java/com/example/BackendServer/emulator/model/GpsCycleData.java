@@ -13,7 +13,7 @@ import lombok.ToString;
 
 public class GpsCycleData {
     @JsonProperty("sec")
-    private String sec; //발생시간 '초' : sendCycleInfo
+    private Integer sec; //발생시간 '초' : sendCycleInfo
 
     @JsonProperty("gcd")
     private String gcd; //GPS 상태
