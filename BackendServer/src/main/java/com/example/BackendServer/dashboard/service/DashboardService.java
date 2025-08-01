@@ -6,6 +6,8 @@ import com.example.BackendServer.dashboard.model.DashboardStatusResponseDto;
 import com.example.BackendServer.dashboard.model.DayCountView;
 import com.example.BackendServer.global.Class.VehicleStatus;
 import com.example.BackendServer.global.Class.VehicleType;
+import com.example.BackendServer.global.exception.CustomException;
+import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.record.db.RecordRepository;
 import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,9 @@ public class DashboardService {
         LocalDate startDate = yesterday.minusDays(6);
 
         List<DayCountView> raw = recordRepository.findDailyCount(startDate, yesterday);
+        if (raw == null) { // null 체크
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
 
         Map<LocalDate, Long> countMap = raw.stream()
                 .collect(Collectors.toMap(DayCountView::getDay,

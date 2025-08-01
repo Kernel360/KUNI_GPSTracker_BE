@@ -3,6 +3,8 @@ package com.example.BackendServer.vehicle.Service;
 import static com.example.BackendServer.global.Class.VehicleStatus.*;
 
 import com.example.BackendServer.global.Class.VehicleStatus;
+import com.example.BackendServer.global.exception.CustomException;
+import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import com.example.BackendServer.vehicle.model.VehicleCreateDto;
@@ -42,7 +44,11 @@ public class VehicleApiService {
 	  @Transactional
     public VehicleEntity createVehicle(VehicleCreateDto dto) {
 
-        // 무작위 초기 위치 생성 (한국 지역 기준)
+          if (vehicleRepository.existsByVehicleNumber(dto.getVehicleNumber())) {
+              throw new CustomException(ErrorCode.VEHICLE_ALREADY_EXISTS); // 이미 등록된 차량인지 확인
+          }
+
+          // 무작위 초기 위치 생성 (한국 지역 기준)
         double initialLatitude = generateRandomLatitude();
         double initialLongitude = generateRandomLongitude();
 
@@ -116,7 +122,7 @@ public class VehicleApiService {
     @Transactional
     public void deleteByVehicleNumber(String vehicleNumber) {
         VehicleEntity vehicle = vehicleRepository.findByVehicleNumber(vehicleNumber)
-                .orElseThrow(() -> new IllegalArgumentException(vehicleNumber));
+                .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND)); // 차량이 존재하지 않을 때
         vehicleRepository.delete(vehicle);
     }
 }

@@ -29,16 +29,15 @@ public class GpsRecordService {
     VehicleEntity vehicle = vehicleRepository.findById(gpsRecordRequest.getVehicleId())
         .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
-
     VehicleStatus statusEnum;
     try {
       statusEnum = gpsRecordRequest.getStatus();
-    } catch (Exception e) {
-      throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); //TODO : 임시, 나중에 적절한 ErrorCode 추가 권장
+    } catch (IllegalArgumentException e) {
+      throw new CustomException(ErrorCode.INVALID_VEHICLE_STATUS);
     }
 
     RecordEntity record = recordRepository.findByVehicleId(vehicle.getId())
-            .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
     GpsRecordEntity gpsRecord = GpsRecordEntity.builder()
         .vehicle(vehicle)
