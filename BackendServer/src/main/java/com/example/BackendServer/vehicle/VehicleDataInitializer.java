@@ -73,6 +73,7 @@ public class VehicleDataInitializer {
 
   @PostConstruct
   public void initVehicles() {
+    if (vehicleRepository.count() > 0) return;  // 이미 데이터가 있다면 초기화하지 않음
     IntStream.range(0, vehicleNumbers.size()).forEach(i -> {
       String number = vehicleNumbers.get(i);
 
