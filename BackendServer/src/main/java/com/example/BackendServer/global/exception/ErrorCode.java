@@ -28,12 +28,13 @@ public enum ErrorCode {
 	// -------------------- GPS Record --------------------
 	GPS_RECORD_NOT_FOUND(404, "GPS-001", "GPS 기록이 존재하지 않습니다."),
 	INVALID_GPS_COORDINATE(400, "GPS-002", "GPS 좌표 값이 유효하지 않습니다."),
+	EMPTY_CLIST_ERROR(500, "GPS-003", "CLIST가 비어있습니다."),
 
 	// -------------------- Location --------------------
 	LOCATION_NOT_FOUND(404, "LOCATION-001", "위치 정보를 찾을 수 없습니다."),
-	LOCATION_SERVICE_ERROR(500, "LOCATION-002", "외부 위치 서비스 호출 중 오류가 발생했습니다.");
+	LOCATION_SERVICE_ERROR(500, "LOCATION-002", "외부 위치 서비스 호출 중 오류가 발생했습니다."),
 
-
+	INVALID_TOKEN_ERROR(500, "TOKEN-001", "유효하지 않은 토큰입니다.");
 	// 예시 에러코드
 	// INPUT_INVALID_VALUE_ERROR(400, "GLOBAL-002", "잘못된 입력 값입니다."),
 	// EMPTY_INPUT_ERROR(400, "GLOBAL-003", "입력 값이 비어있습니다."),
