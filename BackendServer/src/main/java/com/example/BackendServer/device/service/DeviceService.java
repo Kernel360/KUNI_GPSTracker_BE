@@ -23,7 +23,7 @@ public class DeviceService {
   @Transactional
   public DeviceEntity create(DeviceRequest deviceRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(deviceRequest.getVehicleId())
-        .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
     DeviceEntity device = DeviceEntity.builder()
         .vehicle(vehicle)

@@ -5,17 +5,36 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
+
 public enum ErrorCode {
-	// //global
+
+	// -------------------- Global --------------------
 	INTERNAL_SERVER_ERROR(500, "GLOBAL-001", "서버에 오류가 발생하였습니다."),
-	NOT_FOUND(404, "GLOBAL-002", "값을 찾을 수 없습니다."),
+	INVALID_INPUT_VALUE(400, "GLOBAL-002", "잘못된 입력 값입니다."),
+	METHOD_NOT_ALLOWED(405, "GLOBAL-003", "허용되지 않은 HTTP method입니다."),
+	UNSUPPORTED_MEDIA_TYPE(415, "GLOBAL-004", "지원하지 않는 미디어 타입입니다."),
+	HANDLE_ACCESS_DENIED(403, "GLOBAL-005", "접근 권한이 없습니다."),
+	RESOURCE_NOT_FOUND(404, "GLOBAL-006", "요청한 리소스를 찾을 수 없습니다."),
 
-	VEHICLE_NOT_FOUND(400, "VEHICLE-001", "차량을 찾을 수 없습니다."),
-	RECORD_NOT_FOUND(400,"RECORD-001", "운행 기록이 없습니다."),
-	GPS_RECORD_NOT_FOUND(400,"GPS_RECORD-001", "GPS 기록이 없습니다."),
-	INVALID_TOKEN_ERROR(401, "AUTH-001", "jwt 토큰이 유효하지 않습니다."),
-	EMPTY_CLIST_ERROR(400, "GPS-001", "cList가 비어있거나 존재하지 않습니다.");
+	// -------------------- Vehicle --------------------
+	VEHICLE_NOT_FOUND(404, "VEHICLE-001", "해당 차량을 찾을 수 없습니다."),
+	VEHICLE_ALREADY_EXISTS(409, "VEHICLE-002", "이미 등록된 차량입니다."),
+	INVALID_VEHICLE_STATUS(400, "VEHICLE-003", "차량 상태가 올바르지 않습니다."),
 
+	// -------------------- Record --------------------
+	RECORD_NOT_FOUND(404, "RECORD-001", "운행 기록이 존재하지 않습니다."),
+	INVALID_RECORD_DURATION(400, "RECORD-002", "운행 시간 정보가 유효하지 않습니다."),
+
+	// -------------------- GPS Record --------------------
+	GPS_RECORD_NOT_FOUND(404, "GPS-001", "GPS 기록이 존재하지 않습니다."),
+	INVALID_GPS_COORDINATE(400, "GPS-002", "GPS 좌표 값이 유효하지 않습니다."),
+
+	// -------------------- Location --------------------
+	LOCATION_NOT_FOUND(404, "LOCATION-001", "위치 정보를 찾을 수 없습니다."),
+	LOCATION_SERVICE_ERROR(500, "LOCATION-002", "외부 위치 서비스 호출 중 오류가 발생했습니다.");
+
+
+	// 예시 에러코드
 	// INPUT_INVALID_VALUE_ERROR(400, "GLOBAL-002", "잘못된 입력 값입니다."),
 	// EMPTY_INPUT_ERROR(400, "GLOBAL-003", "입력 값이 비어있습니다."),
 	// POST_TIME_ERROR(400, "GLOBAL-004", "시간이 지났습니다."),

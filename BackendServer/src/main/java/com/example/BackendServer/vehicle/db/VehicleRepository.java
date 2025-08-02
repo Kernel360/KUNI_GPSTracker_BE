@@ -23,4 +23,7 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
     long countByStatus(VehicleStatus status);
     // 삭제
     Optional<VehicleEntity> findByVehicleNumber(String vehicleNumber);
+    // 차량 중복 확인
+    boolean existsByVehicleNumber(String vehicleNumber);
+
 }
