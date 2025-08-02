@@ -72,7 +72,7 @@ public class VehicleApiController {
         @Parameter(description = "차량 이름", example = "12가3456",required = false)
         @RequestParam(required = false) String vehicleName,
         @Parameter(description = "차량 상태", example = "ACTIVE")
-        @RequestParam VehicleStatus status
+        @RequestParam(required = false) VehicleStatus status
     ) {
         return ResponseEntity.ok(vehicleApiService.getVehicleList(pageable, vehicleName, status));
     }

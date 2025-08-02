@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>차량 에뮬레이터</title>
+    <style>
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<h1>차량 목록</h1>
+
+<!-- 전송 주기 선택 -->
+<label for="global-interval">전송 주기:</label>
+<select id="global-interval">
+    <option value="60">60초</option>
+    <option value="120">120초</option>
+    <option value="180">180초</option>
+</select>
+
+<!-- 전체 제어 버튼 -->
+<button onclick="toggleAll('ON')">전체 ON</button>
+<button onclick="toggleAll('OFF')">전체 OFF</button>
+
+<!-- 범위 제어 버튼 -->
+<div>
+    <label>번호 범위:</label>
+    <input type="number" id="range-start" placeholder="시작 번호 (예: 1)">
+    <input type="number" id="range-end" placeholder="끝 번호 (예: 100)">
+    <button onclick="toggleRange('ON')">범위 ON</button>
+    <button onclick="toggleRange('OFF')">범위 OFF</button>
+</div>
+
+<!-- 상태 필터링 -->
+<div>
+    <label>상태 필터:</label>
+    <select id="state-filter" onchange="filterByState()">
+        <option value="ALL">전체</option>
+        <option value="ON">ON만</option>
+        <option value="OFF">OFF만</option>
+    </select>
+</div>
+
+<!-- 차량 테이블 -->
+<table border="1" cellpadding="4">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>번호판</th>
+        <th>상태</th>
+        <th>ON</th>
+        <th>OFF</th>
+    </tr>
+    </thead>
+    <tbody id="car-table">
+    <tr th:each="car, iterStat : ${cars}"
+        th:attr="data-index=${iterStat.index + 1}, data-state=${car.state}">
+        <td th:text="${iterStat.index + 1}">1</td>
+        <td th:text="${car.number}">28나3920</td>
+        <td th:text="${car.state}">OFF</td>
+        <td>
+            <button
+                    th:attr="onclick=|toggle('${car.number}','ON')|"
+                    th:disabled="${car.state == T(com.example.emulator.util.CarState).ON}">
+                ON
+            </button>
+        </td>
+        <td>
+            <button
+                    th:attr="onclick=|toggle('${car.number}','OFF')|"
+                    th:disabled="${car.state == T(com.example.emulator.util.CarState).OFF}">
+                OFF
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    // 인터벌 복원 및 저장
+    document.addEventListener('DOMContentLoaded', function () {
+        const savedInterval = localStorage.getItem("selectedInterval");
+        if (savedInterval) {
+            document.getElementById("global-interval").value = savedInterval;
+        }
+
+        document.getElementById("global-interval").addEventListener("change", function (e) {
+            localStorage.setItem("selectedInterval", e.target.value);
+        });
+    });
+
+    // 개별 차량 제어
+    function toggle(number, cmd) {
+        const interval = document.getElementById("global-interval").value;
+
+        fetch(`/emulator/${number}/${cmd}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ interval: interval })
+        }).then(r => r.ok ? location.reload() : r.text().then(alert));
+    }
+
+    // 전체 제어
+    function toggleAll(cmd) {
+        const interval = document.getElementById("global-interval").value;
+
+        fetch(`/emulator/all/${cmd}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ interval: interval })
+        }).then(r => r.ok ? location.reload() : r.text().then(alert));
+    }
+
+    // 범위 제어
+    function toggleRange(cmd) {
+        const start = parseInt(document.getElementById("range-start").value);
+        const end = parseInt(document.getElementById("range-end").value);
+        const interval = document.getElementById("global-interval").value;
+
+        fetch(`/emulator/range/${cmd}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ start, end, interval })
+        }).then(r => r.ok ? location.reload() : r.text().then(alert));
+    }
+
+    // 상태 필터링
+    function filterByState() {
+        const selected = document.getElementById("state-filter").value;
+        const rows = document.querySelectorAll("#car-table tr");
+
+        rows.forEach(row => {
+            const state = row.getAttribute("data-state");
+            if (selected === "ALL" || selected === state) {
+                row.classList.remove("hidden");
+            } else {
+                row.classList.add("hidden");
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import com.example.BackendServer.record.db.RecordEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true) // ✅ toBuilder 추가
 @ToString
 @Entity
 @Table(name = "Vehicle")  // DB 테이블 이름과 매핑
@@ -58,4 +59,5 @@ public class VehicleEntity {
   @Builder.Default
   @JsonIgnore
   private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
+
 }

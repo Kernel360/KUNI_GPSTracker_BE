@@ -14,6 +14,10 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
       String vehicleNumber,
       Pageable pageable
     );
+    Page<VehicleEntity> findAllByVehicleNumberContains(
+        String vehicleNumber,
+        Pageable pageable
+    );
 
     //상태 개수 가져오기
     long countByStatus(VehicleStatus status);

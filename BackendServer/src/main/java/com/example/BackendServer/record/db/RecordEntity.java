@@ -12,6 +12,7 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,7 +37,7 @@ public class RecordEntity {
   @JsonIgnore
   private List<GpsRecordEntity> gpsRecords = new ArrayList<>();
 
-  @Column(name = "sum_dist", nullable = false)
+  @Column(name = "sum_dist", nullable = true)
   private String sumDist;
 
   @Column(name = "on_time", nullable = false)
@@ -44,4 +45,13 @@ public class RecordEntity {
 
   @Column(name = "off_time", nullable = true)
   private LocalDateTime offTime;
+
+  // ✅ 필요한 메서드들 추가
+  public void setOffTime(LocalDateTime offTime) {
+    this.offTime = offTime;
+  }
+
+  public LocalDateTime getBaseTime() {
+    return this.onTime;
+  }
 }

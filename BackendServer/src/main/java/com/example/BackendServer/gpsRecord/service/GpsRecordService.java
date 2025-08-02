@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,8 +33,10 @@ public class GpsRecordService {
         .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
     VehicleStatus statusEnum;
+
     try {
       statusEnum = gpsRecordRequest.getStatus();
+
     } catch (IllegalArgumentException e) {
       throw new CustomException(ErrorCode.INVALID_VEHICLE_STATUS);
     }
@@ -47,9 +52,10 @@ public class GpsRecordService {
         .oTime(gpsRecordRequest.getOTime())
         .gcd(gpsRecordRequest.getGcd())
         .totalDist(gpsRecordRequest.getTotalDist())
-        .record(record) // nullable
+        .record(record)
         .build();
 
     return gpsRecordRepository.save(gpsRecord);
   }
+
 }
