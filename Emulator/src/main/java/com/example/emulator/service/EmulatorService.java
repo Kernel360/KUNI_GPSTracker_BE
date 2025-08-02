@@ -24,10 +24,12 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -43,6 +45,11 @@ public class EmulatorService {
     //처음과 마지막 전송 데이터 저장
     private final ConcurrentMap<String, CSV> firstGps = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, CSV> lastGps = new ConcurrentHashMap<>();
+
+    //시간 보정 값 저장.
+    private static final int MAX_PACKET_SIZE = 60;           // 사양상 한번에 60개씩 전송
+    private final ConcurrentMap<String, Duration> timeShift = new ConcurrentHashMap<>();
+    private static final DateTimeFormatter CSV_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
      * 차량의 상태를 on/off 로 변경한다.
@@ -115,8 +122,8 @@ public class EmulatorService {
      */
     private Mono<Void> sendOff(String mdn) {
 
-        CSV last = lastGps.get(mdn);
         CSV first = firstGps.get(mdn);
+        CSV last = lastGps.get(mdn);
 
         if(last == null) last = first;
 
@@ -125,13 +132,9 @@ public class EmulatorService {
             return Mono.empty();
         }
 
-        DateTimeFormatter inFmt  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-
-        String offTime = LocalDateTime.parse(last.getTimestamp(), inFmt)
-                .format(outFmt);
-        String onTime = LocalDateTime.parse(first.getTimestamp(), inFmt)
-                .format(outFmt);
+        DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String offTime = LocalDateTime.now().format(TS_FMT);
+        String onTime = first.getTimestamp();
 
         Gps gps = Gps.builder()
                 .gcd(last.getGcd())
@@ -180,15 +183,19 @@ public class EmulatorService {
     public Mono<Void> sendOn(Path csvPath, String number) throws IOException {
 
         List<CSV> all = loadCsv(csvPath);
-
         CSV csvFirst = all.get(0);
 
-        DateTimeFormatter inFmt  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        // 첫 타임스탬프를 '지금'으로 평행이동시킬 Δt
+        Duration delta = Duration.between(
+                LocalDateTime.parse(csvFirst.getTimestamp(), CSV_FMT),
+                LocalDateTime.now()
+        );
+        timeShift.put(number, delta);
 
-        String onTime = LocalDateTime.parse(csvFirst.getTimestamp(), inFmt)
-                .format(outFmt);
+        DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String onTime = LocalDateTime.now().format(TS_FMT);
 
+        csvFirst.setTimestamp(onTime);
         firstGps.put(number, csvFirst);
 
         Gps gps = Gps.builder()
@@ -250,14 +257,15 @@ public class EmulatorService {
                 Mono.fromCallable(() -> loadCsv(csv))
                         .subscribeOn(Schedulers.boundedElastic());
 
-        /* 2-2 60개씩 끊어 60초마다 POST */
-        return listMono.flatMapMany(all -> {
-                    List<List<CSV>> batches = Lists.partition(all, interval);
-                    return Flux.fromIterable(batches);
-                })
+        return listMono
+                .flatMapMany(all -> Flux.fromIterable(Lists.partition(all, interval)))
                 .delayElements(Duration.ofSeconds(interval))
-                .flatMap(batch -> sendGpsBatch(mdn, batch))
-                .then();                   // Mono<Void>
+                .flatMap(intervalChunk -> {
+                    List<List<CSV>> packets = Lists.partition(intervalChunk, MAX_PACKET_SIZE);
+                    return Flux.fromIterable(packets)
+                            .concatMap(packet -> sendGpsBatch(mdn, packet));
+                })
+                .then();
     }
 
     /**
@@ -268,27 +276,33 @@ public class EmulatorService {
      */
     private Mono<Void> sendGpsBatch(String mdn, List<CSV> batch) {
 
+        Duration delta = timeShift.getOrDefault(mdn, Duration.ZERO);
+        DateTimeFormatter OUT_MIN_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+
+        LocalDateTime firstShifted =
+                LocalDateTime.parse(batch.get(0).getTimestamp(), CSV_FMT).plus(delta);
+        String oTime = firstShifted.truncatedTo(ChronoUnit.MINUTES).format(OUT_MIN_FMT);
+
+        AtomicInteger idx = new AtomicInteger(0);
+
         List<MdtGpsRequest.CList> cList = batch.stream()
-                .map(csv -> MdtGpsRequest.CList.builder()
-                        .sec(csv.getSec())          // 발생시간 '초'
-                        .bat(csv.getBat())          // 배터리 전압
-                        .gps(Gps.builder()          // GPS 세부 정보
-                                .gcd(csv.getGcd())
-                                .lat(csv.getLat())
-                                .lon(csv.getLon())
-                                .ang(csv.getAng())
-                                .spd(csv.getSpd())
-                                .sum(csv.getSum())
-                                .build())
-                        .build())
+                .map(csv -> {
+                    int secVal = idx.getAndIncrement();     // 0,1,2 … 59
+
+                    return MdtGpsRequest.CList.builder()
+                            .sec(String.format("%02d", secVal))
+                            .bat(csv.getBat())
+                            .gps(Gps.builder()
+                                    .gcd(csv.getGcd())
+                                    .lat(csv.getLat())
+                                    .lon(csv.getLon())
+                                    .ang(csv.getAng())
+                                    .spd(csv.getSpd())
+                                    .sum(csv.getSum())
+                                    .build())
+                            .build();
+                })
                 .toList();
-
-        DateTimeFormatter inFmt  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-
-        String oTime = LocalDateTime.parse(batch.get(0).getTimestamp(), inFmt)
-                .format(outFmt);
-
 
         MdtGpsRequest req = MdtGpsRequest.builder()
                 .mdn(mdn)
