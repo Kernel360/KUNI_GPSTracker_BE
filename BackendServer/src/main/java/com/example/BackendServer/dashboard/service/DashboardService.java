@@ -44,9 +44,6 @@ public class DashboardService {
         LocalDate startDate = yesterday.minusDays(6);
 
         List<DayCountView> raw = recordRepository.findDailyCount(startDate, yesterday);
-        if (raw == null) { // null 체크
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
 
         Map<LocalDate, Long> countMap = raw.stream()
                 .collect(Collectors.toMap(DayCountView::getDay,
