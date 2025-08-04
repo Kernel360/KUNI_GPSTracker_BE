@@ -21,10 +21,10 @@ public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long>
 
     @Query(value = """
             SELECT gr.*
-            FROM GpsRecord gr
+            FROM gpsrecord gr
             INNER JOIN (
                 SELECT vehicle_id, MAX(oTime) AS max_time
-                FROM GpsRecord
+                FROM gpsrecord
                 GROUP BY vehicle_id
             ) latest
             ON gr.vehicle_id = latest.vehicle_id AND gr.oTime = latest.max_time
