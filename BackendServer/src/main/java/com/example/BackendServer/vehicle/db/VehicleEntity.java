@@ -19,7 +19,7 @@ import java.util.List;
 @Builder(toBuilder = true) // ✅ toBuilder 추가
 @ToString
 @Entity
-@Table(name = "Vehicle")  // DB 테이블 이름과 매핑
+@Table(name = "vehicle")  // DB 테이블 이름과 매핑
 public class VehicleEntity {
 
   @Id

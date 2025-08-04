@@ -18,7 +18,7 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 @Builder
 @ToString
 @Entity
-@Table(name = "Record")
+@Table(name = "record")
 public class RecordEntity {
 
   @Id
