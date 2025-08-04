@@ -43,7 +43,7 @@ public class LocationService {
                 .findTopByVehicleIdOrderByOnTimeDesc(vehicle.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
-        // gpsRecordId가 0이면 최신 GPS 데이터를 조회, 아니면 다음 GPS 데이터를 조회
+        // gpsRecordId 다음 GPS 데이터를 조회
         GpsRecordEntity currentGps = gpsRepository
                 .findNextGpsRecord(latestRecord.getId(), gpsRecordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GPS_RECORD_NOT_FOUND));
