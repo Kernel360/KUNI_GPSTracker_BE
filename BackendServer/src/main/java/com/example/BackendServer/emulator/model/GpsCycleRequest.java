@@ -42,7 +42,7 @@ public class GpsCycleRequest {
   private String did; //디바이스 아이디
 
   @JsonProperty("oTime")
-  @Schema(description = "발생시간", example = "1")
+  @Schema(description = "발생시간", example = "2023-10-01T12:00:00")
   private LocalDateTime oTime; //발생시간
 
   @JsonProperty("cCnt")
