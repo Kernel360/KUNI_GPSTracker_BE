@@ -10,7 +10,7 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 @Builder
 @ToString
 @Entity
-@Table(name = "Device")
+@Table(name = "device")
 public class DeviceEntity {
 
   @Id

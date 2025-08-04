@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@Table(name = "GpsRecord")
+@Table(name = "gpsrecord")
 public class GpsRecordEntity {
 
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
