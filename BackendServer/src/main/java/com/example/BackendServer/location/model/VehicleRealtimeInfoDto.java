@@ -28,5 +28,6 @@ public class VehicleRealtimeInfoDto {
     private Double drivingDistanceKm;
     @Schema(description = "현재 위치 정보")
     private Location location;
-
+    @Schema(description = "다음 요청 시 사용할 GPS Record ID", example = "1001")
+    private Long gpsRecordId;
 }

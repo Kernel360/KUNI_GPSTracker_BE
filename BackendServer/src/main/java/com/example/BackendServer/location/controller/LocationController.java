@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,8 +22,10 @@ public class LocationController {
     private final LocationService locationService;
 
     @GetMapping("/{vehicleNumber}")
-    @Operation(summary = "차량 실시간 정보 조회", description = "차량 번호를 통해 차량의 실시간 정보를 조회합니다.")
-    public ResponseEntity<VehicleRealtimeInfoDto> getVehicleRealTimeInfo(@PathVariable @Parameter(description = "차량 이름", example = "12가3456") String vehicleNumber) {
-        return ResponseEntity.ok(locationService.getVehicleRealtimeInfo(vehicleNumber));
+    @Operation(summary = "차량 실시간 정보 조회", description = "차량 번호를 통해 차량의 실시간 정보를 조회합니다. 1초마다 호출하여 다음 GPS 데이터를 받을 수 있습니다.")
+    public ResponseEntity<VehicleRealtimeInfoDto> getVehicleRealTimeInfo(
+            @PathVariable @Parameter(description = "차량 번호", example = "12가3456") String vehicleNumber,
+            @RequestParam(defaultValue = "0") @Parameter(description = "이전 GPS Record ID (초기값은 0)", example = "1000") Long gpsRecordId) {
+        return ResponseEntity.ok(locationService.getVehicleRealtimeInfo(vehicleNumber, gpsRecordId));
     }
 }
