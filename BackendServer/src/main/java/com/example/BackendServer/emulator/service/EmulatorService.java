@@ -14,10 +14,12 @@ import com.example.BackendServer.vehicle.db.VehicleEntity;
 import com.example.BackendServer.vehicle.db.VehicleRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import static com.example.BackendServer.global.Class.VehicleStatus.ACTIVE;
 import static com.example.BackendServer.global.Class.VehicleStatus.INACTIVE;
 import static com.example.BackendServer.global.exception.ErrorCode.EMPTY_CLIST_ERROR;
@@ -48,14 +49,19 @@ public class EmulatorService {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
+    //@Value("${JWT_SECRET}")
+    private String secretBase64 = "SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI=";
+
     private final Map<String, String> tokenStore = new ConcurrentHashMap<>();
     private Key jwtKey;
 
     @PostConstruct
     public void init() {
-        jwtKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        if (secretBase64 == null || secretBase64.isBlank()) {
+            throw new CustomException(ErrorCode.JWT_SECRET_KEY_MISSING);
+        }
+        jwtKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretBase64));
     }
-
     // 토큰 발급
     public TokenResponse issueToken(TokenRequest request) {
         String token = Jwts.builder()
