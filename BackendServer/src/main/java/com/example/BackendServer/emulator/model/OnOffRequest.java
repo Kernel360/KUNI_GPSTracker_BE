@@ -1,5 +1,6 @@
 package com.example.BackendServer.emulator.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -8,17 +9,30 @@ import lombok.ToString;
 @Data
 @ToString
 public class OnOffRequest {
-    private String mdn; // 차량번호 : SendCartStart
-    private String tid; // 터미널 아이디
-    private String mid; // 제조사 아이디
-    private String pv; //패킷 버전
-    private String did; //디바이스 아이디
-    private LocalDateTime onTime; //차량 시동 On 시간
-    private LocalDateTime offTime; //차량 시동 Off 시간
-    private String gcd; //GPS 상태
-    private String lat; //GPS 위도
-    private String lon; //GPS 경도
-    private String ang; //방향
-    private String spd; //속도
-    private String sum; //누적 주행 거리
+    @Schema(description = "차량 번호", example = "12가3456")
+    private String mdn;
+    @Schema(description = "터미널 아이디", example = "A001")
+    private String tid;
+    @Schema(description = "제조사 아이디", example = "6")
+    private String mid;
+    @Schema(description = "패킷 버전", example = "5")
+    private String pv;
+    @Schema(description = "디바이스 아이디", example = "1")
+    private String did;
+    @Schema(description = "차량 시동 On 시간", example = "2025-07-31T07:49:55.941Z")
+    private LocalDateTime onTime;
+    @Schema(description = "차량 시동 Off 시간", example = "2025-07-31T07:49:55.941Z")
+    private LocalDateTime offTime;
+    @Schema(description = "GPS 상태", example = "A")
+    private String gcd;
+    @Schema(description = "GPS 위도", example = "36123456")
+    private String lat;
+    @Schema(description = "GPS 경도", example = "127123456")
+    private String lon;
+    @Schema(description = "방향", example = "270")
+    private String ang;
+    @Schema(description = "속도", example = "5")
+    private String spd;
+    @Schema(description = "누적 주행 거리", example = "10000")
+    private String sum;
 }

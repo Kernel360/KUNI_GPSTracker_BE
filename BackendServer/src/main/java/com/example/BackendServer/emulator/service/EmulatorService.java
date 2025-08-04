@@ -165,8 +165,8 @@ public class EmulatorService {
                     .record(activeRecord)
                     .vehicle(vehicle)
                     .gcd(data.getGcd())
-                    .latitude(Double.parseDouble(data.getLat()))
-                    .longitude(Double.parseDouble(data.getLon()))
+                    .latitude(parseLat(data.getLat()))
+                    .longitude(parseLon(data.getLon()))
                     .oTime(oTime)
                     .status(ACTIVE)
                     .totalDist(data.getSum())
@@ -182,5 +182,17 @@ public class EmulatorService {
     private VehicleEntity getVehicleByMdn(String mdn) {
         return vehicleRepository.findByVehicleNumber(mdn)
             .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
+    }
+
+    /** '앞 2자리.나머지' 형태로 위도 변환 */
+    private static double parseLat(String raw) {
+        if (raw.contains(".")) return Double.parseDouble(raw);   // 이미 변환돼 있음
+        return Double.parseDouble(raw.substring(0, 2) + "." + raw.substring(2));
+    }
+
+    /** '앞 3자리.나머지' 형태로 경도 변환 */
+    private static double parseLon(String raw) {
+        if (raw.contains(".")) return Double.parseDouble(raw);
+        return Double.parseDouble(raw.substring(0, 3) + "." + raw.substring(3));
     }
 }

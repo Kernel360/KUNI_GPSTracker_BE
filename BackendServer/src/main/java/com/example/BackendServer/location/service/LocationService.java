@@ -50,13 +50,18 @@ public class LocationService {
         LocalDateTime endTime = latestRecord.getOffTime();
         if(endTime == null) endTime = LocalDateTime.now();
 
-        long drivingSeconds = Duration.between(
-                latestRecord.getOnTime(),
-                endTime
-        ).getSeconds();
+        long drivingSeconds = Duration.between(latestRecord.getOnTime(), endTime).getSeconds();
+        if (drivingSeconds < 0) {
+            throw new CustomException(ErrorCode.INVALID_RECORD_DURATION); // onTime, offTime의 시간 차가 음수일 경우
+        }
 
         //주행 거리
-        double drivingDistanceKm = Double.parseDouble(latestRecord.getSumDist());
+        double drivingDistanceKm;
+        try {
+            drivingDistanceKm = Double.parseDouble(latestRecord.getSumDist());
+        } catch (NumberFormatException e) {
+            throw new CustomException(ErrorCode.INVALID_RECORD_DURATION); // 주행 거리가 잘못된 값일 경우(ex: null)
+        }
 
         return VehicleRealtimeInfoDto.builder()
                 .vehicleNumber(vehicle.getVehicleNumber())

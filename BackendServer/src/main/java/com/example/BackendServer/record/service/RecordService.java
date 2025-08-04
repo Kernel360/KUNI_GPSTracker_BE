@@ -33,8 +33,7 @@ public class RecordService {
   @Transactional
   public RecordEntity create(RecordRequest recordRequest) {
     VehicleEntity vehicle = vehicleRepository.findById(recordRequest.getVehicleId())
-            // TODO : 추후 예외 수정
-            .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+            .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND)); // 차량이 존재하지 않을 때
 
     RecordEntity record = RecordEntity.builder()
             .vehicle(vehicle)
@@ -58,11 +57,13 @@ public class RecordService {
   /** 운행일지 상세 조회 */
   public RecordDetailResponse getRecordDetail(Long id) {
     RecordEntity record = recordRepository.findById(id)
-            // TODO : 추후 예외 수정 (임시로 NotFound로 수정)
-            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND ));
+            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND)); // 기록이 존재하지 않을 때
 
-    // GPS 경로 조회
     List<GpsRecordEntity> gpsList = gpsRecordRepository.findByRecordIdOrderByOTime(id);
+
+    if (gpsList.isEmpty()) {
+      throw new CustomException(ErrorCode.GPS_RECORD_NOT_FOUND); // GPS 데이터가 존재하지 않을 때
+    }
 
     Double startLat = null;
     Double startLng = null;
