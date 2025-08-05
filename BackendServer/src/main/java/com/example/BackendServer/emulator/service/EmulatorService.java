@@ -90,7 +90,7 @@ public class EmulatorService {
 
         RecordRequest recordReq = RecordRequest.builder()
             .vehicleId(vehicle.getId())
-            .onTime(req.getOnTime())
+            .onTime(LocalDateTime.parse(req.getOnTime(), formatter))
             .build();
 
         recordService.create(recordReq);
@@ -113,7 +113,7 @@ public class EmulatorService {
             .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         // 1. offTime, sumDist 저장
-        activeRecord.setOffTime(req.getOffTime());
+        activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
         activeRecord.setSumDist(req.getSum());  // sum 필드 활용
         recordRepository.save(activeRecord);
 
@@ -159,7 +159,7 @@ public class EmulatorService {
 
         List<GpsRecordEntity> entities = req.getCList().stream()
             .map(data -> {
-                LocalDateTime oTime = req.getOTime().plusSeconds(data.getSec());
+                LocalDateTime oTime = LocalDateTime.parse(req.getOTime(), formatter).plusSeconds(data.getSec());
 
                 return GpsRecordEntity.builder()
                     .record(activeRecord)

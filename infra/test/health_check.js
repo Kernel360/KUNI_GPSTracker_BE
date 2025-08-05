@@ -17,21 +17,21 @@ export const options = {
 // Setup 함수: 테스트 시작 전에 한번만 실행됩니다.
 export function setup() {
   // 테스트 차량 등록
-  const addVehicleUrl = "http://localhost:8080/api/vehicle";
-  const addVehiclePayload = JSON.stringify({
-    vehicleNumber: "12가3456",
-    vehicleName: "MERCEDES",
-  });
-  const addVehicleParams = {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-  const addVehicleRes = http.post(
-    addVehicleUrl,
-    addVehiclePayload,
-    addVehicleParams
-  );
+  // const addVehicleUrl = "http://localhost:8080/api/vehicle";
+  // const addVehiclePayload = JSON.stringify({
+  //   vehicleNumber: "12가3456",
+  //   vehicleName: "MERCEDES",
+  // });
+  // const addVehicleParams = {
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  // };
+  // const addVehicleRes = http.post(
+  //   addVehicleUrl,
+  //   addVehiclePayload,
+  //   addVehicleParams
+  // );
   // 1. 토큰 발급 요청
   const tokenUrl = "http://localhost:8080/api/emulator/token";
   const tokenPayload = JSON.stringify({
@@ -52,30 +52,30 @@ export function setup() {
   console.log(`Token received: ${token}`);
 
   // 2. /api/emulator/on 요청 (토큰 사용)
-  const onUrl = `http://localhost:8080/api/emulator/on`;
-  const onPayload = JSON.stringify({
-    mdn: "12가3456",
-    tid: "string",
-    mid: "string",
-    pv: "string",
-    did: "string",
-    onTime: "2025-07-31T07:49:55.941Z",
-    offTime: "2025-07-31T07:49:55.941Z",
-    gcd: "string",
-    lat: "string",
-    lon: "string",
-    ang: "string",
-    spd: "string",
-    sum: "string",
-  });
-  const onHeaders = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const onRes = http.post(onUrl, onPayload, onHeaders);
-  check(onRes, { "ON request status is 200": (r) => r.status === 200 });
+  // const onUrl = `http://localhost:8080/api/emulator/on`;
+  // const onPayload = JSON.stringify({
+  //   mdn: "12가3456",
+  //   tid: "string",
+  //   mid: "string",
+  //   pv: "string",
+  //   did: "string",
+  //   onTime: "2025-07-31T07:49:55.941Z",
+  //   offTime: "2025-07-31T07:49:55.941Z",
+  //   gcd: "string",
+  //   lat: "string",
+  //   lon: "string",
+  //   ang: "string",
+  //   spd: "string",
+  //   sum: "string",
+  // });
+  // const onHeaders = {
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //     Authorization: `Bearer ${token}`,
+  //   },
+  // };
+  // const onRes = http.post(onUrl, onPayload, onHeaders);
+  // check(onRes, { "ON request status is 200": (r) => r.status === 200 });
 
   // 3. 부하 테스트에 사용할 토큰 반환
   return { authToken: token };

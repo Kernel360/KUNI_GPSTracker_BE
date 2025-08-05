@@ -19,10 +19,10 @@ public class OnOffRequest {
     private String pv;
     @Schema(description = "디바이스 아이디", example = "1")
     private String did;
-    @Schema(description = "차량 시동 On 시간", example = "2025-07-31T07:49:55.941Z")
-    private LocalDateTime onTime;
-    @Schema(description = "차량 시동 Off 시간", example = "2025-07-31T07:49:55.941Z")
-    private LocalDateTime offTime;
+    @Schema(description = "차량 시동 On 시간", example = "20210901092000")
+    private String onTime;
+    @Schema(description = "차량 시동 Off 시간", example = "20210901092000")
+    private String offTime;
     @Schema(description = "GPS 상태", example = "A")
     private String gcd;
     @Schema(description = "GPS 위도", example = "36123456")
