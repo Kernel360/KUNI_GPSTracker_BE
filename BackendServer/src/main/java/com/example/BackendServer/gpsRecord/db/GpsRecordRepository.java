@@ -35,12 +35,13 @@ public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long>
     @Query("SELECT g FROM GpsRecordEntity g WHERE g.record.id = :recordId ORDER BY g.oTime ASC")
     List<GpsRecordEntity> findByRecordIdOrderByOTime(@Param("recordId") Long recordId);
 
-    @Query("""
-            SELECT g FROM GpsRecordEntity g 
-            WHERE g.record.id = :recordId 
-            AND g.id > :gpsRecordId 
-            ORDER BY g.id ASC
-            LIMIT 1
-            """)
-    Optional<GpsRecordEntity> findNextGpsRecord(@Param("recordId") Long recordId, @Param("gpsRecordId") Long gpsRecordId);
+    @Query(value = """
+        SELECT * FROM gps_record_entity g
+        WHERE g.record_id = :recordId
+        AND g.id > :gpsRecordId
+        ORDER BY g.id ASC
+        LIMIT 1
+        """, nativeQuery = true)
+    Optional<GpsRecordEntity> findNextGpsRecordNative(@Param("recordId") Long recordId, @Param("gpsRecordId") Long gpsRecordId);
+
 }
