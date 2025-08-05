@@ -21,8 +21,8 @@ public class VehicleRealtimeInfoDto {
     @Schema(description = "운행 날짜", example = "2025-07-07")
     private LocalDate drivingDate;
     //TODO : 형식 알아보기
-    @Schema(description = "운행 시간", example = "62")
-    private Long drivingTime; //1시간 2분
+    @Schema(description = "운행 시간(분)", example = "62")
+    private Long drivingTime; //62분
     @Schema(description = "운행 거리 (km)", example = "12.5")
     //TODO : 단위 통합하기, 다른 부분에서 운행 거리가 String으로 되어있음
     private Double drivingDistanceKm;
