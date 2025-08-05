@@ -53,8 +53,8 @@ public class LocationService {
         LocalDateTime endTime = latestRecord.getOffTime();
         if(endTime == null) endTime = LocalDateTime.now();
 
-        long drivingSeconds = Duration.between(latestRecord.getOnTime(), endTime).getSeconds();
-        if (drivingSeconds < 0) {
+        long drivingMinutes = Duration.between(latestRecord.getOnTime(), endTime).toMinutes();
+        if (drivingMinutes < 0) {
             throw new CustomException(ErrorCode.INVALID_RECORD_DURATION); // onTime, offTime의 시간 차가 음수일 경우
         }
 
@@ -70,7 +70,7 @@ public class LocationService {
                 .vehicleNumber(vehicle.getVehicleNumber())
                 .vehicleName(vehicle.getType())
                 .drivingDate(latestRecord.getOnTime().toLocalDate())
-                .drivingTime(drivingSeconds)
+                .drivingTime(drivingMinutes)
                 .drivingDistanceKm(drivingDistanceKm)
                 .location(
                         Location.builder()
