@@ -41,7 +41,7 @@ public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long>
         AND g.id > :gpsRecordId
         ORDER BY g.id ASC
         LIMIT 1
-        """, nativeQuery = true)
+        """)
     Optional<GpsRecordEntity> findNextGpsRecordNative(@Param("recordId") Long recordId, @Param("gpsRecordId") Long gpsRecordId);
 
 }
