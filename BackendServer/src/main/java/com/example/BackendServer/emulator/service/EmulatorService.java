@@ -159,7 +159,7 @@ public class EmulatorService {
 
         List<GpsRecordEntity> entities = req.getCList().stream()
             .map(data -> {
-                LocalDateTime oTime = LocalDateTime.parse(req.getOTime(), formatter).plusSeconds(data.getSec());
+                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + "00", formatter).plusSeconds(data.getSec());
 
                 return GpsRecordEntity.builder()
                     .record(activeRecord)
