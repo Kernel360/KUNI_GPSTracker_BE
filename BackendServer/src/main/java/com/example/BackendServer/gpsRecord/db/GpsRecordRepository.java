@@ -40,6 +40,7 @@ public interface GpsRecordRepository extends JpaRepository<GpsRecordEntity,Long>
             WHERE g.record.id = :recordId 
             AND g.id > :gpsRecordId 
             ORDER BY g.id ASC
+            LIMIT 1
             """)
     Optional<GpsRecordEntity> findNextGpsRecord(@Param("recordId") Long recordId, @Param("gpsRecordId") Long gpsRecordId);
 }
