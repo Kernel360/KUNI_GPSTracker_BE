@@ -61,7 +61,7 @@ public class LocationService {
         //주행 거리
         double drivingDistanceKm;
         try {
-            drivingDistanceKm = Double.parseDouble(latestRecord.getSumDist());
+            drivingDistanceKm = Double.parseDouble(currentGps.getTotalDist());
         } catch (NumberFormatException e) {
             throw new CustomException(ErrorCode.INVALID_RECORD_DURATION); // 주행 거리가 잘못된 값일 경우(ex: null)
         }
@@ -82,3 +82,4 @@ public class LocationService {
                 .build();
     }
 }
+
