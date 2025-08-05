@@ -13,10 +13,9 @@ spring:
       hibernate:
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   datasource:
-#    url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
-    url: ${DB_URL}
+    url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
 
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
