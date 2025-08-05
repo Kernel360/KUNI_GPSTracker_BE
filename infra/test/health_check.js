@@ -17,7 +17,7 @@ export const options = {
 // Setup 함수: 테스트 시작 전에 한번만 실행됩니다.
 export function setup() {
   // 테스트 차량 등록
-  // const addVehicleUrl = "http://localhost:8080/api/vehicle";
+  // const addVehicleUrl = "http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/vehicle";
   // const addVehiclePayload = JSON.stringify({
   //   vehicleNumber: "12가3456",
   //   vehicleName: "MERCEDES",
@@ -33,7 +33,8 @@ export function setup() {
   //   addVehicleParams
   // );
   // 1. 토큰 발급 요청
-  const tokenUrl = "http://localhost:8080/api/emulator/token";
+  const tokenUrl =
+    "http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/token";
   const tokenPayload = JSON.stringify({
     mdn: "12가3456",
     tid: "test_tid",
@@ -52,7 +53,7 @@ export function setup() {
   console.log(`Token received: ${token}`);
 
   // 2. /api/emulator/on 요청 (토큰 사용)
-  // const onUrl = `http://localhost:8080/api/emulator/on`;
+  // const onUrl = `http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/on`;
   // const onPayload = JSON.stringify({
   //   mdn: "12가3456",
   //   tid: "string",
@@ -83,7 +84,7 @@ export function setup() {
 
 // 기본 함수: 각 가상 사용자(VU)가 실행하는 코드입니다.
 export default function (data) {
-  const url = `http://localhost:8080/api/emulator/gps`;
+  const url = `http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/gps`;
   const params = {
     headers: {
       "Content-Type": "application/json",
