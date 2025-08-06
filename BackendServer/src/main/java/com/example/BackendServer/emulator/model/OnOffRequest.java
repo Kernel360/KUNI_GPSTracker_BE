@@ -1,6 +1,8 @@
 package com.example.BackendServer.emulator.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -19,7 +21,7 @@ public class OnOffRequest {
     private String did;
     @Schema(description = "차량 시동 On 시간", example = "20210901092000")
     private String onTime;
-    @Schema(description = "차량 시동 Off 시간", example = "20210901102000")
+    @Schema(description = "차량 시동 Off 시간", example = "20210901092000")
     private String offTime;
     @Schema(description = "GPS 상태", example = "A")
     private String gcd;

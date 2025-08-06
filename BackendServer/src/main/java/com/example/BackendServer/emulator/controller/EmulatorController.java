@@ -2,6 +2,8 @@ package com.example.BackendServer.emulator.controller;
 
 import com.example.BackendServer.emulator.model.*;
 import com.example.BackendServer.emulator.service.EmulatorService;
+
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,21 +25,21 @@ public class EmulatorController {
 
     @PostMapping("/on")
     @Operation(summary = "애뮬레이터 시동 ON", description = "애뮬레이터로부터 on 요청을 받습니다.")
-    public ResponseEntity<StandardResponse> on(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<StandardResponse> on(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authHeader) {
         emulatorService.verifyToken(authHeader);
         return ResponseEntity.ok(emulatorService.handleOn(request));
     }
 
     @PostMapping("/off")
     @Operation(summary = "애뮬레이터 시동 OFF", description = "애뮬레이터로부터 off 요청을 받습니다.")
-    public ResponseEntity<StandardResponse> off(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<StandardResponse> off(@RequestBody OnOffRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authHeader) {
         emulatorService.verifyToken(authHeader);
         return ResponseEntity.ok(emulatorService.handleOff(request));
     }
 
     @PostMapping("/gps")
     @Operation(summary = "애뮬레이터 주기 정보", description = "애뮬레이터의 주기정보를 DB에 저장합니다.")
-    public ResponseEntity<StandardResponse> gps(@RequestBody GpsCycleRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<StandardResponse> gps(@RequestBody GpsCycleRequest request, @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authHeader) {
         emulatorService.verifyToken(authHeader);
         return ResponseEntity.ok(emulatorService.handleGps(request));
     }

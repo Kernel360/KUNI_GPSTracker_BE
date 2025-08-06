@@ -14,8 +14,8 @@ import lombok.ToString;
 
 public class GpsCycleData {
     @JsonProperty("sec")
-    @Schema(description = "발생시간 ‘초’", example = "33")
-    private String sec; //발생시간 '초' : sendCycleInfo
+    @Schema(description = "발생시간 ‘초’", example = "30")
+    private Integer sec; //발생시간 '초' : sendCycleInfo
 
     @JsonProperty("gcd")
     @Schema(description = "GPS 상태", example = "A")

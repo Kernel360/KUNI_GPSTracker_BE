@@ -16,6 +16,7 @@ spring:
       ddl-auto: update
   datasource:
     url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
+
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}

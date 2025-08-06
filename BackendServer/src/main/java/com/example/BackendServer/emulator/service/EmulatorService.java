@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -76,6 +77,9 @@ public class EmulatorService {
 
     // 토큰 검증
     public void verifyToken(String authHeader) {
+        if(!StringUtils.hasText(authHeader)){
+            throw new CustomException(INVALID_TOKEN_ERROR);
+        }
         String token = authHeader.replace("Bearer ", "").trim();
         try {
             Jwts.parserBuilder().setSigningKey(jwtKey).build().parseClaimsJws(token);
@@ -161,7 +165,8 @@ public class EmulatorService {
 
         List<GpsRecordEntity> entities = req.getCList().stream()
             .map(data -> {
-                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + data.getSec(), formatter);
+                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + "00", formatter).plusSeconds(data.getSec());
+
                 return GpsRecordEntity.builder()
                     .record(activeRecord)
                     .vehicle(vehicle)
