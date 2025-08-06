@@ -7,7 +7,7 @@ export const options = {
       executor: "constant-arrival-rate",
       rate: 3000,
       timeUnit: "1m",
-      duration: "3m",
+      duration: "10m",
       preAllocatedVUs: 200,
       maxVUs: 500,
     },
@@ -16,8 +16,7 @@ export const options = {
 
 // Setup 함수: 테스트 시작 전에 한번만 실행됩니다.
 export function setup() {
-  // 테스트 차량 등록
-  // const addVehicleUrl = "http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/vehicle";
+  // const addVehicleUrl = "http://localhost:8080/api/vehicle";
   // const addVehiclePayload = JSON.stringify({
   //   vehicleNumber: "12가3456",
   //   vehicleName: "MERCEDES",
@@ -33,10 +32,9 @@ export function setup() {
   //   addVehicleParams
   // );
   // 1. 토큰 발급 요청
-  const tokenUrl =
-    "http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/token";
+  const tokenUrl = "http://localhost:8080/api/emulator/token";
   const tokenPayload = JSON.stringify({
-    mdn: "12가3456",
+    mdn: "123가4567",
     tid: "test_tid",
     mid: "test_mid",
     pv: "1.0",
@@ -53,15 +51,15 @@ export function setup() {
   console.log(`Token received: ${token}`);
 
   // 2. /api/emulator/on 요청 (토큰 사용)
-  // const onUrl = `http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/on`;
+  // const onUrl = `http://localhost:8080/api/emulator/on`;
   // const onPayload = JSON.stringify({
   //   mdn: "12가3456",
   //   tid: "string",
   //   mid: "string",
   //   pv: "string",
   //   did: "string",
-  //   onTime: "2025-07-31T07:49:55.941Z",
-  //   offTime: "2025-07-31T07:49:55.941Z",
+  //   onTime: "20250731074955",
+  //   offTime: "20250731074955",
   //   gcd: "string",
   //   lat: "string",
   //   lon: "string",
@@ -84,7 +82,7 @@ export function setup() {
 
 // 기본 함수: 각 가상 사용자(VU)가 실행하는 코드입니다.
 export default function (data) {
-  const url = `http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/gps`;
+  const url = `http://localhost:8080/api/emulator/gps`;
   const params = {
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +95,7 @@ export default function (data) {
     mid: "string",
     pv: "string",
     did: "string",
-    oTime: "2025-07-31T07:49:55.941Z",
+    oTime: "202507310749",
     cCnt: "string",
     cList: [
       {

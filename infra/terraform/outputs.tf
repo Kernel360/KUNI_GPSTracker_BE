@@ -22,3 +22,13 @@ output "bastion_server_public_ip" {
   description = "The public IP address of the Bastion server."
   value       = aws_instance.bastion_server.public_ip
 }
+
+output "k6_monitoring_public_ip" {
+  description = "The public IP address of the k6 monitoring EC2 instance"
+  value       = aws_instance.k6_monitoring.public_ip
+}
+
+output "k6_monitoring_public_dns" {
+  description = "The public DNS of the k6 monitoring EC2 instance"
+  value       = aws_instance.k6_monitoring.public_dns
+}
