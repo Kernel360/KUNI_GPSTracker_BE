@@ -24,11 +24,11 @@ resource "aws_acm_certificate" "main" {
 
 # ACM 인증서 생성 (ALB용, ap-northeast-2)
 resource "aws_acm_certificate" "alb" {
-  domain_name       = "${var.api_subdomain}.${var.domain_name}"
+  domain_name       = "api.${var.domain_name}"
   validation_method = "DNS"
 
   tags = {
-    Name = "${var.api_subdomain}.${var.domain_name}-certificate"
+    Name = "api.${var.domain_name}-certificate"
   }
 
   lifecycle {
@@ -130,7 +130,7 @@ resource "aws_route53_record" "frontend" {
 # Route 53 레코드: API 서브도메인 -> ALB (백엔드)
 resource "aws_route53_record" "backend" {
   zone_id = data.aws_route53_zone.main.zone_id
-  name    = var.api_subdomain
+  name    = "api"
   type    = "A"
 
   alias {

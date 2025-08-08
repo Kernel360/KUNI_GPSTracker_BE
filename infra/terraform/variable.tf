@@ -3,11 +3,6 @@ variable "domain_name" {
   type        = string
 }
 
-variable "api_subdomain" {
-  description = "백엔드 API 서버를 위한 서브도메인"
-  type        = string
-}
-
 variable "db_username" {
   description = "RDS 데이터베이스 사용자 이름"
   type        = string
