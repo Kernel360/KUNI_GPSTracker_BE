@@ -1,12 +1,19 @@
-# ALB 보안 그룹 (HTTP 트래픽 허용)
+# ALB 보안 그룹 (HTTP 및 HTTPS 트래픽 허용)
 resource "aws_security_group" "alb" {
   name        = "alb-sg"
-  description = "Allow HTTP inbound traffic"
+  description = "Allow HTTP and HTTPS inbound traffic"
   vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
