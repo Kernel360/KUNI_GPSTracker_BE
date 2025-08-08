@@ -97,6 +97,22 @@ resource "aws_iam_policy" "jenkins_policy" {
         Effect = "Allow",
         Action = "iam:PassRole",
         Resource = aws_iam_role.ecs_task_execution_role.arn
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket",
+        ],
+        Resource = "arn:aws:s3:::gps-tracker-fe"
+      }
+      ,{
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        Resource = "arn:aws:s3:::gps-tracker-fe/*"
       }
     ]
   })
