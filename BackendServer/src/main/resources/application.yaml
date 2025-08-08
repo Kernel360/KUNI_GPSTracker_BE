@@ -27,3 +27,4 @@ springdoc:
 logging:
   level:
     org.springframework.boot.context.config: DEBUG  # ⬅️ 추가됨
+    org.springframework.security: DEBUG   # ⬅️ 추가

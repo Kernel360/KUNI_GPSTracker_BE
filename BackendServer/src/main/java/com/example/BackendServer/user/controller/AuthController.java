@@ -31,12 +31,15 @@ public class AuthController {
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> req) {
         var user = userRepository.findById(req.get("id"))
-                .orElseThrow(() -> new RuntimeException("Invalid ID or password"));
+            .orElseThrow(() -> new RuntimeException("Invalid ID or password"));
 
         if (!passwordEncoder.matches(req.get("password"), user.getPassword())) {
             throw new RuntimeException("Invalid ID or password");
         }
-        String token = jwtUtil.generateToken(user.getId());
+
+        // role 포함해서 토큰 생성
+        String token = jwtUtil.generateToken(user.getId(), user.getRole());
+
         return Map.of("token", token);
     }
 

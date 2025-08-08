@@ -11,34 +11,44 @@ import java.util.Date;
 public class JwtUtil {
 
     private final Key secretKey = Keys.hmacShaKeyFor(
-            "very-secret-key-very-secret-key-123456".getBytes()
+        "very-secret-key-very-secret-key-123456".getBytes()
     );
     private final long expiration = 86400000; // 1일
 
-    public String generateToken(String username) {
+    // 토큰 생성 시 username과 role을 클레임에 포함
+    public String generateToken(String username, String role) {
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(username)
+            .claim("role", role)  // role 정보 추가
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public String extractUsername(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    // role 추출 메서드 추가
+    public String extractRole(String token) {
+        return (String) getClaims(token).get("role");
+    }
+
+    private Claims getClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token);
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
             return false;
