@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "gps-tracker-fe"
+  bucket = var.s3_bucket_name
 
   tags = {
     Name        = "GPS Tracker Frontend Bucket"

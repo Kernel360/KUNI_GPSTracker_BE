@@ -103,7 +103,7 @@ resource "aws_iam_policy" "jenkins_policy" {
         Action = [
           "s3:ListBucket",
         ],
-        Resource = "arn:aws:s3:::gps-tracker-fe"
+        Resource = "${aws_s3_bucket.my_bucket.arn}"
       }
       ,{
         Effect = "Allow",
@@ -112,7 +112,7 @@ resource "aws_iam_policy" "jenkins_policy" {
           "s3:GetObject",
           "s3:DeleteObject"
         ],
-        Resource = "arn:aws:s3:::gps-tracker-fe/*"
+        Resource = "${aws_s3_bucket.my_bucket.arn}/*"
       }
     ]
   })
