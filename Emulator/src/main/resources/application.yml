@@ -3,6 +3,8 @@ spring:
     import: "optional:file:.env.properties"
 
 emulator:
-  target-base-url: ${TARGET_BASE_URL}
+  target-base-url: http://localhost:8080/api/emulator
 server:
   port: 8082
+
+  #http://localhost:8080/api/emulator

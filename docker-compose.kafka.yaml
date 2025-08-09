@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    # volumes:
+    #   - ./.data/zookeeper:/bitnami/zookeeper
+
+  kafka1:
+    image: bitnami/kafka:3.6
+    container_name: kafka1
+    hostname: kafka1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"          # 외부(호스트) 접속용
+      - "19092"              # 내부용(도커 네트워크)
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+
+      # 내부/외부 리스너 분리
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:19092,EXTERNAL://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka1:19092,EXTERNAL://localhost:9092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+
+      # 2 브로커 환경 기본값(토픽 자동 생성 시 복제 2로)
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=2
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=2
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=2
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+    # volumes:
+    #   - ./.data/kafka1:/bitnami/kafka
+
+  kafka2:
+    image: bitnami/kafka:3.6
+    container_name: kafka2
+    hostname: kafka2
+    depends_on:
+      - zookeeper
+    ports:
+      - "9093:9093"          # 외부(호스트) 접속용
+      - "19092"              # 내부용(도커 네트워크)
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:19092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka2:19092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=2
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=2
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=2
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+    # volumes:
+    #   - ./.data/kafka2:/bitnami/kafka
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.1
+    container_name: kafka-ui
+    depends_on:
+      - kafka1
+      - kafka2
+    ports:
+      - "8081:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:19092,kafka2:19092

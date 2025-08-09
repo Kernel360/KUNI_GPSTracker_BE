@@ -1,54 +1,38 @@
 package com.example.BackendServer.emulator.service;
 
-import com.example.BackendServer.device.db.DeviceRepository;
 import com.example.BackendServer.emulator.model.*;
 import com.example.BackendServer.global.exception.CustomException;
 import com.example.BackendServer.global.exception.ErrorCode;
-import com.example.BackendServer.gpsRecord.db.GpsRecordEntity;
-import com.example.BackendServer.gpsRecord.db.GpsRecordRepository;
-import com.example.BackendServer.record.db.RecordEntity;
-import com.example.BackendServer.record.db.RecordRepository;
-import com.example.BackendServer.record.model.RecordRequest;
-import com.example.BackendServer.record.service.RecordService;
-import com.example.BackendServer.vehicle.db.VehicleEntity;
-import com.example.BackendServer.vehicle.db.VehicleRepository;
+import com.example.BackendServer.kafka.common.MsgConverter;
+import com.example.BackendServer.kafka.model.GpsMsg;
+import com.example.BackendServer.kafka.model.OnOffMsg;
+import com.example.BackendServer.kafka.producer.GpsProducer;
+import com.example.BackendServer.kafka.producer.OnOffProducer;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import static com.example.BackendServer.global.Class.VehicleStatus.ACTIVE;
-import static com.example.BackendServer.global.Class.VehicleStatus.INACTIVE;
-import static com.example.BackendServer.global.exception.ErrorCode.EMPTY_CLIST_ERROR;
-import static com.example.BackendServer.global.exception.ErrorCode.INVALID_TOKEN_ERROR;
+
+import static com.example.BackendServer.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class EmulatorService {
 
-    private final DeviceRepository deviceRepository;
-    private final VehicleRepository vehicleRepository;
-    private final RecordRepository recordRepository;
-    private final RecordService recordService;
-    private final GpsRecordRepository gpsRecordRepository;
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private final OnOffProducer onOffProducer;
+    private final GpsProducer  gpsProducer;
+    private final MsgConverter msgConverter;
 
     //@Value("${JWT_SECRET}")
     private String secretBase64 = "SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI=";
@@ -91,21 +75,14 @@ public class EmulatorService {
     // 시동 ON 처리 + DB 저장 + Vehicle 상태 ACTIVE
     public StandardResponse handleOn(OnOffRequest req) {
         log.info("✅ [ON] EmulatorService: {}", req);
+        OnOffMsg msg = msgConverter.OnOffRequestToOnOffMsg(req, "ON");
 
-        VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
-
-        RecordRequest recordReq = RecordRequest.builder()
-            .vehicleId(vehicle.getId())
-            .onTime(LocalDateTime.parse(req.getOnTime(), formatter))
-            .build();
-
-        recordService.create(recordReq);
-
-        vehicle = vehicle.toBuilder()
-            .status(ACTIVE)
-            .build();
-        vehicleRepository.save(vehicle);
-
+        try{
+            onOffProducer.sendMessage(msg);
+        }
+        catch (Exception e){
+            throw new CustomException(ONOFF_PRODUCER_ERROR);
+        }
         return new StandardResponse("000", "Success", req.getMdn());
     }
 
@@ -113,38 +90,14 @@ public class EmulatorService {
     public StandardResponse handleOff(OnOffRequest req) {
         log.info("🛑 [OFF] EmulatorService: {}", req);
 
-        VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
+        OnOffMsg msg = msgConverter.OnOffRequestToOnOffMsg(req, "OFF");
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
-            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
-
-        // 1. offTime, sumDist 저장
-        activeRecord.setOffTime(LocalDateTime.parse(req.getOffTime(), formatter));
-        activeRecord.setSumDist(req.getSum());  // sum 필드 활용
-        recordRepository.save(activeRecord);
-
-        // 2. sumDist → totalDist로 변환 및 Vehicle 업데이트
-        String sumDistStr = activeRecord.getSumDist();
-        Long sumDistLong = 0L;
-
-        if (sumDistStr != null) {
-            try {
-                sumDistLong = Long.parseLong(sumDistStr);
-            } catch (NumberFormatException e) {
-                log.warn("sumDist 변환 실패: {}", sumDistStr);
-            }
+        try{
+            onOffProducer.sendMessage(msg);
         }
-
-        // 기존 totalDist + 이번 주행 거리 누적
-        Long updatedTotalDist = vehicle.getTotalDist() + sumDistLong;
-
-        vehicle = vehicle.toBuilder()
-            .status(INACTIVE)
-            .totalDist(updatedTotalDist)
-            .build();
-        vehicleRepository.save(vehicle);
-
-
+        catch (Exception e){
+            throw new CustomException(ONOFF_PRODUCER_ERROR);
+        }
         return new StandardResponse("000", "Success", req.getMdn());
     }
 
@@ -158,47 +111,16 @@ public class EmulatorService {
             throw new CustomException(EMPTY_CLIST_ERROR);
         }
 
-        VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
+        GpsMsg msg = msgConverter.GpsCycleRequestToGpsMsg(req, "GPS");
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
-            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
-
-        List<GpsRecordEntity> entities = req.getCList().stream()
-            .map(data -> {
-                LocalDateTime oTime = LocalDateTime.parse(req.getOTime() + "00", formatter).plusSeconds(data.getSec());
-
-                return GpsRecordEntity.builder()
-                    .record(activeRecord)
-                    .vehicle(vehicle)
-                    .gcd(data.getGcd())
-                    .latitude(parseLat(data.getLat()))
-                    .longitude(parseLon(data.getLon()))
-                    .oTime(oTime)
-                    .status(ACTIVE)
-                    .totalDist(data.getSum())
-                    .build();
-            })
-            .toList();
-
-        gpsRecordRepository.saveAll(entities);
-
+        try{
+            gpsProducer.sendMessage(msg);
+        }
+        catch (Exception e){
+            throw new CustomException(GPS_PRODUCER_ERROR);
+        }
         return new StandardResponse("000", "Success", req.getMdn());
     }
 
-    private VehicleEntity getVehicleByMdn(String mdn) {
-        return vehicleRepository.findByVehicleNumber(mdn)
-            .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
-    }
 
-    /** '앞 2자리.나머지' 형태로 위도 변환 */
-    private static double parseLat(String raw) {
-        if (raw.contains(".")) return Double.parseDouble(raw);   // 이미 변환돼 있음
-        return Double.parseDouble(raw.substring(0, 2) + "." + raw.substring(2));
-    }
-
-    /** '앞 3자리.나머지' 형태로 경도 변환 */
-    private static double parseLon(String raw) {
-        if (raw.contains(".")) return Double.parseDouble(raw);
-        return Double.parseDouble(raw.substring(0, 3) + "." + raw.substring(3));
-    }
 }

@@ -16,9 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-
-
-
 public class GpsCycleRequest {
 
   @JsonProperty("mdn")

@@ -21,6 +21,30 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false         # 수동 커밋
+      allow-auto-create-topics: false   # 토픽 자동 생성 금지(운영 습관)
+      auto-offset-reset: latest         # 필요시 earliest
+      max-poll-records: 500
+      fetch-min-bytes: 1
+      fetch-max-wait-ms: 500
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: 1
+      enable-idempotence: true
+      retries: 10
+      linger-ms: 20                     # 묶음 전송
+      batch-size: 131072                # 128KB
+      compression-type: lz4             # 네트워크 절약(옵션)
+    listener:
+      concurrency: 3                    # 컨슈머 스레드 수 (파티션 수에 맞춰 조정)
+
+
 springdoc:
   override-with-generic-response: false
 
