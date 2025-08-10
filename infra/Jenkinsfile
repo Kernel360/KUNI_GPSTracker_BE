@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = "772375824221"
+        AWS_ACCOUNT_ID = "747030888828"
         AWS_DEFAULT_REGION = "ap-northeast-2"
         ECR_REPOSITORY_NAME = "spring-app"
         ECS_CLUSTER_NAME = "main-cluster"
