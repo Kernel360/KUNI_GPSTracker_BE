@@ -3,11 +3,11 @@ package com.example.BackendServer.user.controller;
 import com.example.BackendServer.user.db.UserEntity;
 import com.example.BackendServer.user.db.UserRepository;
 import com.example.BackendServer.user.jwt.JwtUtil;
+import com.example.BackendServer.user.model.request.*;
+import com.example.BackendServer.user.model.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -19,33 +19,38 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/sign-up")
-    public Map<String, Object> signUp(@RequestBody UserEntity req) {
+    public SignUpResponse signUp(@RequestBody SignUpRequest req) {
         if (userRepository.existsById(req.getId())) {
             throw new RuntimeException("ID already exists");
         }
-        req.setPassword(passwordEncoder.encode(req.getPassword()));
-        userRepository.save(req);
-        return Map.of("id", req.getId());
+
+        UserEntity user = UserEntity.builder()
+            .id(req.getId())
+            .password(passwordEncoder.encode(req.getPassword()))
+            .email(req.getEmail())
+            .role(req.getRole())
+            .build();
+
+        userRepository.save(user);
+        return new SignUpResponse(user.getId());
     }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> req) {
-        var user = userRepository.findById(req.get("id"))
+    public LoginResponse login(@RequestBody LoginRequest req) {
+        var user = userRepository.findById(req.getId())
             .orElseThrow(() -> new RuntimeException("Invalid ID or password"));
 
-        if (!passwordEncoder.matches(req.get("password"), user.getPassword())) {
+        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid ID or password");
         }
 
-        // role 포함해서 토큰 생성
         String token = jwtUtil.generateToken(user.getId(), user.getRole());
-
-        return Map.of("token", token);
+        return new LoginResponse(token);
     }
 
     @PostMapping("/id/duplicate")
-    public Map<String, Boolean> checkId(@RequestBody Map<String, String> req) {
-        boolean exists = userRepository.existsById(req.get("id"));
-        return Map.of("isOk", !exists);
+    public IdCheckResponse checkId(@RequestBody IdCheckRequest req) {
+        boolean exists = userRepository.existsById(req.getId());
+        return new IdCheckResponse(!exists);
     }
 }
