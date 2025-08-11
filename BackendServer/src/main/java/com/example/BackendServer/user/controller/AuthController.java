@@ -5,6 +5,8 @@ import com.example.BackendServer.user.db.UserRepository;
 import com.example.BackendServer.user.jwt.JwtUtil;
 import com.example.BackendServer.user.model.request.*;
 import com.example.BackendServer.user.model.response.*;
+import com.example.BackendServer.global.exception.CustomException;
+import com.example.BackendServer.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ public class AuthController {
     @PostMapping("/sign-up")
     public SignUpResponse signUp(@RequestBody SignUpRequest req) {
         if (userRepository.existsById(req.getId())) {
-            throw new RuntimeException("ID already exists");
+            throw new CustomException(ErrorCode.DUPLICATE_ID);
         }
 
         UserEntity user = UserEntity.builder()
@@ -38,10 +40,10 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest req) {
         var user = userRepository.findById(req.getId())
-            .orElseThrow(() -> new RuntimeException("Invalid ID or password"));
+            .orElseThrow(() -> new CustomException(ErrorCode.INVALID_ID_OR_PASSWORD));
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid ID or password");
+            throw new CustomException(ErrorCode.INVALID_ID_OR_PASSWORD);
         }
 
         String token = jwtUtil.generateToken(user.getId(), user.getRole());
