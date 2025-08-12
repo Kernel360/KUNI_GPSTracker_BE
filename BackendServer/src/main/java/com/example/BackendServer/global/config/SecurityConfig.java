@@ -42,6 +42,10 @@ public class SecurityConfig {
                     "/api/id/duplicate",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
+                    "/api/emulator/token",
+                    "/api/emulator/on",
+                    "/api/emulator/off",
+                    "/api/emulator/gps",
                     "/health"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/vehicle/**").permitAll()
