@@ -7,6 +7,8 @@ import static io.swagger.v3.oas.models.security.SecurityScheme.Type.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -17,6 +19,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Configuration
+@OpenAPIDefinition(servers = {
+	@Server(url = "http://localhost:8080", description = "개발 서버"),
+	@Server(url = "https://gps-tracker.store", description = "운영 서버")
+})
 public class SwaggerConfig {
 	@Bean
 	public OpenAPI customOpenAPI() {
