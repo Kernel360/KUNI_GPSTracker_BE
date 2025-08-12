@@ -1,6 +1,6 @@
-package com.example.BackendServer.user.config;
+package com.example.BackendServer.global.config;
 
-import com.example.BackendServer.user.jwt.JwtFilter;
+import com.example.BackendServer.global.jwt.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +39,8 @@ public class SecurityConfig {
                     "/api/sign-up",
                     "/api/id/duplicate",
                     "/swagger-ui/**",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    "/health"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/vehicle/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/vehicle/**").hasRole("ADMIN")
