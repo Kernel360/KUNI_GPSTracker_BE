@@ -32,7 +32,7 @@ export function setup() {
   //   addVehicleParams
   // );
   // 1. 토큰 발급 요청
-  const tokenUrl = "http://localhost:8080/api/emulator/token";
+  const tokenUrl = "http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/token";
   const tokenPayload = JSON.stringify({
     mdn: "123가4567",
     tid: "test_tid",
@@ -82,7 +82,7 @@ export function setup() {
 
 // 기본 함수: 각 가상 사용자(VU)가 실행하는 코드입니다.
 export default function (data) {
-  const url = `http://localhost:8080/api/emulator/gps`;
+  const url = `http://main-alb-475201330.ap-northeast-2.elb.amazonaws.com/api/emulator/gps`;
   const params = {
     headers: {
       "Content-Type": "application/json",
