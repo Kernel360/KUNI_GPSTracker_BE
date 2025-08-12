@@ -63,9 +63,9 @@ resource "aws_ecs_task_definition" "main" {
       ]
       environment = [
         { name = "DB_HOST", value = aws_db_instance.main.address },
-        { name = "DB_NAME", value = "gpsTracker" },
-        { name = "DB_USERNAME", value = "admin" },
-        { name = "DB_PASSWORD", value = "password" } # 실제 환경에서는 Secrets Manager 사용 권장
+        { name = "DB_NAME", value = var.db_name },
+        { name = "DB_USERNAME", value = var.db_username },
+        { name = "DB_PASSWORD", value = var.db_password } # 실제 환경에서는 Secrets Manager 사용 권장
       ]
       logConfiguration = {
         logDriver = "awslogs"
