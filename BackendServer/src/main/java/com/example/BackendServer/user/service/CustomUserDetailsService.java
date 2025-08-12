@@ -5,7 +5,7 @@ import com.example.BackendServer.global.exception.ErrorCode;
 import com.example.BackendServer.user.db.UserEntity;
 import com.example.BackendServer.user.db.UserRepository;
 import com.example.BackendServer.user.db.UserRole;
-import com.example.BackendServer.user.jwt.JwtUtil;
+import com.example.BackendServer.global.jwt.JwtUtil;
 import com.example.BackendServer.user.model.request.*;
 import com.example.BackendServer.user.model.response.*;
 import lombok.RequiredArgsConstructor;
