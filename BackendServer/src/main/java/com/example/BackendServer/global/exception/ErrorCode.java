@@ -39,7 +39,8 @@ public enum ErrorCode {
 
 	// ===== 회원가입 / 로그인 관련 =====
 	DUPLICATE_ID(409, "AUTH-001", "이미 사용 중인 ID입니다."),
-	INVALID_ID_OR_PASSWORD(401, "AUTH-002", "아이디 또는 비밀번호가 올바르지 않습니다.");
+	INVALID_ID_OR_PASSWORD(401, "AUTH-002", "아이디 또는 비밀번호가 올바르지 않습니다."),
+	INVALID_ROLE(400, "AUTH-003", "잘못된 역할(role)이 지정되었습니다.");
 
 	// 예시 에러코드
 	// INPUT_INVALID_VALUE_ERROR(400, "GLOBAL-002", "잘못된 입력 값입니다."),

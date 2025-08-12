@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
+import com.example.BackendServer.user.db.UserRole;
+
 @Component
 public class JwtUtil {
 
@@ -16,10 +18,10 @@ public class JwtUtil {
     private final long expiration = 86400000; // 1일
 
     // 토큰 생성 시 username과 role을 클레임에 포함
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, UserRole role) {
         return Jwts.builder()
             .setSubject(username)
-            .claim("role", role)  // role 정보 추가
+            .claim("role", role.name())  // enum명 문자열로 저장
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + expiration))
             .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -30,7 +32,6 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
-    // role 추출 메서드 추가
     public String extractRole(String token) {
         return (String) getClaims(token).get("role");
     }
