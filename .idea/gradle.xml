@@ -10,6 +10,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/BackendServer" />
+            <option value="$PROJECT_DIR$/BackendServer/common" />
+            <option value="$PROJECT_DIR$/BackendServer/emulator" />
+            <option value="$PROJECT_DIR$/BackendServer/server" />
           </set>
         </option>
       </GradleProjectSettings>
