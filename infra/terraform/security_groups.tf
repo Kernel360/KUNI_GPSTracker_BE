@@ -125,3 +125,37 @@ resource "aws_security_group" "bastion" {
     Name = "bastion-sg"
   }
 }
+
+# Kafka 보안 그룹
+resource "aws_security_group" "kafka" {
+  name        = "kafka-sg"
+  description = "Allow traffic for Kafka"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "Kafka broker from within VPC"
+    from_port       = 9092
+    to_port         = 9092
+    protocol        = "tcp"
+    cidr_blocks     = [aws_vpc.main.cidr_block]
+  }
+
+  ingress {
+    description = "ssh"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "kafka-broker-sg"
+  }
+}
