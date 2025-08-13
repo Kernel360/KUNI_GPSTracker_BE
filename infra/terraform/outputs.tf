@@ -35,5 +35,5 @@ output "bastion_server_public_ip" {
 
 output "kafka_private_ip" {
   description = "The private IP address of the Kafka server."
-  value       = aws_instance.kafka.private_ip
+  value       = aws_instance.kafka_server.private_ip
 }

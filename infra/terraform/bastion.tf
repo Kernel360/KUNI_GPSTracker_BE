@@ -32,7 +32,7 @@ resource "aws_instance" "bastion_server" {
               docker run -d --name emulator -p 8082:8082 -e TARGET_BASE_URL="https://api.gps-tracker.store/api/emulator" --restart unless-stopped kjh0work/emulator:latest
 
               # Kafka UI 컨테이너 실행
-              docker run --rm -p 8080:8080 -e KAFKA_CLUSTERS_0_NAME=ec2 -e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${aws_instance.kafka.private_ip}:9092 -e JAVA_OPTS="-Xms64m -Xmx256m" provectuslabs/kafka-ui:v0.7.1
+              docker run --rm -p 8080:8080 -e KAFKA_CLUSTERS_0_NAME=ec2 -e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${aws_instance.kafka_server.private_ip}:9092 -e JAVA_OPTS="-Xms64m -Xmx256m" provectuslabs/kafka-ui:v0.7.1
 
               EOF
 

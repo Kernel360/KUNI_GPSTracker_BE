@@ -1,5 +1,5 @@
 # Kafka 브로커 EC2 인스턴스
-resource "aws_instance" "kafka" {
+resource "aws_instance" "kafka_server" {
   ami           = data.aws_ami.amazon_linux_2.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.private_a.id
@@ -35,7 +35,7 @@ resource "aws_instance" "kafka" {
             
 
             PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-            echo "PRIVATE_IP=$PRIVATE_IP" > /home/ec2-user/kafka-ec2/.env
+            echo "PRIVATE_IP=$PRIVATE_IP" > .env
 
             cd ~/kafka-ec2
             # docker compose down -v --remove-orphans || true
@@ -87,8 +87,16 @@ volumes:
   zookeeper_data:
   kafka1_data:
 YAML
+            # Docker Compose 실행
             docker-compose pull
             docker-compose up -d
+
+            # Kafka가 완전히 시작될 때까지 대기
+            until docker exec kafka1 kafka-topics.sh --bootstrap-server kafka1:19092 --list >/dev/null 2>&1; do
+                sleep 5
+            done
+
+            # Kafka 토픽 생성
             docker exec -it kafka1 kafka-topics.sh --bootstrap-server kafka1:19092 --create --topic mdn-topic --replication-factor 1 --partitions 3
 
               EOF
