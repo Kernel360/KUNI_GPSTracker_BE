@@ -2,9 +2,11 @@ package com.example.BackendServer.user.controller;
 
 import com.example.BackendServer.user.model.request.*;
 import com.example.BackendServer.user.model.response.*;
+import com.example.BackendServer.user.service.AuthService;
 import com.example.BackendServer.user.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,20 +14,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final AuthService authService;
 
     @PostMapping("/sign-up")
     public SignUpResponse signUp(@RequestBody @Valid SignUpRequest req) {
-        return customUserDetailsService.signUp(req);
+        return authService.signUp(req);
     }
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest req) {
-        return customUserDetailsService.login(req);
+        return authService.login(req);
     }
 
     @PostMapping("/id/duplicate")
     public IdCheckResponse checkId(@RequestBody IdCheckRequest req) {
-        return customUserDetailsService.checkIdDuplicate(req);
+        return authService.checkIdDuplicate(req);
     }
 }

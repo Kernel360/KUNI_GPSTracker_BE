@@ -41,6 +41,7 @@ public class VehicleApiController {
     @Operation(summary = "차량 등록", description = "차량을 등록합니다.")
     public ResponseEntity<VehicleCreateDto> createVehicle(@Valid @RequestBody VehicleCreateDto dto) {
 
+        log.error("controller에서 에러 찍음.");
         VehicleEntity entity = vehicleApiService.createVehicle(dto);
 
         VehicleCreateDto result = VehicleCreateDto.builder()

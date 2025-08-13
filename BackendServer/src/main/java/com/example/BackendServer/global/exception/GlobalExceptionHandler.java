@@ -23,8 +23,23 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> globalException(CustomException e) {
-		log.info("exception 발생 : {}", e.getMessage());
+
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		// 상세 로그
+		log.error("""
+        [CustomException 발생]
+        - Path     : {}
+        - Method   : {}
+        - ErrorCode: {} ({})
+        - Message  : {}
+        """,
+				request.getRequestURI(),
+				request.getMethod(),
+				e.getErrorCode().getCode(),
+				e.getErrorCode().getStatus(),
+				e.getMessage(),
+				e // 마지막에 Throwable 넣으면 스택트레이스까지 찍힘
+		);
 		ErrorResponse response = ErrorResponse.builder()
 			.timeStamp(LocalDateTime.now())
 			.status(e.getErrorCode().getStatus())
@@ -44,8 +59,21 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
-		log.info("exception 발생");
+
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		// 상세 로그
+		log.error("""
+        [CustomException 발생]
+        - Path     : {}
+        - Method   : {}
+        - Message  : {}
+        """,
+				request.getRequestURI(),
+				request.getMethod(),
+				e.getMessage(),
+				e // 마지막에 Throwable 넣으면 스택트레이스까지 찍힘
+		);
+
 		ErrorResponse response = ErrorResponse.builder()
 			.timeStamp(LocalDateTime.now())
 			.status(400)

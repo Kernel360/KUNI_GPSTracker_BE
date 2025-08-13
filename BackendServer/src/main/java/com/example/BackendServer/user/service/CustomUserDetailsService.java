@@ -18,8 +18,7 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
@@ -37,43 +36,5 @@ public class CustomUserDetailsService implements UserDetailsService {
             .build();
     }
 
-    public SignUpResponse signUp(SignUpRequest req) {
-        if (userRepository.existsById(req.getId())) {
-            throw new CustomException(ErrorCode.DUPLICATE_ID);
-        }
 
-        UserRole userRole;
-        try {
-            userRole = UserRole.valueOf(req.getRole().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new CustomException(ErrorCode.INVALID_ROLE);
-        }
-
-        UserEntity user = UserEntity.builder()
-            .id(req.getId())
-            .password(passwordEncoder.encode(req.getPassword()))
-            .email(req.getEmail())
-            .role(userRole)
-            .build();
-
-        userRepository.save(user);
-        return new SignUpResponse(user.getId());
-    }
-
-    public LoginResponse login(LoginRequest req) {
-        var user = userRepository.findById(req.getId())
-            .orElseThrow(() -> new CustomException(ErrorCode.INVALID_ID_OR_PASSWORD));
-
-        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.INVALID_ID_OR_PASSWORD);
-        }
-
-        String token = jwtUtil.generateToken(user.getId(), user.getRole());
-        return new LoginResponse(token);
-    }
-
-    public IdCheckResponse checkIdDuplicate(IdCheckRequest req) {
-        boolean exists = userRepository.existsById(req.getId());
-        return new IdCheckResponse(!exists);
-    }
 }
