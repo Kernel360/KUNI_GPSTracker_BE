@@ -93,11 +93,17 @@ YAML
 
             # Kafka가 완전히 시작될 때까지 대기
             until docker exec kafka1 kafka-topics.sh --bootstrap-server kafka1:19092 --list >/dev/null 2>&1; do
+                echo "Waiting for Kafka to start..."
                 sleep 5
             done
 
             # Kafka 토픽 생성
-            docker exec -it kafka1 kafka-topics.sh --bootstrap-server kafka1:19092 --create --topic mdn-topic --replication-factor 1 --partitions 3
+            docker exec kafka1 kafka-topics.sh \
+                --bootstrap-server kafka1:19092 \
+                --create \
+                --topic mdn-topic \
+                --replication-factor 1 \
+                --partitions 3
 
               EOF
 

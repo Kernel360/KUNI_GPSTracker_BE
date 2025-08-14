@@ -1,5 +1,3 @@
-# /infra/terraform/route53.tf
-
 # Route 53 Hosted Zone 정보 가져오기
 data "aws_route53_zone" "main" {
   name = var.domain_name
