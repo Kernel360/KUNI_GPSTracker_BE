@@ -2,7 +2,7 @@ package com.example.user.service;
 
 import com.example.global.exception.CustomException;
 import com.example.global.exception.ErrorCode;
-import com.example.global.jwt.JwtUtil;
+import com.example.jwt.JwtUtil;
 import com.example.user.db.UserEntity;
 import com.example.user.db.UserRepository;
 import com.example.user.model.request.*;
