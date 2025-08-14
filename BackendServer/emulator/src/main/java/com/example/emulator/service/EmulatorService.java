@@ -117,7 +117,7 @@ public class EmulatorService {
 
         VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
+        RecordEntity activeRecord = recordRepository.findTopByVehicleIdAndOffTimeIsNullOrderByOnTimeDesc(vehicle.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         // 1. offTime, sumDist 저장
@@ -162,7 +162,7 @@ public class EmulatorService {
 
         VehicleEntity vehicle = getVehicleByMdn(req.getMdn());
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
+        RecordEntity activeRecord = recordRepository.findTopByVehicleIdAndOffTimeIsNullOrderByOnTimeDesc(vehicle.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         List<GpsRecordEntity> entities = req.getCList().stream()

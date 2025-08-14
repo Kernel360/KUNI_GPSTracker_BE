@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.example"})
-public class Main {
+public class ServerMain {
     public static void main(String[] args)  {
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(ServerMain.class, args);
     }
 }

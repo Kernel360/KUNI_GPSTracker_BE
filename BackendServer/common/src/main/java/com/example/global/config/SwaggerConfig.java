@@ -21,7 +21,8 @@ import java.time.format.DateTimeFormatter;
 
 @Configuration
 @OpenAPIDefinition(servers = {
-		@Server(url = "http://localhost:8080", description = "개발 서버"),
+		@Server(url = "http://localhost:8080", description = "프론트 서버"),
+		@Server(url = "http://localhost:8081", description = "애뮬레이터 서버"),
 		@Server(url = "https://api.gps-tracker.store", description = "운영 서버")
 })
 public class SwaggerConfig {
