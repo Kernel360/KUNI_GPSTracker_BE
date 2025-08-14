@@ -1,4 +1,3 @@
-
 # Application Load Balancer 생성
 resource "aws_lb" "main" {
   name               = "main-alb"
@@ -12,7 +11,7 @@ resource "aws_lb" "main" {
   }
 }
 
-# 대상 그룹 생성
+# 대상 그룹 생성 (Main App)
 resource "aws_lb_target_group" "main" {
   name     = "main-tg"
   port     = 8080
@@ -32,6 +31,29 @@ resource "aws_lb_target_group" "main" {
 
   tags = {
     Name = "main-tg"
+  }
+}
+
+# 대상 그룹 생성 (Emulator App)
+resource "aws_lb_target_group" "emulator" {
+  name     = "emulator-tg"
+  port     = 8081
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    path                = "/api/emulator/health"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+
+  tags = {
+    Name = "emulator-tg"
   }
 }
 
@@ -61,6 +83,23 @@ resource "aws_lb_listener" "https" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.main.arn
+    target_group_arn = aws_lb_target_group.main.arn # 기본적으로 Main App으로 트래픽 전달
+  }
+}
+
+# 리스너 규칙 (Emulator App)
+resource "aws_lb_listener_rule" "emulator" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.emulator.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/emulator/*"]
+    }
   }
 }
