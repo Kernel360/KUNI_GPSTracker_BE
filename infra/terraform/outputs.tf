@@ -32,3 +32,8 @@ output "bastion_server_public_ip" {
 #   description = "The public DNS of the k6 monitoring EC2 instance"
 #   value       = aws_instance.k6_monitoring.public_dns
 # }
+
+output "kafka_private_ip" {
+  description = "The private IP address of the Kafka server."
+  value       = aws_instance.kafka_server.private_ip
+}

@@ -114,6 +114,13 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["0.0.0.0/0"] # 보안을 위해 실제 IP 주소로 변경하세요.
   }
 
+  ingress {
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -123,5 +130,81 @@ resource "aws_security_group" "bastion" {
 
   tags = {
     Name = "bastion-sg"
+  }
+}
+
+# Kafka 보안 그룹
+resource "aws_security_group" "kafka" {
+  name        = "kafka-sg"
+  description = "Allow traffic for Kafka"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "Kafka broker from within VPC"
+    from_port       = 9092
+    to_port         = 9092
+    protocol        = "tcp"
+    cidr_blocks     = [aws_vpc.main.cidr_block]
+  }
+
+  ingress {
+    description = "ssh"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "kafka-broker-sg"
+  }
+}
+
+# Jenkins EC2 인스턴스용 보안 그룹
+resource "aws_security_group" "jenkins" {
+  name        = "jenkins-sg"
+  description = "Allow traffic for Jenkins"
+  vpc_id      = aws_vpc.main.id
+
+  # SSH 접근 (본인 IP로 제한 권장)
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # 보안을 위해 실제 IP 주소로 변경하세요.
+  }
+
+  # Jenkins 웹 UI 접근 (본인 IP로 제한 권장)
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # 보안을 위해 실제 IP 주소로 변경하세요.
+  }
+
+  # Jenkins Agent 통신 포트
+  ingress {
+    from_port   = 50000
+    to_port     = 50000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # 필요에 따라 소스 IP 제한
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "jenkins-sg"
   }
 }
