@@ -174,7 +174,7 @@ resource "aws_ecs_service" "main" {
   name            = "main-app-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
-  desired_count   = 2
+  desired_count   = 1
   launch_type     = "FARGATE"
   health_check_grace_period_seconds = 120
 
@@ -197,7 +197,7 @@ resource "aws_ecs_service" "emulator" {
   name            = "emulator-app-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.emulator.arn
-  desired_count   = 2
+  desired_count   = 1
   launch_type     = "FARGATE"
   health_check_grace_period_seconds = 120
 
@@ -220,7 +220,7 @@ resource "aws_ecs_service" "consumer" {
   name            = "consumer-app-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.consumer.arn
-  desired_count   = 2
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
