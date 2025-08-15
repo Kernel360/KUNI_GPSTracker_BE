@@ -1,0 +1,6 @@
+spring:
+  config:
+    import: "classpath:application-common.yaml"
+
+server:
+  port: 8085

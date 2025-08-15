@@ -9,12 +9,16 @@
         </processorPath>
         <module name="BackendServer.common.main" />
         <module name="BackendServer.emulator.main" />
+        <module name="BackendServer.consumer.main" />
         <module name="BackendServer.server.main" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="BackendServer.consumer" options="-parameters" />
+      <module name="BackendServer.consumer.main" options="-parameters" />
+      <module name="BackendServer.consumer.test" options="-parameters" />
       <module name="BackendServer.emulator" options="-parameters" />
       <module name="BackendServer.emulator.main" options="-parameters" />
       <module name="BackendServer.emulator.test" options="-parameters" />
