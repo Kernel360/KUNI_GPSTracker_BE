@@ -5,10 +5,10 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "747030888828"
         AWS_DEFAULT_REGION = "ap-northeast-2"
-        ECR_REPOSITORY_NAME = "spring-app"
+        ECR_REPOSITORY_NAME = "main-app"
         ECS_CLUSTER_NAME = "main-cluster"
-        ECS_SERVICE_NAME = "spring-app-service"
-        ECS_TASK_DEFINITION_FAMILY = "spring-app-task" // 작업 정의 패밀리 이름 추가
+        ECS_SERVICE_NAME = "main-app-service"
+        ECS_TASK_DEFINITION_FAMILY = "main-app-task" // 작업 정의 패밀리 이름 추가
     }
 
     stages {
