@@ -26,7 +26,7 @@ repositories {
 // 다른 모듈(emulator)에서 server의 클래스를 의존할 수 있도록 일반 JAR 생성 활성화
 bootJar { 
     enabled = true 
-    mainClass = 'com.example.Main'
+    mainClass = 'com.example.ServerMain'
 }
 jar { enabled = true }
 
