@@ -39,7 +39,7 @@ public class KafkaService {
     public void handleGps(GpsMsg gps) {
         VehicleEntity vehicle = getVehicleByMdn(gps.getMdn());
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
+        RecordEntity activeRecord = recordRepository.findTopByVehicleIdAndOffTimeIsNullOrderByOnTimeDesc(vehicle.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         List<GpsRecordEntity> entities = gps.getCList().stream()
@@ -81,7 +81,7 @@ public class KafkaService {
     public void handleOff(OnOffMsg off) {
         VehicleEntity vehicle = getVehicleByMdn(off.getMdn());
 
-        RecordEntity activeRecord = recordRepository.findByVehicleIdAndOffTimeIsNull(vehicle.getId())
+        RecordEntity activeRecord = recordRepository.findTopByVehicleIdAndOffTimeIsNullOrderByOnTimeDesc(vehicle.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         // 1. offTime, sumDist 저장

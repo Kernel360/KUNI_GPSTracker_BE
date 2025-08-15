@@ -1,4 +1,4 @@
-package com.example.global;
+package com.example.vehicle;
 
 import com.example.global.Class.VehicleStatus;
 import com.example.global.Class.VehicleType;
