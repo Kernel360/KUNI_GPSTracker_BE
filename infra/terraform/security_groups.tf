@@ -37,8 +37,17 @@ resource "aws_security_group" "ecs_service" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 8080 # Spring Boot App Port
+    description     = "Allow traffic from ALB to Main App"
+    from_port       = 8080 # Main App Port
     to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Allow traffic from ALB to Emulator App"
+    from_port       = 8081 # Emulator App Port
+    to_port         = 8081
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }

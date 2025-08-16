@@ -43,7 +43,7 @@ resource "aws_lb_target_group" "emulator" {
   target_type = "ip"
 
   health_check {
-    path                = "/api/emulator/health"
+    path                = "/health"
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30
