@@ -1,8 +1,8 @@
 package com.example.global.jwt;
 
-import com.example.entity.TokenEntity;
-import com.example.entity.TokenStatus;
-import com.example.repository.TokenRepository;
+import com.example.user.db.TokenEntity;
+import com.example.user.db.TokenStatus;
+import com.example.user.db.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package com.example.repository;
+package com.example.user.db;
 
 import com.example.entity.TokenEntity;
 import com.example.entity.TokenStatus;

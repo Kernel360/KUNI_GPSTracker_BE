@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.user.db;
 
 public enum TokenStatus {
     VALID, INVALID

@@ -1,8 +1,11 @@
 // package com.example.user.controller;
 
 import com.example.user.model.request.LoginRequest;
+import com.example.user.model.request.SignUpRequest;
 import com.example.user.model.response.LoginResponse;
+import com.example.user.model.response.SignUpResponse;
 import com.example.user.service.CustomUserDetailsService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final CustomUserDetailsService userService;
+
+    @PostMapping("/sign-up")
+    public SignUpResponse signUp(@RequestBody @Valid SignUpRequest req) {
+        return customUserDetailsService.signUp(req);
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
