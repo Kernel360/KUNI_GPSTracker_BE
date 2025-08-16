@@ -90,7 +90,6 @@ public class LocationService {
                 .latitude(targetGps.getLatitude())
                 .longitude(targetGps.getLongitude())
                 .build())
-            .gpsRecordId(targetGps.getId())
             .status(vehicle.getStatus()) // 🚀 차량 상태 포함
             .build();
     }
