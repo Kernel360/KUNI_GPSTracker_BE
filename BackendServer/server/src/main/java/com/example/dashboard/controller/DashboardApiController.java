@@ -34,7 +34,7 @@ public class DashboardApiController {
         return ResponseEntity.ok(dashboardService.getDashboardData());
     }
 
-    @Operation(summary = "대시보드 차량 위치 조회", description = "차량의 위치를 조회합니다. status 파라미터로 차량 상태를 필터링할 수 있습니다.", responses = {
+    @Operation(summary = "대시보드 차량 위치 조회", description = "차량 ID 리스트를 통해 차량의 위치를 조회합니다. 차량 ID가 null이면 전체 차량의 1분 전 위치 정보를 반환합니다.", responses = {
             @ApiResponse(
                     responseCode = "200",
                     description = "차량 위치 조회 성공",
@@ -58,8 +58,8 @@ public class DashboardApiController {
     })
     @GetMapping("/map")
     public ResponseEntity<List<DashboardMapDto>> returnVehicleLocation(
-            @RequestParam(required = false) @Parameter(description = "차량 상태", example = "ACTIVE") VehicleStatus status
+            @RequestParam(required = false) @Parameter(description = "차량 번호 리스트 (null이면 전체 차량)", example = "[\"37허9534\", \"34나5678\"]") List<String> vehicleNumbers
     ) {
-        return ResponseEntity.ok(dashboardService.getAllVehicleLocation(status));
+        return ResponseEntity.ok(dashboardService.getAllVehicleLocation(vehicleNumbers));
     }
 }

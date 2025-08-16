@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,10 +78,21 @@ public class DashboardService {
                 .build();
     }
 
-    //map api로 vehicle_id에 따라 위도 경도 상태 가져오는 리스트 반환 함수 (status가 null 이면 전체 또는 각 상태를 지정해서 필터링해서 가져온다
-    //여기서의 record는 GPSRecordEntity의 record와는 아예 다른 것이다
-    public List<DashboardMapDto> getAllVehicleLocation(VehicleStatus status) {
-        List<GpsRecordEntity> latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByStatus(status);
+    //map api로 vehicle_number에 따라 위도 경도 상태 가져오는 리스트 반환 함수
+    //차량 번호 리스트가 null이면 전체 차량, 아니면 지정된 차량들의 1분 전 위치 정보를 반환
+    public List<DashboardMapDto> getAllVehicleLocation(List<String> vehicleNumbers) {
+        // 요청한 시간 기준으로 1분 전 GPS 데이터를 조회
+        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(1);
+
+        List<GpsRecordEntity> latestRecords;
+
+        if (vehicleNumbers == null || vehicleNumbers.isEmpty()) {
+            // 차량 번호가 null이면 전체 차량의 1분 전 위치 정보 조회
+            latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByTime(oneMinuteAgo);
+        } else {
+            // 지정된 차량 번호들의 1분 전 위치 정보 조회
+            latestRecords = gpsRecordRepository.findLatestGpsByVehicleNumbersAndTime(vehicleNumbers, oneMinuteAgo);
+        }
 
         return latestRecords.stream()
                 .map(record -> DashboardMapDto.builder()
@@ -89,6 +101,7 @@ public class DashboardService {
                         .status(record.getStatus())
                         .vehicleNumber(record.getVehicle().getVehicleNumber())
                         .type(record.getVehicle().getType()) // 차량 종류 (MERCEDES, FERRARI, PORSCHE)
+                        .dataRetrievedAt(oneMinuteAgo)
                         .build())
                 .collect(Collectors.toList());
     }

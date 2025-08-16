@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/BackendServer.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/BackendServer.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/consumer/BackendServer.consumer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/consumer/BackendServer.consumer.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/emulator/BackendServer.emulator.main.iml" filepath="$PROJECT_DIR$/.idea/modules/emulator/BackendServer.emulator.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/BackendServer.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/BackendServer.server.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/KUNI_GPSTracker_BE.iml" filepath="$PROJECT_DIR$/.idea/KUNI_GPSTracker_BE.iml" />
