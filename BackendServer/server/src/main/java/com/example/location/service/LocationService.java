@@ -51,10 +51,10 @@ public class LocationService {
             throw new CustomException(ErrorCode.GPS_RECORD_NOT_FOUND);
         }
 
-        // 4️⃣ 1분 전 기준 시각 계산
-        LocalDateTime targetTime = LocalDateTime.now().minusMinutes(1);
+        // 4️⃣ 2분 전 기준 시각 계산
+        LocalDateTime targetTime = LocalDateTime.now().minusMinutes(2);
 
-        // 5️⃣ 1분 전 데이터 선택
+        // 5️⃣ 2분 전 데이터 선택
         GpsRecordEntity targetGps = gpsList.stream()
             .filter(gps -> !gps.getOTime().isAfter(targetTime)) // 1분 전 이전 데이터
             .max(Comparator.comparing(GpsRecordEntity::getOTime)) // 가장 최근
