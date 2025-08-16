@@ -101,7 +101,7 @@ public class DashboardService {
                         .status(record.getStatus())
                         .vehicleNumber(record.getVehicle().getVehicleNumber())
                         .type(record.getVehicle().getType()) // 차량 종류 (MERCEDES, FERRARI, PORSCHE)
-                        .dataRetrievedAt(oneMinuteAgo)
+                        .dataRetrievedAt(record.getOTime())
                         .build())
                 .collect(Collectors.toList());
     }
