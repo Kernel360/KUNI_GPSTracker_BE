@@ -119,10 +119,6 @@ resource "aws_ecs_task_definition" "emulator" {
         }
       ]
       environment = [
-        { name = "DB_HOST", value = aws_db_instance.main.address },
-        { name = "DB_NAME", value = var.db_name },
-        { name = "DB_USERNAME", value = var.db_username },
-        { name = "DB_PASSWORD", value = var.db_password },
         { name = "KAFKA_BOOTSTRAP_SERVERS", value = "${aws_instance.kafka_server.private_ip}:9092" }
       ]
       logConfiguration = {
@@ -155,6 +151,10 @@ resource "aws_ecs_task_definition" "consumer" {
       essential = true
       portMappings = []
       environment = [
+        { name = "DB_HOST", value = aws_db_instance.main.address },
+        { name = "DB_NAME", value = var.db_name },
+        { name = "DB_USERNAME", value = var.db_username },
+        { name = "DB_PASSWORD", value = var.db_password },
         { name = "KAFKA_BOOTSTRAP_SERVERS", value = "${aws_instance.kafka_server.private_ip}:9092" }
       ]
       logConfiguration = {

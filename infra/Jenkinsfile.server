@@ -5,16 +5,22 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "747030888828"
         AWS_DEFAULT_REGION = "ap-northeast-2"
-        ECR_REPOSITORY_NAME = "emulator-app"
+        ECR_REPOSITORY_NAME = "main-app"
         ECS_CLUSTER_NAME = "main-cluster"
-        ECS_SERVICE_NAME = "emulator-app-service"
-        ECS_TASK_DEFINITION_FAMILY = "emulator-app-task" // 작업 정의 패밀리 이름 추가
+        ECS_SERVICE_NAME = "main-app-service"
+        ECS_TASK_DEFINITION_FAMILY = "main-app-task" // 작업 정의 패밀리 이름 추가
     }
 
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'develop', url: 'https://github.com/Kernel360/KUNI_GPSTracker_BE.git' // 실제 Git 리포지토리 URL로 변경
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'cd BackendServer && ./gradlew clean build -x test' // -x test는 테스트를 스킵합니다. 필요에 따라 제거하세요.
             }
         }
 
@@ -29,7 +35,7 @@ pipeline {
                     sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
 
                     // Docker 이미지 빌드: -f 옵션으로 Dockerfile 위치를 지정하고, BackendServer 디렉토리를 빌드 컨텍스트로 사용
-                    sh "docker build -t ${dockerImage} -f infra/Dockerfile.emulator BackendServer"
+                    sh "docker build -t ${dockerImage} -f infra/Dockerfile.server BackendServer"
 
                     // Docker 이미지 푸시
                     sh "docker push ${dockerImage}"
