@@ -82,7 +82,7 @@ public class DashboardService {
     //차량 번호 리스트가 null이면 전체 차량, 아니면 지정된 차량들의 1분 전 위치 정보를 반환
     public List<DashboardMapDto> getAllVehicleLocation(List<String> vehicleNumbers) {
         // 요청한 시간 기준으로 1분 전 GPS 데이터를 조회
-        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(2);
 
         List<GpsRecordEntity> latestRecords;
 
