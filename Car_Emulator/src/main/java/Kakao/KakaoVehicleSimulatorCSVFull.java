@@ -326,7 +326,7 @@ public class KakaoVehicleSimulatorCSVFull {
 
     public static void main(String[] args) {
         // 카카오 API 키
-        Dotenv dotenv = Dotenv.load();  // .env 파일 로드
+        Dotenv dotenv = Dotenv.load();  // ...env 파일 로드
         String apiKey = dotenv.get("KAKAO_REST_API_KEY");
 
         // 차량 번호 리스트 읽기
