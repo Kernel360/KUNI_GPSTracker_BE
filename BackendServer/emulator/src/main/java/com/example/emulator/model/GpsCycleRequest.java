@@ -41,7 +41,7 @@ public class GpsCycleRequest {
   private String did; //디바이스 아이디
 
   @JsonProperty("oTime")
-  @Schema(description = "발생시간", example = "20210901092000")
+  @Schema(description = "발생시간", example = "202109010920")
   private String oTime; //발생시간
 
   @JsonProperty("cCnt")

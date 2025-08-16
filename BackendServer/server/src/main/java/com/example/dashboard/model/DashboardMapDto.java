@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @Schema(description = "대시보드 차량 위치 모델")
@@ -21,4 +23,6 @@ public class DashboardMapDto {
     private String vehicleNumber;
     @Schema(description = "차량 종류", example = "MERCEDES")
     private VehicleType type;
+    @Schema(description = "데이터 조회 시간 (1분 전 기준)", example = "2025-01-27T10:29:00")
+    private LocalDateTime dataRetrievedAt;
 }
