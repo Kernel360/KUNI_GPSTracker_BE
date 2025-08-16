@@ -1,46 +1,3 @@
-
-# Jenkins EC2 인스턴스용 보안 그룹
-resource "aws_security_group" "jenkins" {
-  name        = "jenkins-sg"
-  description = "Allow traffic for Jenkins"
-  vpc_id      = aws_vpc.main.id
-
-  # SSH 접근 (본인 IP로 제한 권장)
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # 보안을 위해 실제 IP 주소로 변경하세요.
-  }
-
-  # Jenkins 웹 UI 접근 (본인 IP로 제한 권장)
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # 보안을 위해 실제 IP 주소로 변경하세요.
-  }
-
-  # Jenkins Agent 통신 포트
-  ingress {
-    from_port   = 50000
-    to_port     = 50000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # 필요에 따라 소스 IP 제한
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "jenkins-sg"
-  }
-}
-
 # Jenkins EC2 인스턴스에 부여할 IAM 역할
 resource "aws_iam_role" "jenkins_role" {
   name = "jenkins-role"
@@ -128,22 +85,6 @@ resource "aws_iam_role_policy_attachment" "jenkins_attach" {
 resource "aws_iam_instance_profile" "jenkins_profile" {
   name = "jenkins-profile"
   role = aws_iam_role.jenkins_role.name
-}
-
-# 최신 Amazon Linux 2 AMI 검색
-data "aws_ami" "amazon_linux_2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
 }
 
 # Jenkins EC2 인스턴스 생성

@@ -3,9 +3,19 @@ output "alb_dns_name" {
   value       = aws_lb.main.dns_name
 }
 
-output "ecr_repository_url" {
-  description = "The URL of the ECR repository."
+output "ecr_repository_url_main" {
+  description = "The URL of the Main App ECR repository."
   value       = aws_ecr_repository.main.repository_url
+}
+
+output "ecr_repository_url_emulator" {
+  description = "The URL of the Emulator App ECR repository."
+  value       = aws_ecr_repository.emulator.repository_url
+}
+
+output "ecr_repository_url_consumer" {
+  description = "The URL of the Consumer App ECR repository."
+  value       = aws_ecr_repository.consumer.repository_url
 }
 
 output "rds_endpoint" {
@@ -32,3 +42,8 @@ output "bastion_server_public_ip" {
 #   description = "The public DNS of the k6 monitoring EC2 instance"
 #   value       = aws_instance.k6_monitoring.public_dns
 # }
+
+output "kafka_private_ip" {
+  description = "The private IP address of the Kafka server."
+  value       = aws_instance.kafka_server.private_ip
+}
