@@ -98,7 +98,7 @@ public class DashboardService {
                 .map(record -> DashboardMapDto.builder()
                         .latitude(record.getLatitude())
                         .longitude(record.getLongitude())
-                        .status(record.getStatus())
+                        .status(record.getVehicle().getStatus())
                         .vehicleNumber(record.getVehicle().getVehicleNumber())
                         .type(record.getVehicle().getType()) // 차량 종류 (MERCEDES, FERRARI, PORSCHE)
                         .dataRetrievedAt(record.getOTime())
