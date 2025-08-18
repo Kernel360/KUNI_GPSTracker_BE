@@ -61,12 +61,13 @@ public class LocationService {
         // 5️⃣ 상태 결정: 최근 데이터가 2분 이상 오래되면 INACTIVE
         VehicleStatus status = (diff.toMinutes() >= 2) ? VehicleStatus.INACTIVE : VehicleStatus.ACTIVE;
 
-        // 6️⃣ 2분 전 기준 GPS 선택 (없으면 가장 최근 사용)
+        // 6️⃣ 2분 전 기준 GPS 선택 (없으면 에러 발생)
         LocalDateTime targetTime = now.minusMinutes(2);
         GpsRecordEntity targetGps = gpsList.stream()
             .filter(gps -> !gps.getOTime().isAfter(targetTime))
             .max(Comparator.comparing(GpsRecordEntity::getOTime))
-            .orElse(latestGps);
+            .orElseThrow(() -> new CustomException(ErrorCode.GPS_RECORD_TOO_RECENT));
+
 
         // 7️⃣ 주행 시간 계산
         LocalDateTime endTime = latestRecord.getOffTime();
