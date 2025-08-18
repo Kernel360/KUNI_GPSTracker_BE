@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,32 +79,51 @@ public class DashboardService {
                 .build();
     }
 
+
     //map api로 vehicle_number에 따라 위도 경도 상태 가져오는 리스트 반환 함수
     //차량 번호 리스트가 null이면 전체 차량, 아니면 지정된 차량들의 1분 전 위치 정보를 반환
     public List<DashboardMapDto> getAllVehicleLocation(List<String> vehicleNumbers) {
         // 요청한 시간 기준으로 1분 전 GPS 데이터를 조회
         LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(2);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String targetString = oneMinuteAgo.format(formatter);
+        LocalDateTime target = LocalDateTime.parse(targetString, formatter);
 
         List<GpsRecordEntity> latestRecords;
+        boolean isFallback = false;
 
         if (vehicleNumbers == null || vehicleNumbers.isEmpty()) {
             // 차량 번호가 null이면 전체 차량의 1분 전 위치 정보 조회
-            latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByTime(oneMinuteAgo);
+            latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByTime(target);
+
+            if (latestRecords == null || latestRecords.isEmpty()) {
+                // Fallback: 과거 최신 데이터 사용
+                latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesNULL(target);
+                isFallback = true;
+            }
         } else {
             // 지정된 차량 번호들의 1분 전 위치 정보 조회
-            latestRecords = gpsRecordRepository.findLatestGpsByVehicleNumbersAndTime(vehicleNumbers, oneMinuteAgo);
+            latestRecords = gpsRecordRepository.findLatestGpsByVehicleNumbersAndTime(vehicleNumbers, target);
+
+            if (latestRecords == null || latestRecords.isEmpty()) {
+                // Fallback: 과거 최신 데이터 사용
+                latestRecords = gpsRecordRepository.findLatestGpsByVehicleNumbersNULL(vehicleNumbers, target);
+                isFallback = true;
+            }
         }
 
+        final boolean finalIsFallback = isFallback;
+
+        // 하나의 return 문으로 통합
         return latestRecords.stream()
                 .map(record -> DashboardMapDto.builder()
                         .latitude(record.getLatitude())
                         .longitude(record.getLongitude())
-                        .status(record.getStatus())
+                        .status(finalIsFallback ? INACTIVE : record.getStatus())  // ← Fallback 여부에 따라 status 결정
                         .vehicleNumber(record.getVehicle().getVehicleNumber())
-                        .type(record.getVehicle().getType()) // 차량 종류 (MERCEDES, FERRARI, PORSCHE)
+                        .type(record.getVehicle().getType())
                         .dataRetrievedAt(record.getOTime())
                         .build())
                 .collect(Collectors.toList());
     }
-
 }
