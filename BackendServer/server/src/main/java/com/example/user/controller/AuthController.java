@@ -1,7 +1,9 @@
 package com.example.user.controller;
 
+import com.example.user.model.request.IdCheckRequest;
 import com.example.user.model.request.LoginRequest;
 import com.example.user.model.request.SignUpRequest;
+import com.example.user.model.response.IdCheckResponse;
 import com.example.user.model.response.LoginResponse;
 import com.example.user.model.response.SignUpResponse;
 import com.example.user.model.response.TokenValidateResponse;
@@ -45,6 +47,11 @@ public class AuthController {
         String token = authorizationHeader.substring(7);
         TokenValidateResponse response = userService.validateTokenDTO(token);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/id/duplicate")
+    public IdCheckResponse checkId(@RequestBody IdCheckRequest req) {
+        return userService.checkIdDuplicate(req);
     }
 
 }
