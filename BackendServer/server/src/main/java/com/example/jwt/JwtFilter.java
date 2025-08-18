@@ -1,5 +1,8 @@
 package com.example.jwt;
 
+import com.example.user.db.TokenEntity;
+import com.example.user.db.TokenStatus;
+import com.example.user.db.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,17 +16,29 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.aspectj.weaver.tools.cache.SimpleCacheFactory.path;
 
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenRepository tokenRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/token/validate");
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
         String token = null;
@@ -35,16 +50,28 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.validateToken(token)) {
-                String role = jwtUtil.extractRole(token);
 
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            // 1) DB에 VALID 상태로 저장돼 있는 토큰인지 확인
+            var opt = tokenRepository.findByAccessTokenAndStatus(token, TokenStatus.VALID);
+            if (opt.isPresent()) {
+                TokenEntity tokenRow = opt.get();
 
-                UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(username, null, authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // 2) 만료 체크 (만료면 자동으로 INVALID로 바꿔줌 - 선택)
+                if (tokenRow.getExpiresAt().isBefore(LocalDateTime.now())) {
+                    tokenRow.setStatus(TokenStatus.INVALID);
+                    tokenRepository.save(tokenRow);
+                } else {
+                    // 3) JWT 자체 서명/만료 검증
+                    if (jwtUtil.validateToken(token)) {
+                        String role = jwtUtil.extractRole(token);
+                        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(username, null, authorities);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
+                }
             }
         }
 

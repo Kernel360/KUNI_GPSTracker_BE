@@ -51,7 +51,7 @@ public class SecurityConfig {
                     "/api/emulator/on",
                     "/api/emulator/off",
                     "/api/emulator/gps",
-                    "/health"
+                    "/health", "/api/token/validate"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/vehicle/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/vehicle/**").hasRole("ADMIN")
