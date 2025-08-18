@@ -4,6 +4,7 @@ import com.example.user.model.request.LoginRequest;
 import com.example.user.model.request.SignUpRequest;
 import com.example.user.model.response.LoginResponse;
 import com.example.user.model.response.SignUpResponse;
+import com.example.user.model.response.TokenValidateResponse;
 import com.example.user.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,16 @@ public class AuthController {
     }
 
     @GetMapping("/token/validate")
-    public ResponseEntity<Boolean> validate(@RequestHeader("Authorization") String authorization) {
-        String token = authorization != null && authorization.startsWith("Bearer ")
-                ? authorization.substring(7) : authorization;
-        return ResponseEntity.ok(userService.isTokenActive(token));
+    public ResponseEntity<TokenValidateResponse> validateToken(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.ok(new TokenValidateResponse(null, false));
+        }
+
+        String token = authorizationHeader.substring(7);
+        TokenValidateResponse response = userService.validateTokenDTO(token);
+        return ResponseEntity.ok(response);
     }
+
 }

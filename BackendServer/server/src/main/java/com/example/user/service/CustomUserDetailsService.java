@@ -111,18 +111,14 @@ public class CustomUserDetailsService implements UserDetailsService {
                 });
     }
 
-    /**
-     * 프런트가 준 토큰이 현재 사용 가능한지 검사
-     * - DB에 VALID로 존재
-     * - expiresAt > now
-     * - JWT 자체 검증 통과
-     */
-    public boolean isTokenActive(String token) {
+    public TokenValidateResponse validateTokenDTO(String token) {
         return tokenRepository.findByAccessTokenAndStatus(token, TokenStatus.VALID)
                 .filter(TokenEntity::isActiveNow)
                 .filter(t -> jwtUtil.validateToken(t.getAccessToken()))
-                .isPresent();
+                .map(t -> new TokenValidateResponse(t.getLoginId(), true))
+                .orElse(new TokenValidateResponse(null, false));
     }
+
 
     public IdCheckResponse checkIdDuplicate(IdCheckRequest req) {
         boolean exists = userRepository.existsById(req.getId());
