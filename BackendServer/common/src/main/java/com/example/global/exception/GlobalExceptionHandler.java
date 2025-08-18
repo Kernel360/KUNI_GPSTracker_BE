@@ -1,6 +1,5 @@
 package com.example.global.exception;
 
-import com.example.global.exception.CustomException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -20,48 +19,54 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	// ✅ 기존 코드는 그대로 유지, 팀원 요청대로 CustomException 로그만 변경
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> globalException(CustomException e) {
-		log.info("exception 발생 : {}", e.getMessage());
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+
+		// 상세 로그 추가 (팀원 요청 반영)
+		log.error("""
+                [CustomException 발생]
+                - Path     : {}
+                - Method   : {}
+                - ErrorCode: {} ({})
+                - Message  : {}
+                """,
+				request.getRequestURI(),
+				request.getMethod(),
+				e.getErrorCode().getCode(),
+				e.getErrorCode().getStatus(),
+				e.getMessage(),
+				e // 스택트레이스 출력
+		);
+
 		ErrorResponse response = ErrorResponse.builder()
-			.timeStamp(LocalDateTime.now())
-			.status(e.getErrorCode().getStatus())
-			.error(e.getErrorCode().getCode())
-			.message(e.getMessage())
-			.path(request.getRequestURI())
-			.build();
+				.timeStamp(LocalDateTime.now())
+				.status(e.getErrorCode().getStatus())
+				.error(e.getErrorCode().getCode())
+				.message(e.getMessage())
+				.path(request.getRequestURI())
+				.build();
+
 		return ResponseEntity.status(e.getErrorCode().getStatus()).body(response);
 	}
 
-	/**
-	 * 클라이언트의 요청에서 오는
-	 * @Valid 에서 발생한 예외 처리
-	 *
-	 * @param e : MethodArgumentNotValidException
-	 * @return Error 메시지를 반환
-	 */
+	// @Valid 에서 발생한 예외 처리
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
-		log.info("exception 발생");
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
 		ErrorResponse response = ErrorResponse.builder()
-			.timeStamp(LocalDateTime.now())
-			.status(400)
-			.error("BAD_REQUEST")
-			.message(e.getBindingResult().getFieldError().getDefaultMessage())
-			.path(request.getRequestURI())
-			.build();
+				.timeStamp(LocalDateTime.now())
+				.status(400)
+				.error("BAD_REQUEST")
+				.message(e.getBindingResult().getFieldError().getDefaultMessage())
+				.path(request.getRequestURI())
+				.build();
 		return ResponseEntity.badRequest().body(response);
 	}
 
-	/**
-	 * DTO의 enum값이 올바르지 않을 경우 발생하는 예외 처리
-	 * HttpMessageNotReadableException 발생할 경우 호출
-	 *
-	 * @param ex : HttpMessageNotReadableException
-	 * @return Error 메시지를 반환
-	 */
+	// DTO enum 값 오류 처리
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleEnumMismatchError(HttpMessageNotReadableException ex) {
 		String errorMessage = "잘못된 요청 형식입니다. 입력 값을 확인해주세요.";
@@ -71,22 +76,22 @@ public class GlobalExceptionHandler {
 				String fieldName = invalidFormatException.getPath().get(0).getFieldName();
 				String rejectedValue = invalidFormatException.getValue().toString();
 				String allowedValues = Arrays.stream(invalidFormatException.getTargetType().getEnumConstants())
-					.map(Object::toString)
-					.collect(Collectors.joining(", "));
+						.map(Object::toString)
+						.collect(Collectors.joining(", "));
 				errorMessage = String.format("필드 '%s'에 잘못된 값이 입력되었습니다. 입력된 값: '%s', 허용되는 값: [%s]",
-					fieldName, rejectedValue, allowedValues);
+						fieldName, rejectedValue, allowedValues);
 			}
 		}
 
 		HttpServletRequest request = ((ServletRequestAttributes)
-		RequestContextHolder.currentRequestAttributes()).getRequest();
+				RequestContextHolder.currentRequestAttributes()).getRequest();
 		ErrorResponse response = ErrorResponse.builder()
-			.timeStamp(LocalDateTime.now())
-			.status(HttpStatus.BAD_REQUEST.value())
-			.error("BAD_REQUEST")
-			.message(errorMessage)
-			.path(request.getRequestURI())
-		.build();
+				.timeStamp(LocalDateTime.now())
+				.status(HttpStatus.BAD_REQUEST.value())
+				.error("BAD_REQUEST")
+				.message(errorMessage)
+				.path(request.getRequestURI())
+				.build();
 
 		return ResponseEntity.badRequest().body(response);
 	}
