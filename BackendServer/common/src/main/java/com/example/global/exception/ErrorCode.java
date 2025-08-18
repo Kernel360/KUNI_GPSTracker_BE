@@ -29,6 +29,7 @@ public enum ErrorCode {
 	GPS_RECORD_NOT_FOUND(404, "GPS-001", "GPS 기록이 존재하지 않습니다."),
 	INVALID_GPS_COORDINATE(400, "GPS-002", "GPS 좌표 값이 유효하지 않습니다."),
 	EMPTY_CLIST_ERROR(500, "GPS-003", "CLIST가 비어있습니다."),
+	GPS_RECORD_TOO_RECENT(404, "GPS-004", "2분 전 기준 GPS 기록이 존재하지 않습니다."),
 
 	// -------------------- Location --------------------
 	LOCATION_NOT_FOUND(404, "LOCATION-001", "위치 정보를 찾을 수 없습니다."),
