@@ -29,15 +29,16 @@ public class JwtFilter extends OncePerRequestFilter {
     private final TokenRepository tokenRepository;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/token/validate");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-
-        if (path.equals("/api/sign-up") || path.equals("/api/login") || path.equals("/api/token/validate")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String authHeader = request.getHeader("Authorization");
         String token = null;
