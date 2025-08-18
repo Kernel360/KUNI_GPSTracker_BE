@@ -1,4 +1,4 @@
-// package com.example.user.controller;
+package com.example.user.controller;
 
 import com.example.user.model.request.LoginRequest;
 import com.example.user.model.request.SignUpRequest;
@@ -19,7 +19,8 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public SignUpResponse signUp(@RequestBody @Valid SignUpRequest req) {
-        return customUserDetailsService.signUp(req);
+        return userService.signUp(req);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {

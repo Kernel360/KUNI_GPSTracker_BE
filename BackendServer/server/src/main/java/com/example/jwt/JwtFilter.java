@@ -1,4 +1,4 @@
-package com.example.global.jwt;
+package com.example.jwt;
 
 import com.example.user.db.TokenEntity;
 import com.example.user.db.TokenStatus;

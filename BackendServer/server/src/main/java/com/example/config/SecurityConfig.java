@@ -1,11 +1,10 @@
-package com.example.global.config;
+package com.example.config;
 
-import com.example.global.jwt.JwtFilter;
+import com.example.jwt.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,11 +50,8 @@ public class SecurityConfig {
                     "/api/emulator/on",
                     "/api/emulator/off",
                     "/api/emulator/gps",
-                    "/health"
+                    "/health", "/api/token/validate"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/vehicle/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/vehicle/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/vehicle/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

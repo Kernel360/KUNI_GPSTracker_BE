@@ -1,4 +1,4 @@
-package com.example.global.config;
+package com.example.config;
 
 
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;

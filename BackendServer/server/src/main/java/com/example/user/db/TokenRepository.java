@@ -1,7 +1,5 @@
 package com.example.user.db;
 
-import com.example.entity.TokenEntity;
-import com.example.entity.TokenStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
