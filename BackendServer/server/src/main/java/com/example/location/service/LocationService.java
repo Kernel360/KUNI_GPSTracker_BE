@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,59 +29,68 @@ public class LocationService {
     private final GpsRecordRepository gpsRepository;
 
     /**
-     * 위치 조회를 위한 정보 반환
-     * 차량 정보와 실시간 위치를 반환한다.
+     * 차량 번호 기준으로 실시간 위치 조회
      *
      * @param vehicleNumber : 차량 번호
-     * @param gpsRecordId : 이전 GPS Record ID (초기값은 0)
      * @return VehicleRealtimeInfoDto
      */
-    public VehicleRealtimeInfoDto getVehicleRealtimeInfo(String vehicleNumber, Long gpsRecordId) {
+    public VehicleRealtimeInfoDto getVehicleRealtimeInfo(String vehicleNumber) {
 
+        // 1️⃣ 차량 정보 조회 (status 포함)
         VehicleEntity vehicle = vehicleRepository.findByVehicleNumber(vehicleNumber)
-                .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
 
+        // 2️⃣ 최신 운행 기록 조회
         RecordEntity latestRecord = recordRepository
-                .findTopByVehicleIdOrderByOnTimeDesc(vehicle.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+            .findTopByVehicleIdOrderByOnTimeDesc(vehicle.getId())
+            .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
-        // gpsRecordId 다음 GPS 데이터를 조회
-        GpsRecordEntity currentGps = gpsRepository
-                .findNextGpsRecord(latestRecord.getId(), gpsRecordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.GPS_RECORD_NOT_FOUND));
-
-
-        //주행 시간
-        LocalDateTime endTime = latestRecord.getOffTime();
-        if(endTime == null) endTime = LocalDateTime.now();
-
-        long drivingMinutes = Duration.between(latestRecord.getOnTime(), endTime).toMinutes();
-        if (drivingMinutes < 0) {
-            throw new CustomException(ErrorCode.INVALID_RECORD_DURATION); // onTime, offTime의 시간 차가 음수일 경우
+        // 3️⃣ 해당 운행의 GPS 데이터 조회
+        List<GpsRecordEntity> gpsList = gpsRepository.findByRecordIdOrderByOTime(latestRecord.getId());
+        if (gpsList.isEmpty()) {
+            throw new CustomException(ErrorCode.GPS_RECORD_NOT_FOUND);
         }
 
-        //주행 거리
+        // 4️⃣ 2분 전 기준 시각 계산
+        LocalDateTime targetTime = LocalDateTime.now().minusMinutes(2);
+
+        // 5️⃣ 2분 전 데이터 선택
+        GpsRecordEntity targetGps = gpsList.stream()
+            .filter(gps -> !gps.getOTime().isAfter(targetTime)) // 1분 전 이전 데이터
+            .max(Comparator.comparing(GpsRecordEntity::getOTime)) // 가장 최근
+            .orElseGet(() -> // 없다면 1분 전 ~ 현재 사이에서 가장 가까운 데이터
+                gpsList.stream()
+                    .filter(gps -> !gps.getOTime().isBefore(targetTime))
+                    .min(Comparator.comparing(gps -> Math.abs(Duration.between(gps.getOTime(), targetTime).getSeconds())))
+                    .orElse(gpsList.get(0))
+            );
+
+        // 6️⃣ 주행 시간 계산
+        LocalDateTime endTime = latestRecord.getOffTime();
+        if (endTime == null) endTime = LocalDateTime.now();
+        long drivingMinutes = Duration.between(latestRecord.getOnTime(), endTime).toMinutes();
+        if (drivingMinutes < 0) drivingMinutes = 0;
+
+        // 7️⃣ 주행 거리 계산
         double drivingDistanceKm;
         try {
-            drivingDistanceKm = Double.parseDouble(currentGps.getTotalDist());
+            drivingDistanceKm = Double.parseDouble(targetGps.getTotalDist());
         } catch (NumberFormatException e) {
-            throw new CustomException(ErrorCode.INVALID_RECORD_DURATION); // 주행 거리가 잘못된 값일 경우(ex: null)
+            throw new CustomException(ErrorCode.INVALID_RECORD_DURATION);
         }
 
+        // 8️⃣ DTO 반환
         return VehicleRealtimeInfoDto.builder()
-                .vehicleNumber(vehicle.getVehicleNumber())
-                .vehicleName(vehicle.getType())
-                .drivingDate(latestRecord.getOnTime().toLocalDate())
-                .drivingTime(drivingMinutes)
-                .drivingDistanceKm(drivingDistanceKm)
-                .location(
-                        Location.builder()
-                                .latitude(currentGps.getLatitude())
-                                .longitude(currentGps.getLongitude())
-                                .build()
-                )
-                .gpsRecordId(currentGps.getId())
-                .build();
+            .vehicleNumber(vehicle.getVehicleNumber())
+            .vehicleName(vehicle.getType())
+            .drivingDate(latestRecord.getOnTime().toLocalDate())
+            .drivingTime(drivingMinutes)
+            .drivingDistanceKm(drivingDistanceKm)
+            .location(Location.builder()
+                .latitude(targetGps.getLatitude())
+                .longitude(targetGps.getLongitude())
+                .build())
+            .status(vehicle.getStatus()) // 🚀 차량 상태 포함
+            .build();
     }
 }
-

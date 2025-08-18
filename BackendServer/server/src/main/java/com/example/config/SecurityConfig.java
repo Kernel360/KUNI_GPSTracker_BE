@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -52,6 +53,9 @@ public class SecurityConfig {
                     "/api/emulator/gps",
                     "/health", "/api/token/validate"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/vehicle/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/vehicle/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/vehicle/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

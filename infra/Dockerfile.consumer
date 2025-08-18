@@ -1,0 +1,16 @@
+FROM gradle:8.5-jdk17 AS build
+WORKDIR /workspace
+COPY gradlew gradlew.bat settings.gradle build.gradle ./
+COPY gradle ./gradle
+COPY common ./common
+COPY consumer ./consumer
+RUN chmod +x ./gradlew
+RUN ./gradlew :consumer:bootJar --no-daemon
+
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /workspace/consumer/build/libs/consumer-*.jar app.jar
+
+# server 포트에 맞춰 수정 (예: 8080)
+EXPOSE 8085
+ENTRYPOINT ["java","-jar","app.jar"]
