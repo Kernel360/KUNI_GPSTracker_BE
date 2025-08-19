@@ -36,8 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-### 주기 정보 파일 용량이 너무 커서 제외 ###
-/src/main/resources/gps/
-
 .env
 .env.properties

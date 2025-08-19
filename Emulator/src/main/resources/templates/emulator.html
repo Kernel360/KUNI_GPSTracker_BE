@@ -18,19 +18,6 @@
     <option value="180">180초</option>
 </select>
 
-<!-- 전체 제어 버튼 -->
-<button onclick="toggleAll('ON')">전체 ON</button>
-<button onclick="toggleAll('OFF')">전체 OFF</button>
-
-<!-- 범위 제어 버튼 -->
-<div>
-    <label>번호 범위:</label>
-    <input type="number" id="range-start" placeholder="시작 번호 (예: 1)">
-    <input type="number" id="range-end" placeholder="끝 번호 (예: 100)">
-    <button onclick="toggleRange('ON')">범위 ON</button>
-    <button onclick="toggleRange('OFF')">범위 OFF</button>
-</div>
-
 <!-- 상태 필터링 -->
 <div>
     <label>상태 필터:</label>
@@ -97,30 +84,6 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ interval: interval })
-        }).then(r => r.ok ? location.reload() : r.text().then(alert));
-    }
-
-    // 전체 제어
-    function toggleAll(cmd) {
-        const interval = document.getElementById("global-interval").value;
-
-        fetch(`/emulator/all/${cmd}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ interval: interval })
-        }).then(r => r.ok ? location.reload() : r.text().then(alert));
-    }
-
-    // 범위 제어
-    function toggleRange(cmd) {
-        const start = parseInt(document.getElementById("range-start").value);
-        const end = parseInt(document.getElementById("range-end").value);
-        const interval = document.getElementById("global-interval").value;
-
-        fetch(`/emulator/range/${cmd}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ start, end, interval })
         }).then(r => r.ok ? location.reload() : r.text().then(alert));
     }
 

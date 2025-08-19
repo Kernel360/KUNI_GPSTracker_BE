@@ -9,7 +9,10 @@ import com.google.common.collect.Lists;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.Disposable;
@@ -17,8 +20,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -39,6 +45,11 @@ public class EmulatorService {
     private final WebClient client;
     private final CarRegistry carRegistry;
     private final TokenService tokenService;
+    private final ResourceLoader resourceLoader;
+
+    /** 기본은 classpath:gps, 운영에서는 file:/data/gps 처럼 바꿔 쓰세요 */
+    @Value("${emulator.gps.location:classpath:gps}")
+    private String gpsLocationRoot;
 
     //전송 스트림 관리를 위한 Map
     private final ConcurrentMap<String, Disposable> running = new ConcurrentHashMap<>();
@@ -61,21 +72,26 @@ public class EmulatorService {
         car.setState(CarState.valueOf(state));
     }
 
+    /** 차량 CSV 리소스 resolve */
+    private Resource resolveCarCsv(String number) {
+        return resourceLoader.getResource(gpsLocationRoot + "/" + number + ".csv");
+    }
+
     /**
      * 차량에 대응되는 csv파일을 읽어서 interval 초 단위로 관제 서버로 데이터를 보내는 메서드
      * sendOnAndStart 메서드를 사용해서 ON 요청과 주기정보 요청을 보내는 메서드를 호출 한다.
      *
      * running에 현재 요청 스트림을 유지한다.
      *
-     * @param csv
+     * @param csvResource
      * @param mdn
      * @param interval
      * @throws IOException
      */
-    public void start(Path csv, String mdn, int interval) throws IOException {
+    public void start(Resource csvResource, String mdn, int interval) throws IOException {
         stop(mdn);   // 같은 차량이 이미 돌고 있으면 중단
 
-        Disposable d = sendOnAndStart(csv, mdn, interval)         //  /on 전송 →  interval 주기 /gps
+        Disposable d = sendOnAndStart(csvResource, mdn, interval)         //  /on 전송 →  interval 주기 /gps
                 .doOnTerminate(() -> stop(mdn))
                 .subscribe(
                         null,
@@ -164,25 +180,25 @@ public class EmulatorService {
 
     /**
      * /on 전송 → 60초마다 /gps 전송
-     * @param csvPath CSV 파일
+     * @param csvResource CSV 파일
      * @param mdn     차량 번호
      */
-    public Mono<Void> sendOnAndStart(Path csvPath, String mdn, int interval) throws IOException {
+    public Mono<Void> sendOnAndStart(Resource csvResource, String mdn, int interval) throws IOException {
 
-        return sendOn(csvPath, mdn)                 // 1. ON
-                .then(startGps(csvPath, mdn, interval));  // 2. 주기 전송
+        return sendOn(csvResource, mdn)                 // 1. ON
+                .then(startGps(csvResource, mdn, interval));  // 2. 주기 전송
     }
 
     /**
      * 관제 서버로 On 요청을 보내느 메서드
-     * @param csvPath
+     * @param csvResource
      * @param number
      * @return
      * @throws IOException
      */
-    public Mono<Void> sendOn(Path csvPath, String number) throws IOException {
+    public Mono<Void> sendOn(Resource csvResource, String number) throws IOException {
 
-        List<CSV> all = loadCsv(csvPath);
+        List<CSV> all = loadCsv(csvResource);
         CSV csvFirst = all.get(0);
 
         // 첫 타임스탬프를 '지금'으로 평행이동시킬 Δt
@@ -231,16 +247,33 @@ public class EmulatorService {
     /**
      * CSV 파일을 읽어서 gps 정보를 리스트로 반환한다.
      *
-     * @param csvPath
+     * @param csvResource
      * @return
      * @throws IOException
      */
-    public List<CSV> loadCsv(Path csvPath) throws IOException {
-        try (Reader reader = Files.newBufferedReader(csvPath)) {
+//    public List<CSV> loadCsv(Path csvPath) throws IOException {
+//        try (Reader reader = Files.newBufferedReader(csvPath)) {
+//
+//            var csvToBean = new CsvToBeanBuilder<CSV>(reader)
+//                    .withType(CSV.class)
+//                    .withIgnoreLeadingWhiteSpace(true) // 앞뒤 공백 무시
+//                    .withSeparator(',')
+//                    .withSkipLines(0)
+//                    .build();
+//
+//            return csvToBean.parse();
+//        }
+//    }
+    public List<CSV> loadCsv(Resource csvResource) throws IOException {
+        if (!csvResource.exists()) {
+            throw new IOException("CSV not found: " + csvResource);
+        }
+        try (Reader reader = new BufferedReader(
+                new InputStreamReader(csvResource.getInputStream(), StandardCharsets.UTF_8))) {
 
             var csvToBean = new CsvToBeanBuilder<CSV>(reader)
                     .withType(CSV.class)
-                    .withIgnoreLeadingWhiteSpace(true) // 앞뒤 공백 무시
+                    .withIgnoreLeadingWhiteSpace(true)
                     .withSeparator(',')
                     .withSkipLines(0)
                     .build();
@@ -250,11 +283,11 @@ public class EmulatorService {
     }
 
     /** CSV를 한 번 읽고 interval초 간격으로 전송 */
-    private Mono<Void> startGps(Path csv, String mdn, int interval) {
+    private Mono<Void> startGps(Resource csvResource, String mdn, int interval) {
 
         /* 2-1 CSV → List<CSV> (블로킹 I/O이므로 boundedElastic) */
         Mono<List<CSV>> listMono =
-                Mono.fromCallable(() -> loadCsv(csv))
+                Mono.fromCallable(() -> loadCsv(csvResource))
                         .subscribeOn(Schedulers.boundedElastic());
 
         return listMono
@@ -330,56 +363,4 @@ public class EmulatorService {
     }
 
 
-    /**
-     * 아래 4가지 메서드는
-     * 애뮬레이터 웹에서 전체 차량 ON/Off , 범위 지정 ON/Off 기능을 구현한 메서드 들이다.
-     *
-     */
-
-
-    public void turnOnAll(int interval) {
-        for (Car car : carRegistry.all()) {
-            try {
-                Path csvPath = new ClassPathResource("gps/" + car.getNumber() + ".csv").getFile().toPath();
-                start(csvPath, car.getNumber(), interval);
-            } catch (Exception e) {
-                log.error("[{}] 전체 ON 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
-            }
-        }
-    }
-
-    public void turnOffAll() {
-        for (Car car : carRegistry.all()) {
-            try {
-                stop(car.getNumber());
-            } catch (Exception e) {
-                log.error("[{}] 전체 OFF 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
-            }
-        }
-    }
-
-    public void turnOnRange(int startIndex, int endIndex, int interval) {
-        List<Car> cars = new ArrayList<>(carRegistry.all());
-        for (int i = startIndex - 1; i < endIndex && i < cars.size(); i++) {
-            Car car = cars.get(i);
-            try {
-                Path csvPath = new ClassPathResource("gps/" + car.getNumber() + ".csv").getFile().toPath();
-                start(csvPath, car.getNumber(), interval);
-            } catch (Exception e) {
-                log.error("[{}] 범위 ON 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
-            }
-        }
-    }
-
-    public void turnOffRange(int startIndex, int endIndex) {
-        List<Car> cars = new ArrayList<>(carRegistry.all());
-        for (int i = startIndex - 1; i < endIndex && i < cars.size(); i++) {
-            Car car = cars.get(i);
-            try {
-                stop(car.getNumber());
-            } catch (Exception e) {
-                log.error("[{}] 범위 OFF 처리 중 오류 발생: {}", car.getNumber(), e.getMessage());
-            }
-        }
-    }
 }
