@@ -186,7 +186,67 @@ public class EmulatorService {
     public Mono<Void> sendOnAndStart(Resource csvResource, String mdn, int interval) throws IOException {
 
         return sendOn(csvResource, mdn)                 // 1. ON
-                .then(startGps(csvResource, mdn, interval));  // 2. 주기 전송
+                .then(sendInitialBurst(csvResource, mdn))// 2) 120개 즉시(60×2) 전송
+                .flatMap(sentCount -> startGps(csvResource, mdn, interval, sentCount));
+                //.then(startGps(csvResource, mdn, interval ,sentCount));  // 2. 주기 전송
+    }
+
+    private Mono<Integer> sendInitialBurst(Resource csvResource, String mdn) {
+        Mono<List<CSV>> listMono = Mono.fromCallable(() -> loadCsv(csvResource))
+                .subscribeOn(Schedulers.boundedElastic());
+
+        return listMono.flatMap(all -> {
+            // 최대 120개만 즉시 전송
+            int limit = Math.min(120, all.size());
+            if (limit <= 0) {
+                log.warn("[{}] 초기 버스트: CSV 비어 있음 → 전송 생략", mdn);
+                return Mono.just(0);
+            }
+
+            List<CSV> first120 = all.subList(0, limit);
+            List<List<CSV>> chunks = Lists.partition(first120, MAX_PACKET_SIZE); // 60개씩
+
+            LocalDateTime base = LocalDateTime.now(); // on 직후 시각
+            DateTimeFormatter OUT_MIN_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+
+            List<Mono<Void>> sends = new ArrayList<>();
+            for (int i = 0; i < chunks.size(); i++) {
+                // i=0 → now-2분, i=1 → now-1분
+                LocalDateTime minute = base.minusMinutes(2 - i);
+                String oTime = minute.truncatedTo(ChronoUnit.MINUTES).format(OUT_MIN_FMT);
+                sends.add(sendGpsBatchWithOTime(mdn, chunks.get(i), oTime));
+            }
+
+            // lastGps 갱신
+            lastGps.put(mdn, first120.get(first120.size() - 1));
+
+            return Mono.when(sends).thenReturn(limit); // 보낸 개수 반환
+        });
+    }
+
+    private Mono<Void> sendGpsBatchWithOTime(String mdn, List<CSV> batch, String oTime) {
+        AtomicInteger idx = new AtomicInteger(0);
+
+        List<MdtGpsRequest.CList> cList = batch.stream()
+                .map(csv -> MdtGpsRequest.CList.builder()
+                        .sec(String.format("%02d", idx.getAndIncrement()))
+                        .bat(csv.getBat())
+                        .gps(Gps.builder()
+                                .gcd(csv.getGcd()).lat(csv.getLat()).lon(csv.getLon())
+                                .ang(csv.getAng()).spd(csv.getSpd()).sum(csv.getSum())
+                                .build())
+                        .build())
+                .toList();
+
+        MdtGpsRequest req = MdtGpsRequest.builder()
+                .mdn(mdn).mdt(MDT.decidedMDT()).oTime(oTime)
+                .cCnt(String.valueOf(cList.size())).cList(cList).build();
+
+        log.info("[{}] 초기 버스트 GPS 전송 ({}건) oTime={}", mdn, batch.size(), oTime);
+
+        return client.post().uri("/gps")
+                .header("Authorization", tokenService.getToken(mdn))
+                .bodyValue(req).retrieve().toBodilessEntity().then();
     }
 
     /**
@@ -201,15 +261,29 @@ public class EmulatorService {
         List<CSV> all = loadCsv(csvResource);
         CSV csvFirst = all.get(0);
 
-        // 첫 타임스탬프를 '지금'으로 평행이동시킬 Δt
+//        // 첫 타임스탬프를 '지금'으로 평행이동시킬 Δt
+//        Duration delta = Duration.between(
+//                LocalDateTime.parse(csvFirst.getTimestamp(), CSV_FMT),
+//                LocalDateTime.now()
+//        );
+//        timeShift.put(number, delta);
+//
+//        DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+//        String onTime = LocalDateTime.now().format(TS_FMT);
+
+        // ✅ ON 직후 '초기 버스트'가 now-2, now-1로 나가므로
+        //    timeShift도 'now-2분'을 기준으로 계산해야 이후(121번째)가 정확히 'now'가 됨.
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime alignBase = now.minusMinutes(2); // 초기 버스트의 시작 기준
         Duration delta = Duration.between(
                 LocalDateTime.parse(csvFirst.getTimestamp(), CSV_FMT),
-                LocalDateTime.now()
+                alignBase
         );
         timeShift.put(number, delta);
 
+        // onTime은 프로토콜상 '지금' 사용
         DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String onTime = LocalDateTime.now().format(TS_FMT);
+        String onTime = now.format(TS_FMT);
 
         csvFirst.setTimestamp(onTime);
         firstGps.put(number, csvFirst);
@@ -283,7 +357,7 @@ public class EmulatorService {
     }
 
     /** CSV를 한 번 읽고 interval초 간격으로 전송 */
-    private Mono<Void> startGps(Resource csvResource, String mdn, int interval) {
+    private Mono<Void> startGps(Resource csvResource, String mdn, int interval, int startIndex) {
 
         /* 2-1 CSV → List<CSV> (블로킹 I/O이므로 boundedElastic) */
         Mono<List<CSV>> listMono =
@@ -291,7 +365,11 @@ public class EmulatorService {
                         .subscribeOn(Schedulers.boundedElastic());
 
         return listMono
-                .flatMapMany(all -> Flux.fromIterable(Lists.partition(all, interval)))
+                .flatMapMany(all -> {
+                    int from = Math.min(Math.max(startIndex, 0), all.size()); // 경계 보호
+                    List<CSV> tail = all.subList(from, all.size());
+                    return Flux.fromIterable(Lists.partition(tail, interval));
+                })
                 .delayElements(Duration.ofSeconds(interval))
                 .flatMap(intervalChunk -> {
                     List<List<CSV>> packets = Lists.partition(intervalChunk, MAX_PACKET_SIZE);
