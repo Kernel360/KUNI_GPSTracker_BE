@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestLoggingController {
 
-  private final com.example.BackendServer.global.log.TestLoggingService testLoggingService;
+  private final com.example.global.log.TestLoggingService testLoggingService;
 
-  public TestLoggingController(com.example.BackendServer.global.log.TestLoggingService testLoggingService) {
+  public TestLoggingController(com.example.global.log.TestLoggingService testLoggingService) {
     this.testLoggingService = testLoggingService;
   }
 

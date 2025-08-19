@@ -1,4 +1,4 @@
-package com.example.BackendServer.global.log;
+package com.example.global.log;
 
 import com.example.global.log.PerfLogging;
 import org.springframework.stereotype.Service;
