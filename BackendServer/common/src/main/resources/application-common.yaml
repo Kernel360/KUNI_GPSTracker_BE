@@ -52,6 +52,7 @@ logging:
   level:
     org.springframework.boot.context.config: DEBUG  # ⬅️ 추가됨
     org.springframework.security: DEBUG   # ⬅️ 추가
+    config: classpath:logback-spring.xml
 
 server:
   forward-headers-strategy: framework
