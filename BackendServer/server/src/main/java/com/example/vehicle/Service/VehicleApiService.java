@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import static com.example.global.Class.VehicleStatus.*;
 
@@ -35,19 +34,10 @@ public class VehicleApiService {
     private final GpsRecordRepository gpsRecordRepository;
     private final Random random = new Random();
 
-    // 렌터카 번호 패턴: 2~3자리 숫자 + 하/허/호 + 4자리 숫자
-    private static final Pattern RENTAL_CAR_PATTERN = Pattern.compile("^[0-9]{2,3}[하허호][0-9]{4}$");
-
     @Transactional
     public VehicleEntity createVehicle(VehicleCreateDto dto) {
 
         String vehicleNumber = dto.getVehicleNumber();
-
-        // 차량 번호 검증
-        if (!RENTAL_CAR_PATTERN.matcher(vehicleNumber).matches()) {
-            log.error("차량 등록 실패 - 잘못된 차량 번호: {}", vehicleNumber);
-            throw new CustomException(ErrorCode.INVALID_VEHICLE_NUMBER); // -------------------- 수정
-        }
 
         // 이미 존재하는 차량 번호 체크
         if (vehicleRepository.existsByVehicleNumber(vehicleNumber)) {
@@ -81,7 +71,7 @@ public class VehicleApiService {
         GpsRecordEntity gpsRecordEntity = GpsRecordEntity.builder()
             .record(savedRecord)
             .vehicle(saved)
-            .status(VehicleStatus.INACTIVE)
+            .status(INACTIVE)
             .latitude(initialLatitude)
             .longitude(initialLongitude)
             .oTime(LocalDateTime.now())

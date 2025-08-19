@@ -20,12 +20,10 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	// ✅ 기존 코드는 그대로 유지, 팀원 요청대로 CustomException 로그만 변경
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> globalException(CustomException e) {
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
 
-		// 상세 로그 추가 (팀원 요청 반영)
 		log.error("""
                 [CustomException 발생]
                 - Path     : {}
@@ -38,7 +36,7 @@ public class GlobalExceptionHandler {
 				e.getErrorCode().getCode(),
 				e.getErrorCode().getStatus(),
 				e.getMessage(),
-				e // 스택트레이스 출력
+				e
 		);
 
 		ErrorResponse response = ErrorResponse.builder()
@@ -52,15 +50,20 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(e.getErrorCode().getStatus()).body(response);
 	}
 
-	// @Valid 에서 발생한 예외 처리
+	// @Valid 예외 처리
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		String errorMessage = e.getBindingResult().getFieldError().getDefaultMessage();
+
+		// 로그 추가
+		log.error("[MethodArgumentNotValidException] Path: {}, Message: {}", request.getRequestURI(), errorMessage, e);
+
 		ErrorResponse response = ErrorResponse.builder()
 				.timeStamp(LocalDateTime.now())
 				.status(400)
 				.error("BAD_REQUEST")
-				.message(e.getBindingResult().getFieldError().getDefaultMessage())
+				.message(errorMessage)
 				.path(request.getRequestURI())
 				.build();
 		return ResponseEntity.badRequest().body(response);
@@ -85,6 +88,10 @@ public class GlobalExceptionHandler {
 
 		HttpServletRequest request = ((ServletRequestAttributes)
 				RequestContextHolder.currentRequestAttributes()).getRequest();
+
+		// 로그 추가
+		log.error("[HttpMessageNotReadableException] Path: {}, Message: {}", request.getRequestURI(), errorMessage, ex);
+
 		ErrorResponse response = ErrorResponse.builder()
 				.timeStamp(LocalDateTime.now())
 				.status(HttpStatus.BAD_REQUEST.value())
