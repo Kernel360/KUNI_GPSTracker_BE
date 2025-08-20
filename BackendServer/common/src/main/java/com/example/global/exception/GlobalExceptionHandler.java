@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> globalException(CustomException e) {
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
 
+		// ✅ stackTrace 제외, 메시지만 출력
 		log.error("""
                 [CustomException 발생]
                 - Path     : {}
@@ -35,8 +36,7 @@ public class GlobalExceptionHandler {
 				request.getMethod(),
 				e.getErrorCode().getCode(),
 				e.getErrorCode().getStatus(),
-				e.getMessage(),
-				e
+				e.getMessage()
 		);
 
 		ErrorResponse response = ErrorResponse.builder()
@@ -56,8 +56,8 @@ public class GlobalExceptionHandler {
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
 		String errorMessage = e.getBindingResult().getFieldError().getDefaultMessage();
 
-		// 로그 추가
-		log.error("[MethodArgumentNotValidException] Path: {}, Message: {}", request.getRequestURI(), errorMessage, e);
+		// ✅ stackTrace 제외, 메시지만 출력
+		log.error("[MethodArgumentNotValidException] Path: {}, Message: {}", request.getRequestURI(), errorMessage);
 
 		ErrorResponse response = ErrorResponse.builder()
 				.timeStamp(LocalDateTime.now())
@@ -89,8 +89,8 @@ public class GlobalExceptionHandler {
 		HttpServletRequest request = ((ServletRequestAttributes)
 				RequestContextHolder.currentRequestAttributes()).getRequest();
 
-		// 로그 추가
-		log.error("[HttpMessageNotReadableException] Path: {}, Message: {}", request.getRequestURI(), errorMessage, ex);
+		// ✅ stackTrace 제외, 메시지만 출력
+		log.error("[HttpMessageNotReadableException] Path: {}, Message: {}", request.getRequestURI(), errorMessage);
 
 		ErrorResponse response = ErrorResponse.builder()
 				.timeStamp(LocalDateTime.now())

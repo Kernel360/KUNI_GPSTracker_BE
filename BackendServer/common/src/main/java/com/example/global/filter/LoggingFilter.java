@@ -64,4 +64,13 @@ public class LoggingFilter extends OncePerRequestFilter {
       responseWrapper.copyBodyToResponse();
     }
   }
+
+  /**
+   * Swagger 관련 요청은 로깅 제외
+   */
+  @Override
+  protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+    String uri = request.getRequestURI();
+    return uri.startsWith("/swagger-ui") || uri.startsWith("/v3/api-docs");
+  }
 }
