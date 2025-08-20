@@ -20,7 +20,7 @@
 
 ## 2) 기술 스택
 
-- **Backend**: Java 17, Spring Boot 3, Spring Data JPA, WebFlux/WebSocket, Spring Security, JWT
+- **Backend**: Java 17, Spring Boot 3, Spring Data JPA, WebFlux, Spring Security, JWT
 - **Messaging**: Apache Kafka (Zookeeper)
 - **DB/Cache**: MySQL (RDS)
 - **Frontend**: React , TypeScript
