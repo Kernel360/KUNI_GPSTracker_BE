@@ -34,6 +34,8 @@ public class DashboardService {
     private final VehicleRepository vehicleRepository;
     private final GpsRecordRepository gpsRecordRepository;
 
+    private static final int TOP_VEHICLES_LIMIT = 3;
+
     /**
      * 최근 1주일간 운행량이 가장 많은 차량 TOP 3 반환
      *
@@ -45,7 +47,7 @@ public class DashboardService {
         List<Object[]> results = recordRepository.findTopVehicles(oneWeekAgo);
 
         return results.stream()
-                .limit(3)
+                .limit(TOP_VEHICLES_LIMIT)
                 .map(obj -> {
                     VehicleEntity vehicle = (VehicleEntity) obj[0];
                     Long count = (Long) obj[1];
