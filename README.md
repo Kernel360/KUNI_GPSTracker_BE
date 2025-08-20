@@ -24,11 +24,10 @@
 - **Messaging**: Apache Kafka (Zookeeper)
 - **DB/Cache**: MySQL (RDS)
 - **Frontend**: React , TypeScript
-- **Infra**: Docker, Docker Compose, Terraform, AWS (ECS, ALB, S3/CloudFront, ECR, RDS, Route53, CloudWatch)
+- **Infra**: Terraform, AWS (ECS, ALB, S3/CloudFront, ECR, RDS, Route53, CloudWatch), Docker, Docker Compose
 - **CI/CD**: Jenkins (멀티브랜치/파이프라인)
 
-> 배지 예시
->
+
 > ![Java](https://img.shields.io/badge/Java-17-007396?logo=java) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot) ![Kafka](https://img.shields.io/badge/Kafka-3.x-231F20?logo=apachekafka) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql) ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react) ![AWS](https://img.shields.io/badge/AWS-ECS%20|%20ALB%20|%20RDS-FF9900?logo=amazon-aws)
 
 ---
