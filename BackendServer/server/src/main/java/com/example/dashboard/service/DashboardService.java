@@ -3,6 +3,8 @@ package com.example.dashboard.service;
 import com.example.dashboard.model.DashboardMapDto;
 import com.example.dashboard.model.DashboardResponseDto;
 import com.example.dashboard.model.DashboardStatusResponseDto;
+import com.example.dashboard.model.TopVehicleResponseDto;
+import com.example.entity.VehicleEntity;
 import com.example.global.Class.VehicleStatus;
 import com.example.entity.GpsRecordEntity;
 import com.example.model.DayCountView;
@@ -31,6 +33,26 @@ public class DashboardService {
     private final RecordRepository recordRepository;
     private final VehicleRepository vehicleRepository;
     private final GpsRecordRepository gpsRecordRepository;
+
+    /**
+     * 최근 1주일간 운행량이 가장 많은 차량 TOP 3 반환
+     *
+     * @return [{vehicleNumber, driveCount}, ...]
+     */
+    public List<TopVehicleResponseDto> getWeeklyTopVehicles() {
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+
+        List<Object[]> results = recordRepository.findTopVehicles(oneWeekAgo);
+
+        return results.stream()
+                .limit(3)
+                .map(obj -> {
+                    VehicleEntity vehicle = (VehicleEntity) obj[0];
+                    Long count = (Long) obj[1];
+                    return new TopVehicleResponseDto(vehicle.getVehicleNumber(), count);
+                })
+                .collect(Collectors.toList());
+    }
 
     /**
      * 어제 포함 과거 7일간의 운행 수를 반환
