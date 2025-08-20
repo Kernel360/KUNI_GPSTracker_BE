@@ -36,19 +36,20 @@ resource "aws_acm_certificate" "alb" {
 
 # ACM 인증서 DNS 검증을 위한 Route 53 레코드 생성 (CloudFront + ALB)
 resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in concat(tolist(aws_acm_certificate.main.domain_validation_options), tolist(aws_acm_certificate.alb.domain_validation_options)) : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
+  for_each = merge(
+    {
+      for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => dvo
+    },
+    {
+      for dvo in aws_acm_certificate.alb.domain_validation_options : dvo.domain_name => dvo
     }
-  }
+  )
 
   allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
+  name            = each.value.resource_record_name
+  records         = [each.value.resource_record_value]
   ttl             = 60
-  type            = each.value.type
+  type            = each.value.resource_record_type
   zone_id         = data.aws_route53_zone.main.zone_id
 }
 
@@ -57,19 +58,19 @@ resource "aws_acm_certificate_validation" "main" {
   provider = aws.us_east_1
 
   certificate_arn         = aws_acm_certificate.main.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+  validation_record_fqdns = [for dvo in aws_acm_certificate.main.domain_validation_options : aws_route53_record.cert_validation[dvo.domain_name].fqdn]
 }
 
 # ACM 인증서 검증 완료 대기 (ALB용)
 resource "aws_acm_certificate_validation" "alb" {
   certificate_arn         = aws_acm_certificate.alb.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+  validation_record_fqdns = [for dvo in aws_acm_certificate.alb.domain_validation_options : aws_route53_record.cert_validation[dvo.domain_name].fqdn]
 }
 
 # S3 정적 사이트를 위한 CloudFront 배포
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.my_bucket.website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.my_bucket.website_endpoint
     origin_id   = "S3-${var.domain_name}"
 
     custom_origin_config {

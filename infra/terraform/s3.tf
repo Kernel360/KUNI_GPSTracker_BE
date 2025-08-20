@@ -5,6 +5,8 @@ resource "aws_s3_bucket" "my_bucket" {
     Name        = "GPS Tracker Frontend Bucket"
     Environment = "Dev"
   }
+
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "my_bucket" {
@@ -21,6 +23,9 @@ resource "aws_s3_bucket_website_configuration" "my_bucket" {
 
   index_document {
     suffix = "index.html"
+  }
+  error_document {
+    key = "index.html"
   }
 }
 
