@@ -28,7 +28,7 @@
         </encoder>
     </appender>
 
-    <!-- APP_FILE: 모든 INFO 이상 로그를 파일로 기록 -->
+    <!-- APP_FILE: LoggingFilter 전용, 모든 INFO 로그 기록 -->
     <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/app.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -44,11 +44,15 @@
     <logger name="org.hibernate.SQL" level="WARN"/>
     <logger name="org.springframework.security" level="INFO"/>
 
-    <!-- ROOT에 콘솔 + WARN_FILE + APP_FILE 연결 -->
+    <!-- LoggingFilter 전용 로거: app.log만 사용, ROOT로 전파 차단 -->
+    <logger name="com.example.global.filter.LoggingFilter" level="INFO" additivity="false">
+        <appender-ref ref="APP_FILE"/>
+    </logger>
+
+    <!-- ROOT에 콘솔 + WARN_FILE 연결 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="WARN_FILE"/>
-        <appender-ref ref="APP_FILE"/>
     </root>
 
 </configuration>
