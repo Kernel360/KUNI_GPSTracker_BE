@@ -166,10 +166,10 @@ docker compose -f docker-compose.kafka.yaml up -d
 - **ECS 오토스케일** (CPU 기반)
 
 >kafka 적용 이전 (총 노트북 5대로 진행, 아래 예시는 1대)
->![alt text](image-2.png)
+>![alt text](docs/image-2.png)
 
 >kafka 적용 이후
->![alt text](image-1.png)
+>![alt text](docs/image-1.png)
 
 >성공률이 20% -> 70% 로 증가
 
