@@ -16,6 +16,15 @@ import java.util.Optional;
 public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
 
     // 📌 여기에 추가
+
+    // 최근 1주일간 차량별 운행 횟수 집계 (TOP 3)
+    @Query("SELECT r.vehicle, COUNT(r) as cnt " +
+            "FROM RecordEntity r " +
+            "WHERE r.onTime >= :startDate " +
+            "GROUP BY r.vehicle " +
+            "ORDER BY cnt DESC")
+    List<Object[]> findTopVehicles(@Param("startDate") LocalDateTime startDate);
+
     Optional<RecordEntity> findTopByVehicleIdAndOffTimeIsNullOrderByOnTimeDesc(Long vehicleId);
 
     @Query(value = """
