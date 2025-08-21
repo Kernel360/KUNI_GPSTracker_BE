@@ -1,0 +1,83 @@
+
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCOUNT_ID = "747030888828"
+        AWS_DEFAULT_REGION = "ap-northeast-2"
+        ECR_REPOSITORY_NAME = "main-app"
+        ECS_CLUSTER_NAME = "main-cluster"
+        ECS_SERVICE_NAME = "main-app-service"
+        ECS_TASK_DEFINITION_FAMILY = "main-app-task" // 작업 정의 패밀리 이름 추가
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'develop', url: 'https://github.com/Kernel360/KUNI_GPSTracker_BE.git' // 실제 Git 리포지토리 URL로 변경
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'cd BackendServer && ./gradlew clean build -x test' // -x test는 테스트를 스킵합니다. 필요에 따라 제거하세요.
+            }
+        }
+
+        stage('Build & Push Image') {
+            steps {
+                script {
+                    def ecrRepositoryUrl = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}"
+                    def imageTag = "${env.BUILD_NUMBER}"
+                    def dockerImage = "${ecrRepositoryUrl}:${imageTag}"
+
+                    // ECR 로그인
+                    sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+
+                    // Docker 이미지 빌드: -f 옵션으로 Dockerfile 위치를 지정하고, BackendServer 디렉토리를 빌드 컨텍스트로 사용
+                    sh "docker build -t ${dockerImage} -f infra/Dockerfile BackendServer"
+
+                    // Docker 이미지 푸시
+                    sh "docker push ${dockerImage}"
+
+                    // 작업 정의 업데이트를 위해 이미지 정보 저장
+                    env.IMAGE_NAME = dockerImage
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // 현재 작업 정의 가져오기 (ECS_TASK_DEFINITION_FAMILY 사용)
+                    def taskDefinitionJson = sh(script: "aws ecs describe-task-definition --task-definition ${ECS_TASK_DEFINITION_FAMILY} --query taskDefinition", returnStdout: true).trim()
+                    
+                    // 새 이미지로 컨테이너 정의 업데이트
+                    def newContainerDefinitions = groovy.json.JsonOutput.toJson(
+                        (new groovy.json.JsonSlurper().parseText(taskDefinitionJson)).containerDefinitions.each { it.image = env.IMAGE_NAME }
+                    )
+
+                    // 새 작업 정의 등록 (family를 ECS_TASK_DEFINITION_FAMILY로 수정)
+                    def newTaskDefinitionArn = sh(script: """
+                        aws ecs register-task-definition \
+                            --family ${ECS_TASK_DEFINITION_FAMILY} \
+                            --cli-input-json '{ \
+                                "containerDefinitions": ${newContainerDefinitions}, \
+                                "family": "${ECS_TASK_DEFINITION_FAMILY}", \
+                                "networkMode": "awsvpc", \
+                                "requiresCompatibilities": ["FARGATE"], \
+                                "cpu": "256", \
+                                "memory": "512", \
+                                "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs_task_execution_role" \
+                            }' \
+                            --query 'taskDefinition.taskDefinitionArn' \
+                            --output text
+                        """, returnStdout: true).trim()
+
+                    // ECS 서비스 업데이트
+                    sh "aws ecs update-service --cluster ${ECS_CLUSTER_NAME} --service ${ECS_SERVICE_NAME} --task-definition ${newTaskDefinitionArn}"
+                }
+            }
+        }
+    }
+}

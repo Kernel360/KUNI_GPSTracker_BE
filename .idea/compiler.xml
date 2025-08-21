@@ -7,15 +7,29 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.38/57f8f5e02e92a30fd21b80cbd426a4172b5f8e29/lombok-1.18.38.jar" />
         </processorPath>
-        <module name="BackendServer.main" />
+        <module name="BackendServer.common.main" />
+        <module name="BackendServer.emulator.main" />
+        <module name="BackendServer.consumer.main" />
+        <module name="BackendServer.server.main" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="BackendServer.consumer" target="17" />
+      <module name="BackendServer.consumer.main" target="17" />
+      <module name="BackendServer.consumer.test" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="BackendServer" options="-parameters" />
-      <module name="BackendServer.main" options="-parameters" />
-      <module name="BackendServer.test" options="-parameters" />
+      <module name="BackendServer.consumer" options="-parameters" />
+      <module name="BackendServer.consumer.main" options="-parameters" />
+      <module name="BackendServer.consumer.test" options="-parameters" />
+      <module name="BackendServer.emulator" options="-parameters" />
+      <module name="BackendServer.emulator.main" options="-parameters" />
+      <module name="BackendServer.emulator.test" options="-parameters" />
+      <module name="BackendServer.server" options="-parameters" />
+      <module name="BackendServer.server.main" options="-parameters" />
+      <module name="BackendServer.server.test" options="-parameters" />
     </option>
   </component>
 </project>

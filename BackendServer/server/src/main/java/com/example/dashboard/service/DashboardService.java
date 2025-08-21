@@ -1,0 +1,153 @@
+package com.example.dashboard.service;
+
+import com.example.dashboard.model.DashboardMapDto;
+import com.example.dashboard.model.DashboardResponseDto;
+import com.example.dashboard.model.DashboardStatusResponseDto;
+import com.example.dashboard.model.TopVehicleResponseDto;
+import com.example.entity.VehicleEntity;
+import com.example.global.Class.VehicleStatus;
+import com.example.entity.GpsRecordEntity;
+import com.example.model.DayCountView;
+import com.example.repository.GpsRecordRepository;
+import com.example.repository.RecordRepository;
+import com.example.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.example.global.Class.VehicleStatus.*;
+
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class DashboardService {
+
+    private final RecordRepository recordRepository;
+    private final VehicleRepository vehicleRepository;
+    private final GpsRecordRepository gpsRecordRepository;
+
+    private static final int TOP_VEHICLES_LIMIT = 3;
+
+    /**
+     * 최근 1주일간 운행량이 가장 많은 차량 TOP 3 반환
+     *
+     * @return [{vehicleNumber, driveCount}, ...]
+     */
+    public List<TopVehicleResponseDto> getWeeklyTopVehicles() {
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+
+        List<Object[]> results = recordRepository.findTopVehicles(oneWeekAgo);
+
+        return results.stream()
+                .limit(TOP_VEHICLES_LIMIT)
+                .map(obj -> {
+                    VehicleEntity vehicle = (VehicleEntity) obj[0];
+                    Long count = (Long) obj[1];
+                    return new TopVehicleResponseDto(vehicle.getVehicleNumber(), count);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 어제 포함 과거 7일간의 운행 수를 반환
+     *
+     * @return [{날짜, 운행 수},...]
+     */
+    public DashboardStatusResponseDto getDashboardWeekStatus() {
+
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate startDate = yesterday.minusDays(6);
+
+        List<DayCountView> raw = recordRepository.findDailyCount(startDate, yesterday);
+
+        Map<LocalDate, Long> countMap = raw.stream()
+                .collect(Collectors.toMap(DayCountView::getDay,
+                        DayCountView::getTotalCar));
+
+        DashboardStatusResponseDto.DayCount[] dayCounts = new DashboardStatusResponseDto.DayCount[7];
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = startDate.plusDays(i);
+            long cnt = countMap.getOrDefault(date, 0L);
+            dayCounts[i] = DashboardStatusResponseDto.DayCount.builder()
+                    .day(date)
+                    .totalCar(cnt)
+                    .build();
+        }
+
+        return DashboardStatusResponseDto.builder()
+                .dayCount(dayCounts)
+                .build();
+    }
+
+
+    //기존 dashboard api 전체 차량 개수와 status에 따른 각 개수를 반환한다
+    public DashboardResponseDto getDashboardData() {
+        long total = vehicleRepository.count();
+        long active = vehicleRepository.countByStatus(ACTIVE);
+        long inactive = vehicleRepository.countByStatus(INACTIVE);
+        long inspect = vehicleRepository.countByStatus(INSPECTING);
+
+        return DashboardResponseDto.builder()
+                .vehicles(total)
+                .active(active)
+                .inactive(inactive)
+                .inspect(inspect)
+                .build();
+    }
+
+
+    //map api로 vehicle_number에 따라 위도 경도 상태 가져오는 리스트 반환 함수
+    //차량 번호 리스트가 null이면 전체 차량, 아니면 지정된 차량들의 1분 전 위치 정보를 반환
+    public List<DashboardMapDto> getAllVehicleLocation(List<String> vehicleNumbers) {
+        // 요청한 시간 기준으로 1분 전 GPS 데이터를 조회
+        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(2);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String targetString = oneMinuteAgo.format(formatter);
+        LocalDateTime target = LocalDateTime.parse(targetString, formatter);
+
+        List<GpsRecordEntity> latestRecords;
+        boolean isFallback = false;
+
+        if (vehicleNumbers == null || vehicleNumbers.isEmpty()) {
+            // 차량 번호가 null이면 전체 차량의 1분 전 위치 정보 조회
+            latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesByTime(target);
+
+            if (latestRecords == null || latestRecords.isEmpty()) {
+                // Fallback: 과거 최신 데이터 사용
+                latestRecords = gpsRecordRepository.findLatestGpsForAllVehiclesNULL(target);
+                isFallback = true;
+            }
+        } else {
+            // 지정된 차량 번호들의 1분 전 위치 정보 조회
+            latestRecords = gpsRecordRepository.findLatestGpsByVehicleNumbersAndTime(vehicleNumbers, target);
+
+            if (latestRecords == null || latestRecords.isEmpty()) {
+                // Fallback: 과거 최신 데이터 사용
+                latestRecords = gpsRecordRepository.findLatestGpsByVehicleNumbersNULL(vehicleNumbers, target);
+                isFallback = true;
+            }
+        }
+
+        final boolean finalIsFallback = isFallback;
+
+        // 하나의 return 문으로 통합
+        return latestRecords.stream()
+                .map(record -> DashboardMapDto.builder()
+                        .latitude(record.getLatitude())
+                        .longitude(record.getLongitude())
+                        .status(finalIsFallback ? INACTIVE : record.getStatus())  // ← Fallback 여부에 따라 status 결정
+                        .vehicleNumber(record.getVehicle().getVehicleNumber())
+                        .type(record.getVehicle().getType())
+                        .dataRetrievedAt(record.getOTime())
+                        .build())
+                .collect(Collectors.toList());
+    }
+}
