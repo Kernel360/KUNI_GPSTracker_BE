@@ -19,6 +19,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  jwt:
+    secret: ${JWT_SECRET}
+    secret-base64: ${JWT_SECRET_BASE64}
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
