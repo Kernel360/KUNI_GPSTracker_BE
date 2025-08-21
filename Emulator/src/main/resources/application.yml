@@ -1,8 +1,0 @@
-spring:
-  config:
-    import: "optional:file:.env.properties"
-
-emulator:
-  target-base-url: ${TARGET_BASE_URL}
-server:
-  port: 8082
