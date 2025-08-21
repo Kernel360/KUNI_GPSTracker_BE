@@ -69,8 +69,15 @@ resource "aws_acm_certificate_validation" "alb" {
 # S3 정적 사이트를 위한 CloudFront 배포
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.my_bucket.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.my_bucket.website_endpoint
     origin_id   = "S3-${var.domain_name}"
+
+    custom_origin_config {
+          origin_protocol_policy = "http-only"
+          http_port              = 80
+          https_port             = 443
+          origin_ssl_protocols   = ["TLSv1.2"]
+    }
   }
 
   enabled             = true

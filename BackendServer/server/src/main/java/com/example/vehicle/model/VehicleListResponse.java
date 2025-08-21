@@ -1,7 +1,7 @@
 package com.example.vehicle.model;
 
-import com.example.global.Class.VehicleStatus;
-import com.example.global.Class.VehicleType;
+import com.example.model.VehicleStatus;
+import com.example.model.VehicleType;
 import com.example.entity.VehicleEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

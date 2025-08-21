@@ -3,7 +3,6 @@ package com.example.dashboard.service;
 import com.example.dashboard.model.DashboardMapDto;
 import com.example.dashboard.model.DashboardResponseDto;
 import com.example.dashboard.model.DashboardStatusResponseDto;
-import com.example.global.Class.VehicleStatus;
 import com.example.entity.GpsRecordEntity;
 import com.example.model.DayCountView;
 import com.example.repository.GpsRecordRepository;
@@ -12,6 +11,11 @@ import com.example.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.dashboard.model.TopVehicleResponseDto;
+import com.example.entity.VehicleEntity;
+
+
+import com.example.model.VehicleStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,8 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.example.global.Class.VehicleStatus.*;
 
 
 @Service
@@ -31,6 +33,28 @@ public class DashboardService {
     private final RecordRepository recordRepository;
     private final VehicleRepository vehicleRepository;
     private final GpsRecordRepository gpsRecordRepository;
+
+    private static final int TOP_VEHICLES_LIMIT = 3;
+
+    /**
+     * 최근 1주일간 운행량이 가장 많은 차량 TOP 3 반환
+     *
+     * @return [{vehicleNumber, driveCount}, ...]
+     */
+    public List<TopVehicleResponseDto> getWeeklyTopVehicles() {
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+
+        List<Object[]> results = recordRepository.findTopVehicles(oneWeekAgo);
+
+        return results.stream()
+                .limit(TOP_VEHICLES_LIMIT)
+                .map(obj -> {
+                    VehicleEntity vehicle = (VehicleEntity) obj[0];
+                    Long count = (Long) obj[1];
+                    return new TopVehicleResponseDto(vehicle.getVehicleNumber(), count);
+                })
+                .collect(Collectors.toList());
+    }
 
     /**
      * 어제 포함 과거 7일간의 운행 수를 반환
@@ -67,9 +91,9 @@ public class DashboardService {
     //기존 dashboard api 전체 차량 개수와 status에 따른 각 개수를 반환한다
     public DashboardResponseDto getDashboardData() {
         long total = vehicleRepository.count();
-        long active = vehicleRepository.countByStatus(ACTIVE);
-        long inactive = vehicleRepository.countByStatus(INACTIVE);
-        long inspect = vehicleRepository.countByStatus(INSPECTING);
+        long active = vehicleRepository.countByStatus(VehicleStatus.ACTIVE);
+        long inactive = vehicleRepository.countByStatus(VehicleStatus.INACTIVE);
+        long inspect = vehicleRepository.countByStatus(VehicleStatus.INSPECTING);
 
         return DashboardResponseDto.builder()
                 .vehicles(total)
@@ -119,7 +143,7 @@ public class DashboardService {
                 .map(record -> DashboardMapDto.builder()
                         .latitude(record.getLatitude())
                         .longitude(record.getLongitude())
-                        .status(finalIsFallback ? INACTIVE : record.getStatus())  // ← Fallback 여부에 따라 status 결정
+                        .status(finalIsFallback ? VehicleStatus.INACTIVE : record.getStatus())  // ← Fallback 여부에 따라 status 결정
                         .vehicleNumber(record.getVehicle().getVehicleNumber())
                         .type(record.getVehicle().getType())
                         .dataRetrievedAt(record.getOTime())

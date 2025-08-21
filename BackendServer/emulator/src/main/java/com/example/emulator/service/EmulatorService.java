@@ -1,51 +1,30 @@
 package com.example.emulator.service;
 
 import com.example.emulator.model.*;
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
-// common 모듈의 엔티티와 리포지토리 사용
-import com.example.entity.GpsRecordEntity;
-import com.example.entity.RecordEntity;
-import com.example.entity.VehicleEntity;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.kafka.converter.MsgConverter;
 import com.example.kafka.model.GpsMsg;
 import com.example.kafka.model.OnOffMsg;
 import com.example.kafka.producer.GpsProducer;
 import com.example.kafka.producer.OnOffProducer;
-import com.example.repository.GpsRecordRepository;
-import com.example.repository.RecordRepository;
-import com.example.repository.VehicleRepository;
-import com.example.repository.DeviceRepository;
-import com.example.model.RecordRequest;
-import com.example.service.RecordService;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.example.global.Class.VehicleStatus.ACTIVE;
-import static com.example.global.Class.VehicleStatus.INACTIVE;
-import static com.example.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class EmulatorService {
 
     private final OnOffProducer onOffProducer;
@@ -80,13 +59,13 @@ public class EmulatorService {
     // 토큰 검증
     public void verifyToken(String authHeader) {
         if(!StringUtils.hasText(authHeader)){
-            throw new CustomException(INVALID_TOKEN_ERROR);
+            throw new CustomException(ErrorCode.INVALID_TOKEN_ERROR);
         }
         String token = authHeader.replace("Bearer ", "").trim();
         try {
             Jwts.parserBuilder().setSigningKey(jwtKey).build().parseClaimsJws(token);
         } catch (Exception e) {
-            throw new CustomException(INVALID_TOKEN_ERROR);
+            throw new CustomException(ErrorCode.INVALID_TOKEN_ERROR);
         }
     }
 
@@ -99,7 +78,7 @@ public class EmulatorService {
             onOffProducer.sendMessage(msg);
         }
         catch (Exception e){
-            throw new CustomException(ONOFF_PRODUCER_ERROR);
+            throw new CustomException(ErrorCode.ONOFF_PRODUCER_ERROR);
         }
         return new StandardResponse("000", "Success", req.getMdn());
     }
@@ -114,7 +93,7 @@ public class EmulatorService {
             onOffProducer.sendMessage(msg);
         }
         catch (Exception e){
-            throw new CustomException(ONOFF_PRODUCER_ERROR);
+            throw new CustomException(ErrorCode.ONOFF_PRODUCER_ERROR);
         }
         return new StandardResponse("000", "Success", req.getMdn());
     }
@@ -126,7 +105,7 @@ public class EmulatorService {
 
         if (req.getCList() == null || req.getCList().isEmpty()) {
             log.warn("[GPS] cList is null or empty for mdn: {}", req.getMdn());
-            throw new CustomException(EMPTY_CLIST_ERROR);
+            throw new CustomException(ErrorCode.EMPTY_CLIST_ERROR);
         }
 
         GpsMsg msg = msgConverter.GpsCycleRequestToGpsMsg(req, "GPS");
@@ -135,7 +114,7 @@ public class EmulatorService {
             gpsProducer.sendMessage(msg);
         }
         catch (Exception e){
-            throw new CustomException(GPS_PRODUCER_ERROR);
+            throw new CustomException(ErrorCode.GPS_PRODUCER_ERROR);
         }
         return new StandardResponse("000", "Success", req.getMdn());
     }

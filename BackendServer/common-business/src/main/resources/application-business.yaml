@@ -1,0 +1,8 @@
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false   # 숫자 타임스탬프(에포크) 사용 금지
+    date-format: yyyy-MM-dd'T'HH:mm:ss
+
+springdoc:
+  override-with-generic-response: false

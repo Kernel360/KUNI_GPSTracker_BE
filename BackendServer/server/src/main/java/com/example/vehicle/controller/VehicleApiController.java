@@ -1,6 +1,6 @@
 package com.example.vehicle.controller;
 
-import com.example.global.Class.VehicleStatus;
+import com.example.model.VehicleStatus;
 import com.example.vehicle.Service.VehicleApiService;
 import com.example.entity.VehicleEntity;
 import com.example.vehicle.model.VehicleCreateDto;

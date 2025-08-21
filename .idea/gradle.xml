@@ -11,6 +11,10 @@
           <set>
             <option value="$PROJECT_DIR$/BackendServer" />
             <option value="$PROJECT_DIR$/BackendServer/common" />
+            <option value="$PROJECT_DIR$/BackendServer/common-business" />
+            <option value="$PROJECT_DIR$/BackendServer/common-database" />
+            <option value="$PROJECT_DIR$/BackendServer/common-global" />
+            <option value="$PROJECT_DIR$/BackendServer/common-log" />
             <option value="$PROJECT_DIR$/BackendServer/consumer" />
             <option value="$PROJECT_DIR$/BackendServer/emulator" />
             <option value="$PROJECT_DIR$/BackendServer/server" />

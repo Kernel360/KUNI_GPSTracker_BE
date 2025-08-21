@@ -1,0 +1,23 @@
+spring:
+  config:
+    import: optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: 1
+      enable-idempotence: true
+      retries: 10
+      linger-ms: 20                     # 묶음 전송
+      batch-size: 131072                # 128KB
+      compression-type: lz4             # 네트워크 절약(옵션)
+
+server:
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    org.springframework.boot.context.config: DEBUG
+    org.springframework.security: DEBUG

@@ -4,3 +4,8 @@ include 'common'
 include 'emulator'
 include 'server'
 include 'consumer'
+
+include 'common-global'
+include 'common-database'
+include 'common-business'
+include 'common-log'

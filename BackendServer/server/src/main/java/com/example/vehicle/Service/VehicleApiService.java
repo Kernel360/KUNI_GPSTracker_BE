@@ -1,8 +1,8 @@
 package com.example.vehicle.Service;
 
-import com.example.global.Class.VehicleStatus;
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
+import com.example.model.VehicleStatus;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.entity.GpsRecordEntity;
 import com.example.repository.GpsRecordRepository;
 import com.example.entity.RecordEntity;
@@ -12,6 +12,7 @@ import com.example.repository.VehicleRepository;
 import com.example.vehicle.model.VehicleCreateDto;
 import com.example.vehicle.model.VehicleListResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-import static com.example.global.Class.VehicleStatus.*;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class VehicleApiService {
 
     private final VehicleRepository vehicleRepository;
@@ -32,27 +32,24 @@ public class VehicleApiService {
     private final GpsRecordRepository gpsRecordRepository;
     private final Random random = new Random();
 
-    /**
-     * 차량 등록 : Repository에 차량 entity를 등록한다.
-     * 차량 등록 후 RecordEntity와 GpsRecordEntity에 초기 데이터를 생성한다.
-     *
-     * @param dto : vehicleNumber와 vehicleName을 field로 가진다.
-     * @return VehicleEntity  : dto를 이용해 Builder로 Entity 생성 후 반환
-     */
-	  @Transactional
+    @Transactional
     public VehicleEntity createVehicle(VehicleCreateDto dto) {
 
-          if (vehicleRepository.existsByVehicleNumber(dto.getVehicleNumber())) {
-              throw new CustomException(ErrorCode.VEHICLE_ALREADY_EXISTS); // 이미 등록된 차량인지 확인
-          }
+        String vehicleNumber = dto.getVehicleNumber();
+
+        // 이미 존재하는 차량 번호 체크
+        if (vehicleRepository.existsByVehicleNumber(vehicleNumber)) {
+            log.warn("차량 등록 실패 - 이미 존재하는 차량 번호: {}", vehicleNumber);
+            throw new CustomException(ErrorCode.VEHICLE_ALREADY_EXISTS);
+        }
 
           // 무작위 초기 위치 생성 (한국 지역 기준)
         double initialLatitude = generateRandomLatitude();
         double initialLongitude = generateRandomLongitude();
 
         VehicleEntity entity = VehicleEntity.builder()
-                .vehicleNumber(dto.getVehicleNumber())
-                .status(INACTIVE)
+                .vehicleNumber(vehicleNumber)
+                .status(VehicleStatus.INACTIVE)
                 .totalDist(0L)
                 .type(dto.getVehicleName())
                 .createDate(LocalDateTime.now())
@@ -81,44 +78,33 @@ public class VehicleApiService {
                 .build();
         
         gpsRecordRepository.save(gpsRecordEntity);
-        
+
+        log.info("차량 등록 성공: {}", saved.getVehicleNumber());
+
         return saved;
     }
 
-    
-    //무작위 위도 생성 (한국 지역: 33.0 ~ 38.5)
     private double generateRandomLatitude() {
         return 33.0 + (random.nextDouble() * 5.5);
     }
 
-    
-    //무작위 경도 생성 (한국 지역: 124.5 ~ 132.0)
     private double generateRandomLongitude() {
         return 124.5 + (random.nextDouble() * 7.5);
     }
 
-    /**
-     * 차량 리스트 조회 : 차량 타입과 상태에 따라 페이지네이션된 차량 리스트를 반환한다.
-     * @param pageable page, sort 정보를 가진다정
-     * @param vehicleName 차량 번호
-     * @param status 차량 상태
-     * @return Page<VehicleListResponse> : 차량 리스트를 반환한다.
-     */
     public Page<VehicleListResponse> getVehicleList(Pageable pageable, String vehicleName, VehicleStatus status) {
         return status == null ?
             vehicleRepository.findAllByVehicleNumberContains(vehicleName == null ? "" : vehicleName, pageable)
-                .map(VehicleListResponse::from
-                ) :
+                .map(VehicleListResponse::from) :
             vehicleRepository.findAllByStatusAndVehicleNumberContains(status, vehicleName == null ? "" : vehicleName,
-                pageable).map(VehicleListResponse::from
-            );
+                pageable).map(VehicleListResponse::from);
     }
 
-    // 삭제
     @Transactional
     public void deleteByVehicleNumber(String vehicleNumber) {
         VehicleEntity vehicle = vehicleRepository.findByVehicleNumber(vehicleNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND)); // 차량이 존재하지 않을 때
         vehicleRepository.delete(vehicle);
+        log.info("차량 삭제 완료: {}", vehicleNumber);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.user.service;
 
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.jwt.JwtUtil;
 import com.example.user.db.TokenEntity;
 import com.example.user.db.TokenRepository;

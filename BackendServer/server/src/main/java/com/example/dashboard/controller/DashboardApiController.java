@@ -3,8 +3,7 @@ package com.example.dashboard.controller;
 import com.example.dashboard.model.DashboardMapDto;
 import com.example.dashboard.model.DashboardResponseDto;
 import com.example.dashboard.service.DashboardService;
-
-import com.example.global.Class.VehicleStatus;
+import com.example.dashboard.model.TopVehicleResponseDto;
 
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,4 +61,33 @@ public class DashboardApiController {
     ) {
         return ResponseEntity.ok(dashboardService.getAllVehicleLocation(vehicleNumbers));
     }
+
+
+    @Operation(summary = "최근 1주일 운행량 TOP 3 차량 조회", description = "최근 1주일간 운행 횟수가 가장 많은 차량 3대 조회", responses = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "TOP 3 차량 조회 성공",
+                    content = @Content(
+                            array = @ArraySchema(
+                                    schema = @Schema(implementation = TopVehicleResponseDto.class)
+                            ),
+                            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    name = "TopVehicleResponseDto",
+                                    value = """
+                                        [
+                                          {"vehicleNumber": "12가3456", "driveCount": 14},
+                                          {"vehicleNumber": "34나5678", "driveCount": 12},
+                                          {"vehicleNumber": "56다9012", "driveCount": 10}
+                                        ]
+                                        """
+                            )
+                    )
+            )
+    })
+    @GetMapping("/top-vehicles")
+    public ResponseEntity<List<TopVehicleResponseDto>> getWeeklyTopVehicles() {
+        List<TopVehicleResponseDto> topVehicles = dashboardService.getWeeklyTopVehicles();
+        return ResponseEntity.ok(topVehicles);
+    }
+
 }

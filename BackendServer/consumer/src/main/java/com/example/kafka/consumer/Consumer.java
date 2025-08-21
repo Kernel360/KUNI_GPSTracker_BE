@@ -3,6 +3,7 @@ package com.example.kafka.consumer;
 import com.example.kafka.model.GpsMsg;
 import com.example.kafka.model.OnOffMsg;
 import com.example.kafka.service.KafkaService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
