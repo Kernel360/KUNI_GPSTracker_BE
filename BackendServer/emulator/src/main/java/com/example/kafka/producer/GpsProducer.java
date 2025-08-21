@@ -22,7 +22,7 @@ public class GpsProducer {
 
         kafkaTemplate.send(
                 Topic.MDN_TOPIC,
-            String.valueOf(message.getMid()),
+            String.valueOf(message.getMdn()),
             objectMapper.writeValueAsString(message)
         );
     }
