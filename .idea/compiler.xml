@@ -7,11 +7,13 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.38/57f8f5e02e92a30fd21b80cbd426a4172b5f8e29/lombok-1.18.38.jar" />
         </processorPath>
-        <module name="BackendServer.common.main" />
-        <module name="BackendServer.common-database.main" />
+        <module name="BackendServer.common-log.main" />
         <module name="BackendServer.consumer.main" />
-        <module name="BackendServer.server.main" />
         <module name="BackendServer.common-business.main" />
+        <module name="BackendServer.common.main" />
+        <module name="BackendServer.support.main" />
+        <module name="BackendServer.common-database.main" />
+        <module name="BackendServer.server.main" />
         <module name="BackendServer.common-global.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
@@ -22,9 +24,6 @@
         <module name="BackendServer.emulator.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="BackendServer.common-log.test" target="17" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

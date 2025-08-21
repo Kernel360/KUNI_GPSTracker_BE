@@ -3,6 +3,7 @@ package com.example.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.security.Key;
 import java.util.Date;
@@ -12,9 +13,12 @@ import com.example.db.UserRole;
 @Component
 public class JwtUtil {
 
-    private final Key secretKey = Keys.hmacShaKeyFor(
-            "very-secret-key-very-secret-key-123456".getBytes()
-    );
+    private final Key secretKey;
+
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
     private final long expiration = 86400000; // 1일
 
     // 토큰 생성 시 username과 role을 클레임에 포함

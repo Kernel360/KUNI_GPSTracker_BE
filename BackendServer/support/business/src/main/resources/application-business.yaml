@@ -6,3 +6,4 @@ spring:
 
 springdoc:
   override-with-generic-response: false
+

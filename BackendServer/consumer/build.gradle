@@ -1,28 +1,7 @@
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '3.5.3'
-    id 'io.spring.dependency-management' version '1.1.7'
-}
-
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
-repositories {
-    mavenCentral()
 }
 
 // 독립적으로 실행 가능한 JAR 생성
@@ -33,17 +12,15 @@ bootJar {
 jar { enabled = true }
 
 dependencies {
-    implementation project(':common')
-    implementation project(':common-global')
-    implementation project(':common-database')
-    implementation project(':common-business')
-    implementation project(':common-log')
+    implementation project(':support:common')
+    implementation project(':support:global')
+    implementation project(':support:database')
+    implementation project(':support:business')
+    implementation project(':support:log')
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.projectlombok:lombok'
 
     //kafka
     implementation 'org.springframework.kafka:spring-kafka'

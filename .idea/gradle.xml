@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/BackendServer/consumer" />
             <option value="$PROJECT_DIR$/BackendServer/emulator" />
             <option value="$PROJECT_DIR$/BackendServer/server" />
+            <option value="$PROJECT_DIR$/BackendServer/support" />
           </set>
         </option>
       </GradleProjectSettings>

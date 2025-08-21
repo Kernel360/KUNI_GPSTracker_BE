@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.security.Key;
 import java.util.Date;
@@ -31,8 +32,8 @@ public class EmulatorService {
     private final GpsProducer gpsProducer;
     private final MsgConverter msgConverter;
 
-    //@Value("${JWT_SECRET}")
-    private String secretBase64 = "SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI=";
+    @Value("${jwt.secret-base64}")
+    private String secretBase64;
 
     private final Map<String, String> tokenStore = new ConcurrentHashMap<>();
     private Key jwtKey;

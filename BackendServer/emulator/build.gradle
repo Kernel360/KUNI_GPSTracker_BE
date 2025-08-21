@@ -1,28 +1,7 @@
 plugins {
-	id 'java'
 	id 'org.springframework.boot' version '3.2.12'
-	id 'io.spring.dependency-management' version '1.1.7'
+
 }
-
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-repositories {
-	mavenCentral()
-}
-
 // 독립적으로 실행 가능한 JAR 생성
 bootJar {
 	enabled = true
@@ -31,13 +10,10 @@ bootJar {
 jar { enabled = true }
 
 dependencies {
-	implementation project(':common-global')
-	implementation project(':common-log')
+	implementation project(':support:global')
+	implementation project(':support:log')
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
 
 	// ✅ [추가] Jakarta 어노테이션 (@PostConstruct)
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
