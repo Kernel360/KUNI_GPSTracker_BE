@@ -120,6 +120,10 @@ resource "aws_ecs_task_definition" "emulator" {
         }
       ]
       environment = [
+        { name = "DB_HOST", value = aws_db_instance.main.address },
+        { name = "DB_NAME", value = var.db_name },
+        { name = "DB_USERNAME", value = var.db_username },
+        { name = "DB_PASSWORD", value = var.db_password },
         { name = "KAFKA_BOOTSTRAP_SERVERS", value = "${aws_instance.kafka_server.private_ip}:9092" },
         { name = "TZ", value = "Asia/Seoul" },
       ]
@@ -234,8 +238,8 @@ resource "aws_ecs_service" "consumer" {
 
 # Auto Scaling 설정 (Main App)
 resource "aws_appautoscaling_target" "main" {
-  max_capacity       = 4
-  min_capacity       = 2
+  max_capacity       = 2
+  min_capacity       = 1
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
