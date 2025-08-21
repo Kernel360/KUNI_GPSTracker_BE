@@ -4,26 +4,16 @@ server:
 
 spring:
   config:
-    import: optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+    import:
+      - optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+      - classpath:application-global.yaml        # common-global의 YAML
+      - classpath:application-log.yaml           # common-log의
+
 
   jackson:
     serialization:
-      write-dates-as-timestamps: false
+      write-dates-as-timestamps: false   # 숫자 타임스탬프(에포크) 사용 금지
     date-format: yyyy-MM-dd'T'HH:mm:ss
 
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: 1
-      enable-idempotence: true
-      retries: 10
-      linger-ms: 20                     # 묶음 전송
-      batch-size: 131072                # 128KB
-      compression-type: lz4             # 네트워크 절약(옵션)
-
-logging:
-  level:
-    org.springframework.boot.context.config: DEBUG
-    org.springframework.security: DEBUG
+springdoc:
+  override-with-generic-response: false

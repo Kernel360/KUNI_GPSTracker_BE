@@ -1,49 +1,11 @@
 spring:
   config:
-    import: optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false   # 숫자 타임스탬프(에포크) 사용 금지
-    date-format: yyyy-MM-dd'T'HH:mm:ss
-  jpa:
-    show-sql: off
-    properties:
-      format_sql: true
-      dialect: org.hibernate.dialect.MySQL8Dialect
-      hibernate:
-        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    hibernate:
-      ddl-auto: update
-  datasource:
-    url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}?allowPublicKeyRetrieval=true
-
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      enable-auto-commit: false         # 수동 커밋
-      allow-auto-create-topics: false   # 토픽 자동 생성 금지(운영 습관)
-      auto-offset-reset: latest         # 필요시 earliest
-      max-poll-records: 500
-      fetch-min-bytes: 1
-      fetch-max-wait-ms: 500
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: 1
-      enable-idempotence: true
-      retries: 10
-      linger-ms: 20                     # 묶음 전송
-      batch-size: 131072                # 128KB
-      compression-type: lz4             # 네트워크 절약(옵션)
-    listener:
-      concurrency: 3                    # 컨슈머 스레드 수 (파티션 수에 맞춰 조정)
-      ack-mode: manual
+    import:
+      - optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+      - classpath:application-business.yaml      # common-business의 YAML
+      - classpath:application-database.yaml      # common-database의 YAML
+      - classpath:application-global.yaml        # common-global의 YAML
+      - classpath:application-log.yaml           # common-log의 YAML
 
 server:
   port: 8085
