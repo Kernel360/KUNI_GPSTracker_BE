@@ -163,6 +163,8 @@ resource "aws_ecs_task_definition" "consumer" {
         { name = "DB_PASSWORD", value = var.db_password },
         { name = "KAFKA_BOOTSTRAP_SERVERS", value = "${aws_instance.kafka_server.private_ip}:9092" },
         { name = "TZ", value = "Asia/Seoul" },
+        { name = "JWT_SECRET", value = var.jwt_secret },
+        { name = "JWT_SECRET_BASE64", value = var.jwt_secret_base64 }
       ]
       logConfiguration = {
         logDriver = "awslogs"
