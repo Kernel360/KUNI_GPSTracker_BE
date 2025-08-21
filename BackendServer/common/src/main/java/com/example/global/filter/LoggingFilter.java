@@ -36,8 +36,12 @@ public class LoggingFilter extends OncePerRequestFilter {
     } finally {
       long duration = System.currentTimeMillis() - startTime;
 
-      String requestBody = new String(requestWrapper.getContentAsByteArray(), request.getCharacterEncoding());
-      String responseBody = new String(responseWrapper.getContentAsByteArray(), response.getCharacterEncoding());
+      // 인코딩 처리 (응답은 강제로 UTF-8 fallback 적용)
+      String requestEncoding = request.getCharacterEncoding() != null ? request.getCharacterEncoding() : "UTF-8";
+      String responseEncoding = response.getCharacterEncoding() != null ? response.getCharacterEncoding() : "UTF-8";
+
+      String requestBody = new String(requestWrapper.getContentAsByteArray(), requestEncoding);
+      String responseBody = new String(responseWrapper.getContentAsByteArray(), responseEncoding);
 
       LOGGER.info("""
                     [HTTP REQUEST]
