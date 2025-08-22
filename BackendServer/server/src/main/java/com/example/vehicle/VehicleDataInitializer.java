@@ -19,11 +19,13 @@ public class VehicleDataInitializer {
   private final VehicleRepository vehicleRepository;
 
   private final List<String> vehicleNumbers = List.of(
+
       "37허9534", "77하9129", "47하7226", "18하9305", "42호3796",
       "89하8148", "25하2382", "88허2646", "64허1225", "99하5525",
       "26호6540", "50호2768", "94호8121", "19하5914", "70하3860",
       "20호9563", "79허1985", "72하7318", "69하4844", "47호5239"
   );
+
 
   @PostConstruct
   public void initVehicles() {
