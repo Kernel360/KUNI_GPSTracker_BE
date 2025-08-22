@@ -62,11 +62,23 @@ public class LocationService {
         VehicleStatus status = (diff.toMinutes() >= 2) ? VehicleStatus.INACTIVE : VehicleStatus.ACTIVE;
 
         // 6️⃣ 2분 전 기준 GPS 선택 (없으면 에러 발생)
-        LocalDateTime targetTime = now.minusMinutes(2);
-        GpsRecordEntity targetGps = gpsList.stream()
-            .filter(gps -> !gps.getOTime().isAfter(targetTime))
-            .max(Comparator.comparing(GpsRecordEntity::getOTime))
-            .orElseThrow(() -> new CustomException(ErrorCode.GPS_RECORD_TOO_RECENT));
+        GpsRecordEntity targetGps;
+
+        if (latestRecord.getOffTime() != null) {
+            // 🚗 운행 종료 상태라면 → offTime 기준으로 가장 마지막 위치 반환
+            targetGps = gpsList.stream()
+                    .filter(gps -> !gps.getOTime().isAfter(latestRecord.getOffTime()))
+                    .max(Comparator.comparing(GpsRecordEntity::getOTime))
+                    .orElse(latestGps); // 만약 없으면 그냥 최신값 사용
+        } else {
+            // 🚗 운행 중 상태라면 → 기존 로직(2분 전 기준 GPS)
+            LocalDateTime targetTime = now.minusMinutes(2);
+            targetGps = gpsList.stream()
+                    .filter(gps -> !gps.getOTime().isAfter(targetTime))
+                    .max(Comparator.comparing(GpsRecordEntity::getOTime))
+                    .orElse(latestGps); // 없으면 최신값
+        }
+
 
 
         // 7️⃣ 주행 시간 계산
