@@ -59,7 +59,7 @@ public class LocationService {
         Duration diff = Duration.between(latestGps.getOTime(), now);
 
         // 5️⃣ 상태 결정: 최근 데이터가 2분 이상 오래되면 INACTIVE
-        VehicleStatus status = (diff.toMinutes() >= 2) ? VehicleStatus.INACTIVE : VehicleStatus.ACTIVE;
+        VehicleStatus status = vehicle.getStatus();
 
         // 6️⃣ 2분 전 기준 GPS 선택 (없으면 에러 발생)
         GpsRecordEntity targetGps;
