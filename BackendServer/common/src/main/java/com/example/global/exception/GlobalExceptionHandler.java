@@ -3,7 +3,9 @@ package com.example.global.exception;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -20,11 +23,25 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+	private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorCode, String message, HttpServletRequest request) {
+		ErrorResponse response = ErrorResponse.builder()
+				.timeStamp(LocalDateTime.now())
+				.status(status.value())
+				.error(errorCode)
+				.message(message)
+				.path(request.getRequestURI())
+				.build();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+
+		return new ResponseEntity<>(response, headers, status);
+	}
+
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> globalException(CustomException e) {
-		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-		// ✅ stackTrace 제외, 메시지만 출력
 		log.error("""
                 [CustomException 발생]
                 - Path     : {}
@@ -39,37 +56,19 @@ public class GlobalExceptionHandler {
 				e.getMessage()
 		);
 
-		ErrorResponse response = ErrorResponse.builder()
-				.timeStamp(LocalDateTime.now())
-				.status(e.getErrorCode().getStatus())
-				.error(e.getErrorCode().getCode())
-				.message(e.getMessage())
-				.path(request.getRequestURI())
-				.build();
-
-		return ResponseEntity.status(e.getErrorCode().getStatus()).body(response);
+		return buildResponse(HttpStatus.valueOf(e.getErrorCode().getStatus()), e.getErrorCode().getCode(), e.getMessage(), request);
 	}
 
-	// @Valid 예외 처리
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
-		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 		String errorMessage = e.getBindingResult().getFieldError().getDefaultMessage();
 
-		// ✅ stackTrace 제외, 메시지만 출력
 		log.error("[MethodArgumentNotValidException] Path: {}, Message: {}", request.getRequestURI(), errorMessage);
 
-		ErrorResponse response = ErrorResponse.builder()
-				.timeStamp(LocalDateTime.now())
-				.status(400)
-				.error("BAD_REQUEST")
-				.message(errorMessage)
-				.path(request.getRequestURI())
-				.build();
-		return ResponseEntity.badRequest().body(response);
+		return buildResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", errorMessage, request);
 	}
 
-	// DTO enum 값 오류 처리
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleEnumMismatchError(HttpMessageNotReadableException ex) {
 		String errorMessage = "잘못된 요청 형식입니다. 입력 값을 확인해주세요.";
@@ -86,20 +85,10 @@ public class GlobalExceptionHandler {
 			}
 		}
 
-		HttpServletRequest request = ((ServletRequestAttributes)
-				RequestContextHolder.currentRequestAttributes()).getRequest();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-		// ✅ stackTrace 제외, 메시지만 출력
 		log.error("[HttpMessageNotReadableException] Path: {}, Message: {}", request.getRequestURI(), errorMessage);
 
-		ErrorResponse response = ErrorResponse.builder()
-				.timeStamp(LocalDateTime.now())
-				.status(HttpStatus.BAD_REQUEST.value())
-				.error("BAD_REQUEST")
-				.message(errorMessage)
-				.path(request.getRequestURI())
-				.build();
-
-		return ResponseEntity.badRequest().body(response);
+		return buildResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", errorMessage, request);
 	}
 }

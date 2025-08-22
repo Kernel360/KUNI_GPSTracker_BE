@@ -13,6 +13,8 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class LoggingFilter extends OncePerRequestFilter {
@@ -26,7 +28,6 @@ public class LoggingFilter extends OncePerRequestFilter {
       FilterChain filterChain
   ) throws ServletException, IOException {
 
-    // 요청/응답 Wrapping
     var requestWrapper = new ContentCachingRequestWrapper(request);
     var responseWrapper = new ContentCachingResponseWrapper(response);
 
@@ -36,30 +37,32 @@ public class LoggingFilter extends OncePerRequestFilter {
     } finally {
       long duration = System.currentTimeMillis() - startTime;
 
-      // 인코딩 처리 (응답은 강제로 UTF-8 fallback 적용)
-      String requestEncoding = request.getCharacterEncoding() != null ? request.getCharacterEncoding() : "UTF-8";
-      String responseEncoding = response.getCharacterEncoding() != null ? response.getCharacterEncoding() : "UTF-8";
+      // 요청 인코딩 (fallback: UTF-8)
+      Charset requestCharset = request.getCharacterEncoding() != null
+          ? Charset.forName(request.getCharacterEncoding())
+          : StandardCharsets.UTF_8;
+      String requestBody = new String(requestWrapper.getContentAsByteArray(), requestCharset);
 
-      String requestBody = new String(requestWrapper.getContentAsByteArray(), requestEncoding);
-      String responseBody = new String(responseWrapper.getContentAsByteArray(), responseEncoding);
+      // 응답 인코딩 → 무조건 UTF-8 강제
+      String responseBody = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
 
       LOGGER.info("""
-                    [HTTP REQUEST]
-                    Method: {}
-                    Path  : {}
-                    Body  : {}
-                    """,
+                            [HTTP REQUEST]
+                            Method: {}
+                            Path  : {}
+                            Body  : {}
+                            """,
           request.getMethod(),
           request.getRequestURI(),
           requestBody
       );
 
       LOGGER.info("""
-                    [HTTP RESPONSE]
-                    Status: {}
-                    Duration: {}ms
-                    Body: {}
-                    """,
+                            [HTTP RESPONSE]
+                            Status: {}
+                            Duration: {}ms
+                            Body: {}
+                            """,
           response.getStatus(),
           duration,
           responseBody
@@ -69,9 +72,6 @@ public class LoggingFilter extends OncePerRequestFilter {
     }
   }
 
-  /**
-   * Swagger 관련 요청은 로깅 제외
-   */
   @Override
   protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
     String uri = request.getRequestURI();
