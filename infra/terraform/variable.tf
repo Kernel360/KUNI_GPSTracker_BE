@@ -23,3 +23,15 @@ variable "s3_bucket_name" {
   description = "S3 버킷 이름"
   type        = string
 }
+
+variable "jwt_secret" {
+  description = "JWT 토큰 생성/검증에 사용하는 비밀 키 (일반 문자열)"
+  type        = string
+  sensitive   = true
+}
+
+variable "jwt_secret_base64" {
+  description = "JWT 토큰 생성/검증에 사용하는 Base64 인코딩된 비밀 키"
+  type        = string
+  sensitive   = true
+}

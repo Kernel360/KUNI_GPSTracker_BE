@@ -1,9 +1,9 @@
 spring:
   config:
-    import: optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+    import: optional:file:.env.properties
   jackson:
     serialization:
-      write-dates-as-timestamps: false   # 숫자 타임스탬프(에포크) 사용 금지
+      write-dates-as-timestamps: false
     date-format: yyyy-MM-dd'T'HH:mm:ss
   jpa:
     show-sql: off
@@ -16,19 +16,21 @@ spring:
       ddl-auto: update
   datasource:
     url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}?allowPublicKeyRetrieval=true
-
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  jwt:
+    secret: ${JWT_SECRET}
+    secret-base64: ${JWT_SECRET_BASE64}
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      enable-auto-commit: false         # 수동 커밋
-      allow-auto-create-topics: false   # 토픽 자동 생성 금지(운영 습관)
-      auto-offset-reset: latest         # 필요시 earliest
+      enable-auto-commit: false
+      allow-auto-create-topics: false
+      auto-offset-reset: latest
       max-poll-records: 500
       fetch-min-bytes: 1
       fetch-max-wait-ms: 500
@@ -38,20 +40,21 @@ spring:
       acks: 1
       enable-idempotence: true
       retries: 10
-      linger-ms: 20                     # 묶음 전송
-      batch-size: 131072                # 128KB
-      compression-type: lz4             # 네트워크 절약(옵션)
+      linger-ms: 20
+      batch-size: 131072
+      compression-type: lz4
     listener:
-      concurrency: 3                    # 컨슈머 스레드 수 (파티션 수에 맞춰 조정)
+      concurrency: 3
       ack-mode: manual
 
 springdoc:
   override-with-generic-response: false
 
 logging:
-  level:
-    org.springframework.boot.context.config: DEBUG  # ⬅️ 추가됨
-    org.springframework.security: DEBUG   # ⬅️ 추가
+  config: classpath:logback-spring.xml
+  # level:
+  #   org.springframework.boot.context.config: DEBUG
+  #   org.springframework.security: DEBUG
 
 server:
   forward-headers-strategy: framework

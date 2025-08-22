@@ -20,7 +20,8 @@ public enum ErrorCode {
 	VEHICLE_NOT_FOUND(404, "VEHICLE-001", "해당 차량을 찾을 수 없습니다."),
 	VEHICLE_ALREADY_EXISTS(409, "VEHICLE-002", "이미 등록된 차량입니다."),
 	INVALID_VEHICLE_STATUS(400, "VEHICLE-003", "차량 상태가 올바르지 않습니다."),
-
+	INVALID_VEHICLE_NUMBER(400, "VEHICLE-004", "차량 번호 형식이 올바르지 않습니다. '하/허/호' 형식으로 입력하세요."),
+	INVALID_VEHICLE_TYPE(400, "VEHICLE-005", "차량 종류가 올바르지 않습니다. MERCEDES, FERRARI, PORSCHE 중 하나를 입력하세요."),
 	// -------------------- Record --------------------
 	RECORD_NOT_FOUND(404, "RECORD-001", "운행 기록이 존재하지 않습니다."),
 	INVALID_RECORD_DURATION(400, "RECORD-002", "운행 시간 정보가 유효하지 않습니다."),
