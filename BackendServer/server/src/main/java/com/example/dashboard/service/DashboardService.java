@@ -138,11 +138,11 @@ public class DashboardService {
 
         return Stream.concat(
                 latestMinus2.stream()
-                        .filter(r -> r.getVehicle().getStatus() == ACTIVE)
+                        .filter(r -> r.getVehicle().getStatus() == VehicleStatus.ACTIVE)
                         .filter(vehicleFilter)
                         .map(toDto),
                 latestNow.stream()
-                        .filter(r -> r.getVehicle().getStatus() == INACTIVE)
+                        .filter(r -> r.getVehicle().getStatus() == VehicleStatus.INACTIVE)
                         .filter(vehicleFilter)
                         .map(toDto)
         ).toList();
