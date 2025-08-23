@@ -3,9 +3,6 @@ package com.example.dashboard.service;
 import com.example.dashboard.model.DashboardMapDto;
 import com.example.dashboard.model.DashboardResponseDto;
 import com.example.dashboard.model.DashboardStatusResponseDto;
-import com.example.dashboard.model.TopVehicleResponseDto;
-import com.example.entity.VehicleEntity;
-import com.example.global.Class.VehicleStatus;
 import com.example.entity.GpsRecordEntity;
 import com.example.model.DayCountView;
 import com.example.repository.GpsRecordRepository;
@@ -14,6 +11,11 @@ import com.example.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.dashboard.model.TopVehicleResponseDto;
+import com.example.entity.VehicleEntity;
+
+
+import com.example.model.VehicleStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,8 +28,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.example.global.Class.VehicleStatus.*;
 
 
 @Service
@@ -96,9 +96,9 @@ public class DashboardService {
     //기존 dashboard api 전체 차량 개수와 status에 따른 각 개수를 반환한다
     public DashboardResponseDto getDashboardData() {
         long total = vehicleRepository.count();
-        long active = vehicleRepository.countByStatus(ACTIVE);
-        long inactive = vehicleRepository.countByStatus(INACTIVE);
-        long inspect = vehicleRepository.countByStatus(INSPECTING);
+        long active = vehicleRepository.countByStatus(VehicleStatus.ACTIVE);
+        long inactive = vehicleRepository.countByStatus(VehicleStatus.INACTIVE);
+        long inspect = vehicleRepository.countByStatus(VehicleStatus.INSPECTING);
 
         return DashboardResponseDto.builder()
                 .vehicles(total)
@@ -138,11 +138,11 @@ public class DashboardService {
 
         return Stream.concat(
                 latestMinus2.stream()
-                        .filter(r -> r.getVehicle().getStatus() == ACTIVE)
+                        .filter(r -> r.getVehicle().getStatus() == VehicleStatus.ACTIVE)
                         .filter(vehicleFilter)
                         .map(toDto),
                 latestNow.stream()
-                        .filter(r -> r.getVehicle().getStatus() == INACTIVE)
+                        .filter(r -> r.getVehicle().getStatus() == VehicleStatus.INACTIVE)
                         .filter(vehicleFilter)
                         .map(toDto)
         ).toList();

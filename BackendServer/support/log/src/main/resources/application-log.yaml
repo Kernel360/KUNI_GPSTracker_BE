@@ -1,0 +1,6 @@
+
+logging:
+  config: classpath:logback-spring.xml
+  # level:
+  #   org.springframework.boot.context.config: DEBUG
+  #   org.springframework.security: DEBUG

@@ -1,6 +1,11 @@
 rootProject.name = 'BackendServer'
 
-include 'common'
 include 'emulator'
 include 'server'
 include 'consumer'
+
+include 'support:common'
+include 'support:global'
+include 'support:database'
+include 'support:business'
+include 'support:log'

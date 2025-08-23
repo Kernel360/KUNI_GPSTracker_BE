@@ -1,6 +1,12 @@
-server:
-  port: 8080
-
 spring:
+
+  server:
+    forward-headers-strategy: framework
+    port: 8080
+
   config:
-    import: "classpath:application-common.yaml"
+    import:
+      - optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+      - classpath:application-business.yaml      # common-business의 YAML
+      - classpath:application-database.yaml      # common-database의 YAML
+      - classpath:application-log.yaml           # common-log의 YAML

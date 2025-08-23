@@ -2,7 +2,7 @@ FROM gradle:8.5-jdk17 AS build
 WORKDIR /workspace
 COPY gradlew gradlew.bat settings.gradle build.gradle ./
 COPY gradle ./gradle
-COPY common ./common
+COPY support ./support
 COPY consumer ./consumer
 RUN chmod +x ./gradlew
 RUN ./gradlew :consumer:bootJar --no-daemon

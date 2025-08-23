@@ -1,6 +1,6 @@
 package com.example.config;
 
-import com.example.jwt.JwtFilter;
+import  com.example.jwt.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

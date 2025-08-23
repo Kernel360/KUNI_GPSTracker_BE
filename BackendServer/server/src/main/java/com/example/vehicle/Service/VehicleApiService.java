@@ -1,8 +1,8 @@
 package com.example.vehicle.Service;
 
-import com.example.global.Class.VehicleStatus;
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
+import com.example.model.VehicleStatus;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.entity.GpsRecordEntity;
 import com.example.repository.GpsRecordRepository;
 import com.example.entity.RecordEntity;
@@ -20,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
-
-import static com.example.global.Class.VehicleStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,40 +43,40 @@ public class VehicleApiService {
             throw new CustomException(ErrorCode.VEHICLE_ALREADY_EXISTS);
         }
 
-        // 무작위 초기 위치 생성 (한국 지역 기준)
+          // 무작위 초기 위치 생성 (한국 지역 기준)
         double initialLatitude = generateRandomLatitude();
         double initialLongitude = generateRandomLongitude();
 
         VehicleEntity entity = VehicleEntity.builder()
-            .vehicleNumber(vehicleNumber)
-            .status(INACTIVE)
-            .totalDist(0L)
-            .type(dto.getVehicleName())
-            .createDate(LocalDateTime.now())
-            .build();
+                .vehicleNumber(vehicleNumber)
+                .status(VehicleStatus.INACTIVE)
+                .totalDist(0L)
+                .type(dto.getVehicleName())
+                .createDate(LocalDateTime.now())
+                .build();
 
         VehicleEntity saved = vehicleRepository.save(entity);
-
+        
         RecordEntity recordEntity = RecordEntity.builder()
-            .vehicle(saved)
-            .sumDist("0")
-            .onTime(LocalDateTime.now())
-            .offTime(LocalDateTime.now())
-            .build();
-
+                .vehicle(saved)
+                .sumDist("0")
+                .onTime(LocalDateTime.now())
+                .offTime(LocalDateTime.now())
+                .build();
+        
         RecordEntity savedRecord = recordRepository.save(recordEntity);
-
+        
         GpsRecordEntity gpsRecordEntity = GpsRecordEntity.builder()
-            .record(savedRecord)
-            .vehicle(saved)
-            .status(INACTIVE)
-            .latitude(initialLatitude)
-            .longitude(initialLongitude)
-            .oTime(LocalDateTime.now())
-            .gcd("V")
-            .totalDist("0")
-            .build();
-
+                .record(savedRecord)
+                .vehicle(saved)
+                .status(VehicleStatus.INACTIVE)
+                .latitude(initialLatitude)
+                .longitude(initialLongitude)
+                .oTime(LocalDateTime.now()) 
+                .gcd("V") 
+                .totalDist("0")
+                .build();
+        
         gpsRecordRepository.save(gpsRecordEntity);
 
         log.info("차량 등록 성공: {}", saved.getVehicleNumber());
@@ -105,7 +103,7 @@ public class VehicleApiService {
     @Transactional
     public void deleteByVehicleNumber(String vehicleNumber) {
         VehicleEntity vehicle = vehicleRepository.findByVehicleNumber(vehicleNumber)
-            .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.VEHICLE_NOT_FOUND)); // 차량이 존재하지 않을 때
         vehicleRepository.delete(vehicle);
         log.info("차량 삭제 완료: {}", vehicleNumber);
     }

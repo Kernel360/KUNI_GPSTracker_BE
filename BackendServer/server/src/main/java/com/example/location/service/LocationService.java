@@ -1,7 +1,7 @@
 package com.example.location.service;
 
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.entity.GpsRecordEntity;
 import com.example.repository.GpsRecordRepository;
 import com.example.location.model.Location;
@@ -10,7 +10,7 @@ import com.example.entity.RecordEntity;
 import com.example.repository.RecordRepository;
 import com.example.entity.VehicleEntity;
 import com.example.repository.VehicleRepository;
-import com.example.global.Class.VehicleStatus;
+import com.example.model.VehicleStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

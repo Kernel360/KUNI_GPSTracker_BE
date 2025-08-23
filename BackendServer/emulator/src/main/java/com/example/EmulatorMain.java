@@ -8,4 +8,5 @@ public class EmulatorMain {
     public static void main(String[] args)  {
         SpringApplication.run(EmulatorMain.class, args);
     }
+
 }

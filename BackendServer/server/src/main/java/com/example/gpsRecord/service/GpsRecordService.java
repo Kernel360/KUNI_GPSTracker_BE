@@ -1,8 +1,8 @@
 package com.example.gpsRecord.service;
 
-import com.example.global.Class.VehicleStatus;
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
+import com.example.model.VehicleStatus;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.entity.GpsRecordEntity;
 import com.example.repository.GpsRecordRepository;
 import com.example.gpsRecord.model.GpsRecordRequest;
@@ -13,9 +13,6 @@ import com.example.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

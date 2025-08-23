@@ -4,11 +4,11 @@ package com.example.kafka.service;
 import com.example.entity.GpsRecordEntity;
 import com.example.entity.RecordEntity;
 import com.example.entity.VehicleEntity;
-import com.example.global.exception.CustomException;
-import com.example.global.exception.ErrorCode;
+import com.example.exception.CustomException;
+import com.example.exception.ErrorCode;
 import com.example.kafka.model.GpsMsg;
 import com.example.kafka.model.OnOffMsg;
-import com.example.model.RecordRequest;
+import com.example.Response.RecordRequest;
 import com.example.repository.GpsRecordRepository;
 import com.example.repository.RecordRepository;
 import com.example.repository.VehicleRepository;
@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.example.global.Class.VehicleStatus.ACTIVE;
-import static com.example.global.Class.VehicleStatus.INACTIVE;
+import static com.example.model.VehicleStatus.ACTIVE;
+import static com.example.model.VehicleStatus.INACTIVE;
 
 @Slf4j
 @Service

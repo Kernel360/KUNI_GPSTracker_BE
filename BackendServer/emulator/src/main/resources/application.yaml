@@ -1,6 +1,24 @@
 server:
   port: 8081
+  forward-headers-strategy: framework
 
 spring:
   config:
-    import: "classpath:application-common.yaml"
+    import:
+      - optional:file:.env.properties  # 환경 변수 파일 import (경로 수정 완료)
+      - classpath:application-global.yaml        # common-global의 YAML
+      - classpath:application-log.yaml           # common-log의
+
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false   # 숫자 타임스탬프(에포크) 사용 금지
+    date-format: yyyy-MM-dd'T'HH:mm:ss
+
+  jwt:
+    secret: ${JWT_SECRET}
+    secret-base64: ${JWT_SECRET_BASE64}
+
+springdoc:
+  override-with-generic-response: false
+

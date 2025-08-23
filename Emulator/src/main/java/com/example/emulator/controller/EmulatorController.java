@@ -41,11 +41,8 @@ public class EmulatorController {
     @ResponseBody
     public void changeState(@PathVariable("number") String number, @PathVariable("state") String state, @RequestBody HtmlRequest req) throws IOException {
         Resource res = resourceLoader.getResource(gpsLocation + "/" + number + ".csv");
-
         //2. 서버로 정보 전송
         if(state.equals("ON")) emulatorService.start(res, number, req.getInterval());
         else emulatorService.stop(number);
-
     }
-
 }

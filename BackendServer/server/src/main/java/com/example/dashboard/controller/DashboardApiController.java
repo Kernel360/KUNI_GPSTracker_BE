@@ -5,7 +5,6 @@ import com.example.dashboard.model.DashboardResponseDto;
 import com.example.dashboard.service.DashboardService;
 import com.example.dashboard.model.TopVehicleResponseDto;
 
-import com.example.global.Class.VehicleStatus;
 
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,6 +62,7 @@ public class DashboardApiController {
     ) {
         return ResponseEntity.ok(dashboardService.getAllVehicleLocation(vehicleNumbers));
     }
+
 
     @Operation(summary = "최근 1주일 운행량 TOP 3 차량 조회", description = "최근 1주일간 운행 횟수가 가장 많은 차량 3대 조회", responses = {
             @ApiResponse(

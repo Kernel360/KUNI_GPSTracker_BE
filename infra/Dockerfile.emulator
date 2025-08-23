@@ -7,7 +7,7 @@ COPY gradlew gradlew.bat settings.gradle build.gradle ./
 COPY gradle ./gradle
 
 # 소스 복사 (필요 모듈만)
-COPY common   ./common
+COPY support  ./support
 COPY emulator ./emulator
 
 # 윈도우 환경 대비 (gradlew 실행권한)

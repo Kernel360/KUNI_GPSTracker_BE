@@ -1,7 +1,7 @@
 package com.example.record.controller;
 
-import com.example.model.RecordDetailResponse;
-import com.example.model.RecordListResponse;
+import com.example.Response.RecordDetailResponse;
+import com.example.Response.RecordListResponse;
 import com.example.service.RecordService;
 
 import io.swagger.v3.oas.annotations.Operation;

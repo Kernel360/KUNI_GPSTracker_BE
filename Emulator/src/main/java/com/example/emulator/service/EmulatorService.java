@@ -188,7 +188,7 @@ public class EmulatorService {
         return sendOn(csvResource, mdn)                 // 1. ON
                 .then(sendInitialBurst(csvResource, mdn))// 2) 120개 즉시(60×2) 전송
                 .flatMap(sentCount -> startGps(csvResource, mdn, interval, sentCount));
-                //.then(startGps(csvResource, mdn, interval ,sentCount));  // 2. 주기 전송
+        //.then(startGps(csvResource, mdn, interval ,sentCount));  // 2. 주기 전송
     }
 
     private Mono<Integer> sendInitialBurst(Resource csvResource, String mdn) {
@@ -347,7 +347,7 @@ public class EmulatorService {
 
             var csvToBean = new CsvToBeanBuilder<CSV>(reader)
                     .withType(CSV.class)
-                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreLeadingWhiteSpace(true) // 앞뒤 공백 무시
                     .withSeparator(',')
                     .withSkipLines(0)
                     .build();
@@ -439,6 +439,4 @@ public class EmulatorService {
                         log.error("[{}] GPS 전송 실패: {}", mdn, e.getMessage()))
                 .then();
     }
-
-
 }
