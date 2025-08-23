@@ -6,7 +6,8 @@ WORKDIR /workspace
 COPY gradlew gradlew.bat settings.gradle build.gradle ./
 COPY gradle ./gradle
 
-COPY common   ./support
+# 소스 복사 (필요 모듈만)
+COPY support  ./support
 COPY emulator ./emulator
 
 # 윈도우 환경 대비 (gradlew 실행권한)

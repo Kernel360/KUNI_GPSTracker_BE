@@ -4,6 +4,7 @@ resource "aws_ecr_repository" "main" {
   tags = {
     Name = "main-app-repo"
   }
+  force_delete = true
 }
 
 # ECR 리포지토리 생성 (Emulator App)
@@ -12,6 +13,7 @@ resource "aws_ecr_repository" "emulator" {
   tags = {
     Name = "emulator-app-repo"
   }
+  force_delete = true
 }
 
 # ECR 리포지토리 생성 (Consumer App)
@@ -20,4 +22,5 @@ resource "aws_ecr_repository" "consumer" {
   tags = {
     Name = "consumer-app-repo"
   }
+  force_delete = true
 }

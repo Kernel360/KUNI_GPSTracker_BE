@@ -210,7 +210,7 @@ resource "aws_ecs_service" "emulator" {
   name            = "emulator-app-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.emulator.arn
-  desired_count   = 1
+  desired_count   = 2
   launch_type     = "FARGATE"
   health_check_grace_period_seconds = 120
 
@@ -270,8 +270,8 @@ resource "aws_appautoscaling_policy" "main_cpu" {
 
 # Auto Scaling 설정 (Emulator App)
 resource "aws_appautoscaling_target" "emulator" {
-  max_capacity       = 2
-  min_capacity       = 1
+  max_capacity       = 4
+  min_capacity       = 2
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.emulator.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
