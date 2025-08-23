@@ -7,8 +7,10 @@ import com.example.emulator.service.EmulatorService;
 import com.example.emulator.service.TokenService;
 import com.example.emulator.util.CarRegistry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +26,10 @@ public class EmulatorController {
 
     private final CarRegistry carRegistry;
     private final EmulatorService emulatorService;
-    private final TokenService tokenService;
+    private final ResourceLoader resourceLoader;
+
+    @Value("${emulator.gps.location:classpath:gps}")
+    private String gpsLocation;
 
     @GetMapping
     public String mainPage(Model model) {
@@ -35,32 +40,9 @@ public class EmulatorController {
     @PostMapping("/{number}/{state}")
     @ResponseBody
     public void changeState(@PathVariable("number") String number, @PathVariable("state") String state, @RequestBody HtmlRequest req) throws IOException {
-        Resource res = new ClassPathResource("gps/"+number+".csv");
-        Path csv = res.getFile().toPath();
+        Resource res = resourceLoader.getResource(gpsLocation + "/" + number + ".csv");
         //2. 서버로 정보 전송
-        if(state.equals("ON")) emulatorService.start(csv, number, req.getInterval());
+        if(state.equals("ON")) emulatorService.start(res, number, req.getInterval());
         else emulatorService.stop(number);
-
     }
-
-    @PostMapping("/all/{state}")
-    @ResponseBody
-    public void turnOnAll(@PathVariable String state, @RequestBody OnRequestPayload payload) {
-        if(state.equals("ON")) {
-            emulatorService.turnOnAll(payload.getInterval());
-        }
-        else emulatorService.turnOffAll();
-
-    }
-
-    @PostMapping("/range/{state}")
-    @ResponseBody
-    public void turnOnRange(@PathVariable String state, @RequestBody RangeRequest payload) {
-        if(state.equals("ON")) {
-            emulatorService.turnOnRange(payload.getStart(), payload.getEnd(), payload.getInterval());
-        }
-        else emulatorService.turnOffRange(payload.getStart(), payload.getEnd());
-
-    }
-
 }

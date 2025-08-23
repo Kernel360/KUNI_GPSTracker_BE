@@ -3,40 +3,12 @@
 
     <!-- 패턴 -->
     <property name="CONSOLE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
-    <property name="LOG_DIR" value="${LOG_DIR:-logs}"/>
-    <property name="FILE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
 
     <!-- 콘솔: 사람이 보는 표준 출력 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
-    <!-- WARN/ERROR 파일: 일자별 롤링 -->
-    <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/warn-error.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/warn-error.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level> <!-- WARN 이상만 파일 -->
-        </filter>
-        <encoder>
-            <pattern>${FILE_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
-    <!-- APP_FILE: LoggingFilter 전용, 모든 INFO 로그 기록 -->
-    <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/app.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${FILE_PATTERN}</pattern>
+            <charset>UTF-8</charset> <!-- 👈 한글 깨짐 방지 -->
         </encoder>
     </appender>
 
@@ -44,15 +16,14 @@
     <logger name="org.hibernate.SQL" level="WARN"/>
     <logger name="org.springframework.security" level="INFO"/>
 
-    <!-- LoggingFilter 전용 로거: app.log만 사용, ROOT로 전파 차단 -->
+    <!-- LoggingFilter 전용 로거: 콘솔만 사용 -->
     <logger name="com.example.global.filter.LoggingFilter" level="INFO" additivity="false">
-        <appender-ref ref="APP_FILE"/>
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <!-- ROOT에 콘솔 + WARN_FILE 연결 -->
+    <!-- ROOT에 콘솔 연결 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="WARN_FILE"/>
     </root>
 
 </configuration>

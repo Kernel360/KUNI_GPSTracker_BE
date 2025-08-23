@@ -13,6 +13,8 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class LoggingFilter extends OncePerRequestFilter {
@@ -26,7 +28,6 @@ public class LoggingFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // 요청/응답 Wrapping
         var requestWrapper = new ContentCachingRequestWrapper(request);
         var responseWrapper = new ContentCachingResponseWrapper(response);
 
@@ -36,8 +37,14 @@ public class LoggingFilter extends OncePerRequestFilter {
         } finally {
             long duration = System.currentTimeMillis() - startTime;
 
-            String requestBody = new String(requestWrapper.getContentAsByteArray(), request.getCharacterEncoding());
-            String responseBody = new String(responseWrapper.getContentAsByteArray(), response.getCharacterEncoding());
+            // 요청 인코딩 (fallback: UTF-8)
+            Charset requestCharset = request.getCharacterEncoding() != null
+                    ? Charset.forName(request.getCharacterEncoding())
+                    : StandardCharsets.UTF_8;
+            String requestBody = new String(requestWrapper.getContentAsByteArray(), requestCharset);
+
+            // 응답 인코딩 → 무조건 UTF-8 강제
+            String responseBody = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
 
             LOGGER.info("""
                     [HTTP REQUEST]
@@ -65,9 +72,6 @@ public class LoggingFilter extends OncePerRequestFilter {
         }
     }
 
-    /**
-     * Swagger 관련 요청은 로깅 제외
-     */
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String uri = request.getRequestURI();
