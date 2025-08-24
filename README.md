@@ -242,8 +242,8 @@ DB_NAME=gpsTracker
 DB_USERNAME=root
 DB_PASSWORD=password
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-JWT_SECRET=very-secret-key-very-secret-key-123456
-JWT_SECRET_BASE64=SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI=
+jwt.secret=very-secret-key-very-secret-key-123456
+jwt.secret-base64=SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI=
 
 # Emulator용 (루트/Emulator/.env.properties)
 TARGET_BASE_URL=http://localhost:8081/api/emulator
