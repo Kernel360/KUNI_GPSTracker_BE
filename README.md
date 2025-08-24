@@ -235,15 +235,15 @@ flowchart TD
 ### 7-2. 환경 변수 파일 추가
 
 ```bash
-# BackendServer 공통 (루트/BackendServer/각 모듈의 루트(server,emulator,consumer)/.env.properties)
+# BackendServer 공통 (루트/BackendServer/.env.properties)
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=gpsTracker
 DB_USERNAME=root
 DB_PASSWORD=password
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-JWT_SECRET="very-secret-key-very-secret-key-123456"
-JWT_SECRET_BASE64="SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI="
+JWT_SECRET=very-secret-key-very-secret-key-123456
+JWT_SECRET_BASE64=SFVGjDe/OwyN46p1euKSNQvZrpF14kwEKI9kUJ50BvI=
 
 # Emulator용 (루트/Emulator/.env.properties)
 TARGET_BASE_URL=http://localhost:8081/api/emulator
