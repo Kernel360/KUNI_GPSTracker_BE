@@ -12,7 +12,7 @@
   - 대시보드에서 차량 현황/주행 이력 확인
   - 최근 2분 기준 상태 판정 (주행/정지/오프라인)
 - **특징**
-  - 모놀리식이 아닌 *Main/Consumer/Emulator/Common* **멀티모듈**
+  - 모놀리식이 아닌 *Main/Consumer/Emulator/Support* **멀티모듈**
   - **AWS ECS + ALB + S3/CloudFront + RDS + ECR** 프로덕션 배포
   - **Terraform**으로 인프라 IaC, **Jenkins**로 CI/CD
 
